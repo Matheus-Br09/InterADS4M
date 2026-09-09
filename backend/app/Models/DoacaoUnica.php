@@ -6,23 +6,19 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Voluntario extends Model
+class DoacaoUnica extends Model
 {
     use HasFactory;
 
-    protected $table = 'voluntarios';
+    protected $table = 'doacoes_unicas';
 
     public $timestamps = false;
 
     protected $fillable = [
         'apoiador_id',
-        'area_atuacao',
-        'disponibilidade',
-        'arquivo_curriculo',
-        'status',
-        'data_entrevista',
-        'mensagem_entrevista',
-        'data_inscricao',
+        'valor',
+        'metodo_pagamento',
+        'data_doacao',
     ];
 
     public function apoiador(): BelongsTo
