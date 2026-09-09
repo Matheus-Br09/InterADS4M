@@ -1,11 +1,16 @@
 import { useState } from 'react'
+import { BrowserRouter, Routes, Route, Link, Outlet  } from 'react-router-dom'
+
 import './App.css'
+
 
 function App() {
     return(
-      <>
-        <h1>Salve baitola</h1>
-      </>
+      <div className='bg-amber-500'>
+        <h1>Pagina inicial</h1>
+        <Outlet />
+        <p>Footer</p>
+      </div>
     )
 }
 
