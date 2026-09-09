@@ -45,7 +45,6 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        path: "landing",
         element: <LandingPage />
       },
       {
