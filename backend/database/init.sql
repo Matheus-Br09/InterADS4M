@@ -50,6 +50,7 @@ CREATE TABLE `apoiadores` (
   `celular` varchar(20) NOT NULL,
   `cpf` varchar(14) NOT NULL,
   `sexo` enum('Masculino','Feminino') NOT NULL,
+  `data_nascimento` date DEFAULT NULL,
   `cep` varchar(10) NOT NULL,
   `logradouro` varchar(150) NOT NULL,
   `numero` varchar(20) NOT NULL,
@@ -58,6 +59,86 @@ CREATE TABLE `apoiadores` (
   `cidade` varchar(100) NOT NULL,
   `estado` char(2) NOT NULL,
   `data_cadastro` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `administradores`
+--
+
+CREATE TABLE `administradores` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nome` varchar(150) NOT NULL,
+  `email` varchar(100) NOT NULL UNIQUE,
+  `senha` varchar(255) NOT NULL,
+  `data_criacao` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `noticias`
+--
+
+CREATE TABLE `noticias` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(150) NOT NULL,
+  `resumo` varchar(255) NOT NULL,
+  `texto_completo` text NOT NULL,
+  `imagem` varchar(255) DEFAULT NULL,
+  `tipo` enum('noticia','evento','campanha') DEFAULT 'noticia',
+  `data_evento` datetime DEFAULT NULL,
+  `data_criacao` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `materiais_didaticos`
+--
+
+CREATE TABLE `materiais_didaticos` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(150) NOT NULL,
+  `descricao` text DEFAULT NULL,
+  `arquivo_pdf` varchar(255) NOT NULL,
+  `imagem_capa` varchar(255) DEFAULT NULL,
+  `categoria` varchar(100) DEFAULT 'Neuropedagogia',
+  `data_upload` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `documentos_transparencia`
+--
+
+CREATE TABLE `documentos_transparencia` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `titulo` varchar(150) NOT NULL,
+  `ano_referencia` int(4) NOT NULL,
+  `tipo_documento` enum('Relatório Anual','Balancete','Estatuto','Certidão','Outros') NOT NULL,
+  `arquivo_pdf` varchar(255) NOT NULL,
+  `data_upload` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Estrutura para tabela `newsletter`
+--
+
+CREATE TABLE `newsletter` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `email` varchar(100) NOT NULL UNIQUE,
+  `nome` varchar(100) DEFAULT NULL,
+  `data_inscricao` datetime DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
