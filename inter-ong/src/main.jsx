@@ -13,28 +13,6 @@ import Sobre from './pages/Sobre.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
 
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <App />,
-//     errorElement: <ErrorPage />,
-//     children: [
-//       {
-//         path: "landing",
-//         element: <LandingPage />
-//       },
-//       {
-//         path: "Sobre",
-//         element: <Sobre />
-//       },
-//       {
-//         path: "Doar",
-//         element: <Doar />
-//       }
-//     ]
-//   },
-// ])
-
 
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui 
 
