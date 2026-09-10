@@ -1,7 +1,7 @@
 export default function Contato(){
-    return(
+    return (
         <div>
-
+            <h1 className="bg-black text-white">Page contato</h1> 
         </div>
     )
 }

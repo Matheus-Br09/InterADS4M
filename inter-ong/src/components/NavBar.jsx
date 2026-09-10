@@ -17,7 +17,7 @@ export default function NavBar(){
                         <p className='border p-3 rounded-2xl'>Sobre</p>
                     </Link>
 
-                    <Link to={""}>
+                    <Link to={"/contato"}>
                         <p className='border p-3 rounded-2xl'>Contato</p>
                     </Link>
 

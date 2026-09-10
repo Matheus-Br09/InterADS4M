@@ -11,6 +11,7 @@ import LandingPage from './pages/LandingPage.jsx'
 import Doar from './pages/Doar.jsx'
 import Sobre from './pages/Sobre.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
+import Contato from './pages/Contato.jsx'
 
 // const router = createBrowserRouter([
 //   {
@@ -52,8 +53,12 @@ const router = createBrowserRouter([
         element: <Doar />
       },
       {
-        path: "sobre",
+                path: "sobre",
         element: <Sobre />
+      },
+      {
+        path: "contato",
+        element: <Contato/>
       }
     ]
   }
