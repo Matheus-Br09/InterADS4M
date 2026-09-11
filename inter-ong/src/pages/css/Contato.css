@@ -1,0 +1,11 @@
+.info-contact{
+    background-color: white;
+    padding: 15px;
+    margin: 30px;
+    margin-right: 120px;
+    border-radius: 10px;
+}
+
+.info-name{
+    font-weight: bolder;
+}
