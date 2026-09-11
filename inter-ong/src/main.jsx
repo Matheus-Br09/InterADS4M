@@ -31,12 +31,12 @@ const router = createBrowserRouter([
         element: <Doar />
       },
       {
-                path: "sobre",
+        path: "sobre",
         element: <Sobre />
       },
       {
         path: "contato",
-        element: <Contato/>
+        element: <Contato />
       }
     ]
   }
