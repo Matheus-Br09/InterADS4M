@@ -36,6 +36,7 @@ class Apoiador extends Authenticatable
         'senha',
     ];
 
+    // Diz ao Laravel que o campo de senha da tabela é 'senha' e não 'password'
     public function getAuthPassword()
     {
         return $this->senha;
