@@ -12,6 +12,7 @@ import Doar from './pages/Doar.jsx'
 import Sobre from './pages/Sobre.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
+import Educacional from './pages/Educacional.jsx'
 
 
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui 
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "contato",
         element: <Contato />
+      },
+      {
+        path: "educacional",
+        element: <Educacional />
       }
     ]
   }

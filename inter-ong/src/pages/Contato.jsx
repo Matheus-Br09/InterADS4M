@@ -3,7 +3,7 @@ import "./css/Contato.css"
 export default function Contato(){
     return (
         <div className="flex items-center justify-center">
-            <main className="flex w-326 h-156 items-center justify-center m-6 bg-rose-400 rounded-2xl gap-45">
+            <main className="flex w-full h-156 items-center justify-center m-6 bg-rose-400 rounded-2xl gap-45">
                 <div className="bg-gray-100 rounded-2xl m-4 p-2.5">
                     <div className="info-contact">
                         <p className="info-name">imeiu da impresa</p>
