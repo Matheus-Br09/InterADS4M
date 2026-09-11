@@ -48,12 +48,14 @@ export default function NavBar() {
               className="flex items-center group transition-transform duration-200 hover:scale-105 active:scale-95"
               aria-label="SOS Tudo pelo Social - Página Inicial"
             >
+              <div className="px-4 py-2  bg-white/60 background-blur border-gradiente border-white/60 rounded-full ">
               <img
                 src={logoImg}
                 alt="SOS Tudo pelo social"
                 className="h-9 sm:h-11 md:h-12 w-auto object-contain drop-shadow-sm "
               />
-            </Link>
+           </div>
+           </Link>
 
 
             <nav className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 shadow-inner">
