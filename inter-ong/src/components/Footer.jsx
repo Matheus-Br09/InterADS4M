@@ -18,17 +18,17 @@ export default function Footer(){
                 
             </div>
             <div className='flex gap-26'>
-                <div>
-                    <p className='font-bold p-2'>Links Rápidos</p>
+                <div className='p-2'>
+                    <p className='font-bold mb-3.5'>Links Rápidos</p>
 
-                    <p className='link-rapido'> <Link to={"/"}>Home</Link> </p>
-                    <p className='link-rapido'> <Link to={"sobre"}>Sobre</Link> </p>
-                    <p className='link-rapido'> <Link to={"educacional"}>Área Educacional</Link></p>
-                    <p className='link-rapido'> <Link to={"contato"}>Contato</Link> </p>
+                    <p className='link-rapido'><Link to={"/"}>Home</Link> </p>
+                    <p className='link-rapido'><Link to={"sobre"}>Sobre</Link> </p>
+                    <p className='link-rapido'><Link to={"educacional"}>Área Educacional</Link></p>
+                    <p className='link-rapido'><Link to={"contato"}>Contato</Link> </p>
 
                 </div>
                 <div className='w-70 p-2'>
-                    <p className='font-bold mb-2.5'>Contato</p>
+                    <p className='font-bold mb-3.5'>Contato</p>
 
                     <p className='contato-rapido'>sostudopelosocial@gmail.com</p>
                     <p className='contato-rapido'>@Sostudopelosocial</p>
