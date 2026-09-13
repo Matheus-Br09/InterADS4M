@@ -30,8 +30,10 @@ export default function Footer(){
                 <div className='w-70 p-2'>
                     <p className='font-bold mb-3.5'>Contato</p>
 
-                    <p className='contato-rapido'>sostudopelosocial@gmail.com</p>
-                    <p className='contato-rapido'>@Sostudopelosocial</p>
+                    <p className='contato-rapido'><a href="https://mail.google.com/mail/u/0/#inbox?compose=new/sostudopelosocial@gmail.com" target='_blank'>sostudopelosocial@gmail.com</a></p>
+
+                    <p className='contato-rapido'><a href="https://www.instagram.com/SosTudopelosocial" target='_blank'>@Sostudopelosocial</a></p>
+
                     <p className='contato-rapido'>Rua Hosana Alves do Nascimento n°493, Casa 01 Janga, Paulista/PE</p>
                 </div>
             </div>
