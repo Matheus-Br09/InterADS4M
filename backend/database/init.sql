@@ -182,7 +182,8 @@ CREATE TABLE `doacoes_unicas` (
   `id` int(11) NOT NULL,
   `apoiador_id` int(11) NOT NULL,
   `valor` decimal(10,2) NOT NULL,
-  `metodo_pagamento` enum('PIX','Cartão de Crédito','Boleto') NOT NULL,
+  `metodo_pagamento` varchar(50) NOT NULL,
+  `status` varchar(50) DEFAULT 'concluido',
   `data_doacao` datetime DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
