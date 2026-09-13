@@ -10,6 +10,10 @@ use App\Models\DoacaoUnica;
 use App\Models\ProgramaAcao;
 use App\Models\Voluntario;
 use App\Models\Galeria;
+use App\Models\Noticia;
+use App\Models\MaterialDidatico;
+use App\Models\DocumentoTransparencia;
+use App\Models\Newsletter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Artisan;
@@ -108,5 +112,52 @@ class DashboardTesteController extends Controller
             'total' => Apadrinhamento::count(),
             'dados' => Apadrinhamento::with('apoiador', 'crianca', 'recompensas')->get()
         ]);
+    }
+
+        public function apiNoticias()
+    {
+        return response()->json([
+            'status' => 'success',
+            'total' => Noticia::count(),
+            'dados' => Noticia::latest('id')->get()
+        ]);
+    }
+
+    public function apiMateriaisDidaticos()
+    {
+        return response()->json([
+            'status' => 'success',
+            'total' => MaterialDidatico::count(),
+            'dados' => MaterialDidatico::latest('id')->get()
+        ]);
+    }
+
+    public function apiTransparencia()
+    {
+        return response()->json([
+            'status' => 'success',
+            'total' => DocumentoTransparencia::count(),
+            'dados' => DocumentoTransparencia::latest('ano_referencia')->get()
+        ]);
+    }
+
+    public function storeNewsletter(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email|unique:newsletter,email',
+            'nome' => 'nullable|string|max:100',
+        ]);
+
+        $lead = Newsletter::create([
+            'email' => $validated['email'],
+            'nome' => $validated['nome'] ?? null,
+            'data_inscricao' => now(),
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'mensagem' => 'E-mail cadastrado com sucesso na newsletter!',
+            'dados' => $lead
+        ], 201);
     }
 }
