@@ -2,7 +2,7 @@
 
 $host     = '127.0.0.1'; // ou localhost
 $port     = '3306';
-$dbname   = 'meu_banco';
+$dbname   = 'ong';
 $user     = 'meu_usuario';
 $password = 'minha_senha';
 
