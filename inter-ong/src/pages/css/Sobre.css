@@ -8,7 +8,7 @@
     margin: auto;
     margin-top: 30px;
     margin-bottom: 30px;
-    background-image: linear-gradient(to right, #FF8DAE, #FFE9F0, #FF85A7);
+    background-image: linear-gradient(to right, #f302fc2d, #FFE9F0, #f302fc2d);
     border-radius: 80px;
     padding: 40px;
     width: fit-content;
@@ -41,7 +41,7 @@
     width: 898px;
     border-radius: 10px;
 
-    background-color: rgba(243, 2, 252, 0.178);
+    background-image: linear-gradient(to right,#f302fc2d, #FFE9F0, #f302fc2d);
 
     box-shadow: gray 1px 1px 2px;
 }
@@ -50,6 +50,4 @@
     font-family: "Readex Pro", sans-serif;
     font-weight: 800;
     font-size: 30px;
-
-    
 }
