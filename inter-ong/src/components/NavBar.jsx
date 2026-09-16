@@ -64,7 +64,7 @@ export default function NavBar() {
               </NavLink>
 
               <NavLink to="/sobre" className={desktopNavLinkClass}>
-                Sobre
+                Sobre Nós
               </NavLink>
 
               <NavLink to="/contato" className={desktopNavLinkClass}>
