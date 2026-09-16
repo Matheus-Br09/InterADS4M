@@ -1,5 +1,13 @@
 # 🌱 InterADS4M
 
+![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square)
+![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square)
+![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square)
+![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square)
+![MySQL](https://img.shields.io/badge/MySQL-8-4479A1?style=flat-square)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square)
+
 Plataforma web para a **ONG SOS** — divulgação de ações, angariação de doações e gestão de apoiadores, voluntários e crianças atendidas. Sistema em dois repositórios: API REST e views em **Laravel** + SPA em **React**.
 
 > Projeto colaborativo — Carlos & Matheus. Status: **em desenvolvimento**.
