@@ -16,9 +16,14 @@ import avatarParceiroImg from '../assets/avatar-parceiro.jpg'
 
 export default function LandingPage() {
   return (
-    <main className="landing-page-main">
-      
-  
+    <main className="landing-page-main" id="conteudo-principal">
+
+      <a
+        href="#conteudo-principal"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-4 focus:py-2 focus:bg-white focus:text-pink-600 focus:rounded focus:shadow-lg focus:font-semibold"
+      >
+        Pular para o conteúdo principal
+      </a>
       <section className="hero-section">
         
         <div className="hero-ambient-glow-sky" />
@@ -66,7 +71,7 @@ export default function LandingPage() {
 
                 <div className="hero-metric-pill-item">
                   <div className="hero-pill-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                       <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                     </svg>
                   </div>
@@ -79,7 +84,7 @@ export default function LandingPage() {
  
                 <div className="hero-metric-pill-item">
                   <div className="hero-pill-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   </div>
@@ -92,7 +97,7 @@ export default function LandingPage() {
 
                 <div className="hero-metric-pill-item">
                   <div className="hero-pill-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   </div>
@@ -138,8 +143,8 @@ export default function LandingPage() {
               </div>
 
 
-              <div className="hero-left-doodle-heart">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <div className="hero-left-doodle-heart" aria-hidden="true">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                 </svg>
               </div>
@@ -151,7 +156,7 @@ export default function LandingPage() {
 
 
 
-      <section className="about-section">
+      <section className="about-section" aria-label="Sobre nós">
         <div className="landing-container">
           <div className="about-grid">
             
@@ -251,7 +256,7 @@ export default function LandingPage() {
 
 
 
-      <section id="projetos" className="projects-section">
+      <section id="projetos" className="projects-section" aria-label="Nossos projetos">
         <div className="landing-container">
           
 
@@ -367,7 +372,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="impact-section">
+      <section className="impact-section" aria-label="Nosso impacto">
         <div className="landing-container">
           
           <div className="impact-banner-wrapper">
@@ -454,7 +459,7 @@ export default function LandingPage() {
 
 
 
-      <section className="help-section">
+      <section className="help-section" aria-label="Como ajudar">
         <div className="landing-container">
           
  
@@ -564,7 +569,7 @@ export default function LandingPage() {
 
 
 
-      <section className="testimonials-section">
+      <section className="testimonials-section" aria-label="Depoimentos">
         <div className="landing-container">
           
 
@@ -637,7 +642,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="cta-section">
+      <section className="cta-section" aria-label="Chamada para ação">
         <div className="landing-container">
           
           <div className="cta-banner-wrapper">
