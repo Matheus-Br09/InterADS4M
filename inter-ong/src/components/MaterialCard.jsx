@@ -34,16 +34,14 @@ export default function MaterialCard({ material, onSelect }) {
           <div className="flex items-center gap-1.5">
             {material.destaque && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
-                ★ Destaque
               </span>
             )}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-600">
-              {isPdf ? "📄 PDF" : "🔗 LINK"}
+              {isPdf ? " PDF" : " LINK"}
             </span>
           </div>
         </div>
 
-        {/* Title */}
         <h3
           onClick={() => onSelect(material)}
           className="text-lg font-bold text-slate-800 group-hover:text-[#fb2782] cursor-pointer transition-colors line-clamp-2 leading-snug mb-2.5"
@@ -51,25 +49,24 @@ export default function MaterialCard({ material, onSelect }) {
           {material.titulo}
         </h3>
 
-        {/* Description */}
+
         <p className="text-slate-600 text-sm line-clamp-3 leading-relaxed mb-4">
           {material.descricao}
         </p>
       </div>
 
-      {/* Footer Info & Actions */}
+
       <div className="mt-4 pt-4 border-t border-slate-100">
-        {/* Metadados rápidos */}
+  
         <div className="flex items-center justify-between text-xs text-slate-500 mb-4">
           <span className="truncate max-w-[170px]" title={material.publico}>
-            👥 {material.publico || "Geral"}
+             {material.publico || "Geral"}
           </span>
           <span className="shrink-0 font-medium text-slate-600">
             {material.paginas || material.tempoLeitura || "Acesso Livre"}
           </span>
         </div>
 
-        {/* Botões */}
         <div className="flex items-center gap-2">
           <button
             type="button"
