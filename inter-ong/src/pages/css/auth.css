@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
+
+.auth-container{
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    margin: 50px;
+}
+
+.input-group{
+
+    display: flex;
+    flex-direction: column;
+
+    box-shadow: black 1px 1px 2px;
+    border-radius: 10px;
+
+    width: fit-content;
+    padding: 15px;
+    margin: 10px;
+}
+
+.input-group input{
+    padding: 10px;
+}
+
+.auth-button{
+    box-shadow: black 1px 1px 2px;
+    margin: 5px;
+    padding: 5px;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+}
