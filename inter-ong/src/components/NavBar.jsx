@@ -74,6 +74,10 @@ export default function NavBar() {
               <NavLink to="/educacional" className={desktopNavLinkClass}>
                 Área Educacional
               </NavLink>
+
+              <NavLink to="/login" className={desktopNavLinkClass}>
+                Login / Cadastro
+              </NavLink>
             </nav>
 
             <div className="hidden md:flex items-center gap-3">
