@@ -1,6 +1,5 @@
 import "./css/Sobre.css";
 
-import { motion } from "framer-motion";
 
 export default function Sobre() {
 
@@ -24,17 +23,7 @@ export default function Sobre() {
 
         {/* Card principal */}
 
-        <motion.div
-
-          initial={{ opacity: 0, y: 30 }}
-
-          animate={{ opacity: 1, y: 0 }}
-
-          transition={{ duration: 0.6 }}
-
-          className="bg-white/70 backdrop-blur-md p-8 rounded-3xl shadow-xl border border-white/40 hover:scale-[1.01] transition-all duration-300"
-
-        >
+        
 
           <p className="text-gray-700 leading-relaxed mb-4">
 
@@ -90,27 +79,16 @@ export default function Sobre() {
 
           </p>
 
-        </motion.div>
+        
 
         {/* Divider */}
 
-        <div className="w-24 h-1 bg-gradient-to-r from-pink-400 to-purple-400 mx-auto my-10 rounded-full"></div>
+        <div className="w-24 h-1 bg-linear-to-r from-pink-400 to-purple-400 mx-auto my-10 rounded-full"></div>
 
         {/* Missão */}
 
-        <motion.div
 
-          initial={{ opacity: 0, y: 30 }}
-
-          animate={{ opacity: 1, y: 0 }}
-
-          transition={{ duration: 0.6, delay: 0.2 }}
-
-          className="mt-12 bg-gradient-to-r from-pink-300 to-purple-300 p-8 rounded-3xl shadow-lg text-center"
-
-        >
-
-          <h2 className="text-2xl font-semibold mb-4 text-white drop-shadow">
+          <h2 className="text-2xl font-semibold mb-4 text-white drop-shadow text-center">
 
             Missão
 
@@ -125,8 +103,6 @@ export default function Sobre() {
             independentemente de suas limitações."
 
           </p>
-
-        </motion.div>
 
       </div>
 
