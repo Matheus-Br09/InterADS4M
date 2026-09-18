@@ -15,7 +15,31 @@ export default function LoginECadastro(){
         e.preventDefault()
         setError('')
         setMessage('')
+
+        if (!email || !password){
+            setError('Por favor, preencha os campos corretamente.')
+            return;
+        }
+
+        if (!isLogin && password !== confirmPassword){
+            setError('As senhas não coincidem')
+            return;
+        }
+
+        if (isLogin){
+            console.log('Efetuando login com: ', {email, password})
+            setMessage('Login realizado com sucesso')
+        } else {
+            console.log('Cadastrando usuário com: ', {email, password})
+            setMessage('Cadastro realizado com sucesso! Faça Login')
+
+            setIsLogin(true)
+            setPassword('');
+            setConfirmPassword('');
+        }
     }
+
+    
 
     return(
         <div className="auth-container">
