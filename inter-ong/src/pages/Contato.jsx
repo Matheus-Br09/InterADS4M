@@ -1,20 +1,16 @@
-import "./css/Contato.css"
+import "./css/Contato.css";
 
 export default function Contato() {
   return (
-    <div className="min-h-screen flex items-center justify-center 
-    bg-gradient-to-b from-pink-200 via-pink-100 to-white p-6">
-
-      <main className="flex flex-col lg:flex-row w-full max-w-6xl 
-      bg-gradient-to-r from-pink-400 to-rose-400 
-      rounded-3xl p-8 gap-10 shadow-xl">
-
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white p-6">
+      <main className="flex flex-col lg:flex-row w-full max-w-6xl bg-gradient-to-r from-pink-400 to-rose-400 rounded-3xl p-8 gap-10 shadow-xl">
         {/* CARD DE CONTATO */}
         <div className="w-[510px] bg-white rounded-3xl p-6 shadow-md space-y-5">
-
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
             <p className="text-sm text-gray-400">Email da empresa</p>
-            <p className="font-semibold text-gray-800">sostudopelosocial@gmail.com</p>
+            <p className="font-semibold text-gray-800">
+              sostudopelosocial@gmail.com
+            </p>
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
@@ -35,7 +31,6 @@ export default function Contato() {
             <p className="text-sm text-gray-400">Instagram</p>
             <p className="font-semibold text-pink-600">@SosTudopelosocial</p>
           </div>
-
         </div>
 
         {/* MAPA */}
@@ -46,8 +41,7 @@ export default function Contato() {
             loading="lazy"
           ></iframe>
         </div>
-
       </main>
     </div>
-  )
+  );
 }
