@@ -58,7 +58,7 @@ export default function NavBar() {
            </Link>
 
 
-            <nav className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 shadow-inner">
+            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 shadow-inner">
               <NavLink to="/" className={desktopNavLinkClass} end>
                 Início
               </NavLink>
@@ -73,6 +73,10 @@ export default function NavBar() {
 
               <NavLink to="/educacional" className={desktopNavLinkClass}>
                 Área Educacional
+              </NavLink>
+
+              <NavLink to="/login" className={desktopNavLinkClass}>
+                Login / Cadastro
               </NavLink>
             </nav>
 
@@ -111,8 +115,9 @@ export default function NavBar() {
                 type="button"
                 onClick={toggleMobileMenu}
                 className="p-2.5 rounded-2xl bg-white/70 text-gray-700 hover:text-[#fb2782] hover:bg-white border border-pink-200/50 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fb2782]/40"
-                aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+                aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu de navegação"}
                 aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-nav-menu"
               >
                 <div className="w-5 h-4 flex flex-col justify-between items-center relative">
                   <span
@@ -139,6 +144,9 @@ export default function NavBar() {
 
 
         <div
+          id="mobile-nav-menu"
+          role="navigation"
+          aria-label="Menu de navegação mobile"
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
             isMobileMenuOpen ? "max-h-96 opacity-100 pb-5" : "max-h-0 opacity-0 pb-0"
           }`}
