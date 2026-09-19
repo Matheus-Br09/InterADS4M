@@ -8,8 +8,31 @@ export default function LoginECadastro(){
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
+    const [cpf, setCpf] = useState('');
+    const [resultado, setResultado] = useState('');
+
     const [message, setMessage] = useState('')
     const [error, setError] = useState('')
+
+    const validarCPF = async () => {
+        try {
+            const resposta = await fetch(
+                `https://api.invertexto.com/api-validador-cpf-cnpj/${cpf}`
+            );
+
+            const dados = await resposta.json();
+
+            if (dados.valido) {
+                setResultado("CPF válido!");
+            } else {
+                setResultado("CPF inválido!");
+            }
+
+        } catch (erro) {
+            console.log("Erro:", erro);
+            setResultado("Erro ao validar CPF.");
+        }
+    }
 
     const handleSubmit = (e) => {
         e.preventDefault()
@@ -29,13 +52,19 @@ export default function LoginECadastro(){
 
                     <button
                     className="auth-button"
-                    onClick={() => {setIsLogin(false); setError(''); setMessage('')}}>
+                    onClick={() => {
+                        setIsLogin(false); 
+                        setError(''); 
+                        setMessage('')}}>
                         Cadastrar
                     </button>
                 </div>
                 <form action="auth-form" onSubmit={handleSubmit}>
 
-                    <h2>{isLogin ? 'Bem-vindo de volta!' : 'Crie sua conta'}</h2>
+                    <h2>
+                        {isLogin ? 'Bem-vindo de volta!' 
+                        : 'Crie sua conta'}
+                    </h2>
 
                     {error && <p className="error-msg">{error}</p>}
                     {message && <p className="succes-msg">{message}</p>}
@@ -60,6 +89,21 @@ export default function LoginECadastro(){
                         onChange={(e) => setPassword(e.target.value)}/>
                     </div>
 
+                        <div className="validador-cpf">
+                            <label htmlFor="cpf">CPF</label>
+                        <input  type="text"
+                                placeholder="Digite deu CPF: "
+                                value={cpf}
+                                onChange={(e)=> setCpf(e.target.value)}
+                             />
+                            <button type='button'
+                                    onClick={validarCPF}
+                        >
+                            validar CPF
+                        </button>
+                        <p>{resultado}</p>
+
+                    </div>
                     {!isLogin && (
                         <div className="input-group">
                             <label htmlFor="confirmPassword">Confirmar Senha</label>
@@ -71,6 +115,7 @@ export default function LoginECadastro(){
                             onChange={(e) => setConfirmPassword(e.target.value)}
                             />
                         </div>
+ 
                     )}
 
                     <button type="submit" className="auth-button">
