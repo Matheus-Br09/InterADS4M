@@ -113,16 +113,15 @@ export default function LoginECadastro(){
                         onChange={(e) => setPassword(e.target.value)}/>
                     </div>
 
-                        <div className="validador-cpf">
-                            <label htmlFor="cpf">CPF</label>
-                        <input  type="text"
-                                placeholder="Digite deu CPF: "
-                                value={cpf}
-                                onChange={(e)=> setCpf(e.target.value)}
-                             />
-                            <button type='button'
-                                    onClick={validarCPF}
-                        >
+                    <div className="input-group">
+                        <label htmlFor="cpf">CPF:</label>
+                        <input  
+                        type="text"
+                        placeholder=" 111.222.333-00 "
+                        value={cpf}
+                        onChange={(e)=> setCpf(e.target.value)}
+                        />
+                        <button type='button' onClick={validarCPF} className="auth-button">
                             validar CPF
                         </button>
                         <p>{resultado}</p>
