@@ -60,7 +60,7 @@ export default function LoginECadastro(){
             .then((dados) => {
                 setMessage(dados)
             })
-            .catch((error) => setError('O erro foi: ', error))
+            .catch((error) => console.log('O erro foi: ', error))
             console.log('funcionando o login')
         } else {
             fetch('NomeDoArquivoParaCadastro.php')
@@ -68,7 +68,7 @@ export default function LoginECadastro(){
             .then((dados) => {
                 setMessage(dados)
             })
-            .catch((error) => setError('O erro foi: ', error))
+            .catch((error) => console.log('Erro foi: ', error))
 
             setIsLogin(true)
             setPassword('');
