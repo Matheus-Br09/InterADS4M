@@ -39,6 +39,8 @@ export default function LoginECadastro(){
         setError('')
         setMessage('')
 
+        // Para você ai plebeu do back-end esses dois if's são tratamento de erro
+
         if (!email || !password){
             setError('Por favor, preencha os campos corretamente.')
             return;
@@ -49,12 +51,24 @@ export default function LoginECadastro(){
             return;
         }
 
+
+        // aqui que vai acontecer a parada toda pro back pegar os dados
+
         if (isLogin){
-            console.log('Efetuando login com: ', {email, password})
-            setMessage('Login realizado com sucesso')
+            fetch('NomeDoArquivoLogin.php')
+            .then((resposta) => resposta.json())
+            .then((dados) => {
+                setMessage(dados)
+            })
+            .catch((error) => setError('O erro foi: ', error))
+            console.log('funcionando o login')
         } else {
-            console.log('Cadastrando usuário com: ', {email, password})
-            setMessage('Cadastro realizado com sucesso! Faça Login')
+            fetch('NomeDoArquivoParaCadastro.php')
+            .then((resposta) => resposta.json())
+            .then((dados) => {
+                setMessage(dados)
+            })
+            .catch((error) => setError('O erro foi: ', error))
 
             setIsLogin(true)
             setPassword('');
@@ -113,31 +127,39 @@ export default function LoginECadastro(){
                         onChange={(e) => setPassword(e.target.value)}/>
                     </div>
 
-                    <div className="input-group">
-                        <label htmlFor="cpf">CPF:</label>
-                        <input  
-                        type="text"
-                        placeholder=" 111.222.333-00 "
-                        value={cpf}
-                        onChange={(e)=> setCpf(e.target.value)}
-                        />
-                        <button type='button' onClick={validarCPF} className="auth-button">
-                            validar CPF
-                        </button>
-                        <p>{resultado}</p>
-
-                    </div>
+                    
                     {!isLogin && (
-                        <div className="input-group">
-                            <label htmlFor="confirmPassword">Confirmar Senha</label>
-                            <input 
-                            type="password"
-                            id="confirmPassword" 
-                            placeholder="Repita Sua Senha"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            />
+                        <div>
+                           <div className="input-group">
+                                <label htmlFor="confirmPassword">Confirmar Senha</label>
+                                <input 
+                                type="password"
+                                id="confirmPassword" 
+                                placeholder="Repita Sua Senha"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                />
+                            </div> 
+
+                            <div className="input-group">
+                                <label htmlFor="cpf">CPF:</label>
+                                <input  
+                                type="int"
+                                maxLength={11}
+                                placeholder=" 111.222.333-00 "
+                                value={cpf}
+                                onChange={(e)=> setCpf(e.target.value)}
+                                />
+                                <button type='button' onClick={validarCPF} className="auth-button">
+                                    validar CPF
+                                </button>
+                                <p>{resultado}</p>
+
+                            </div>
                         </div>
+                        
+                        
+                        
  
                     )}
 
