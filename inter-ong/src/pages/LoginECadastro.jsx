@@ -92,7 +92,7 @@ export default function LoginECadastro(){
                     <button
                     className="auth-button"
                     onClick={() => { setIsLogin(true); setError(''); setMessage('')}}>
-                        Entrar
+                        Fazer Login
                     </button>
 
                     <button
@@ -101,7 +101,7 @@ export default function LoginECadastro(){
                         setIsLogin(false); 
                         setError(''); 
                         setMessage('')}}>
-                        Cadastrar
+                        Cadastrar Conta
                     </button>
                 </div>
                 <form action="auth-form" onSubmit={handleSubmit} className="flex flex-col justify-center items-center mb-38.5">
