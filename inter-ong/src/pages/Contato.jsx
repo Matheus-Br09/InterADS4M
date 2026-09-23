@@ -3,33 +3,56 @@ import "./css/Contato.css";
 export default function Contato() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white p-6">
+
       <main className="flex flex-col lg:flex-row w-full max-w-6xl bg-gradient-to-r from-pink-400 to-rose-400 rounded-3xl p-8 gap-10 shadow-xl">
+
         {/* CARD DE CONTATO */}
         <div className="w-[510px] bg-white rounded-3xl p-6 shadow-md space-y-5">
+
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
             <p className="text-sm text-gray-400">Email da empresa</p>
-            <p className="font-semibold text-gray-800">
+
+            <a href="mailto:sostudopelosocial@gmail.com"
+                aria-label="Enviar e-mail para sostudopelosocial@gmail.com">
+
+              <p className="font-semibold text-gray-800">
               sostudopelosocial@gmail.com
-            </p>
+              </p>
+
+            </a>
+            
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+
             <p className="text-sm text-gray-400">Número de Telefone</p>
             <p className="font-semibold text-gray-800">(81) 99281-2080</p>
+
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+
             <p className="text-sm text-gray-400">Endereço</p>
             <p className="font-semibold text-gray-800">
               Rua Hosana Alves do Nascimento, nº 493
             </p>
             <p className="text-gray-700">Casa 01 - Janga</p>
             <p className="text-gray-700">Paulista / PE</p>
+
           </div>
 
           <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+
             <p className="text-sm text-gray-400">Instagram</p>
-            <p className="font-semibold text-pink-600">@SosTudopelosocial</p>
+
+            <a href="https://www.instagram.com/SosTudopelosocial"
+                target='_blank'
+                rel="noopener noreferrer"
+                aria-label="Visitar @Sostudopelosocial no Instagram (abre em nova aba)">
+              <p className="font-semibold text-pink-600">@SosTudopelosocial</p>
+              
+            </a>
+            
           </div>
         </div>
 

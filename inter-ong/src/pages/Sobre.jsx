@@ -83,26 +83,28 @@ export default function Sobre() {
 
         {/* Divider */}
 
-        <div className="w-24 h-1 bg-linear-to-r from-pink-400 to-purple-400 mx-auto my-10 rounded-full"></div>
+        <div className="w-24 h-1 bg-linear-150 from-pink-400 to-purple-400 mx-auto my-10 rounded-full"></div>
 
         {/* Missão */}
 
-
-          <h2 className="text-2xl font-semibold mb-4 text-white drop-shadow text-center">
+          <div className="bg-pink-400 p-2 rounded-2xl shadow-2xl shadow-fuchsia-900">
+            <h2 className="text-2xl font-semibold mb-4 text-white drop-shadow text-center">
 
             Missão
 
-          </h2>
+            </h2>
 
-          <p className="text-white leading-relaxed">
+            <p className="text-white leading-relaxed">
 
-            "Construir uma sociedade mais justa e inclusiva, onde cada pessoa
+              "Construir uma sociedade mais justa e inclusiva, onde cada pessoa
 
-            tenha acesso aos cuidados e oportunidades que merece,
+              tenha acesso aos cuidados e oportunidades que merece,
 
-            independentemente de suas limitações."
+              independentemente de suas limitações."
 
-          </p>
+            </p>
+          </div>
+          
 
       </div>
 

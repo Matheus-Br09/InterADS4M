@@ -140,22 +140,72 @@ export default function LoginECadastro(){
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                             </div> 
+                            <div className="grid grid-cols-3 gap-4">
 
-                            <div className="input-group">
-                                <label htmlFor="cpf">CPF:</label>
-                                <input  
-                                type="int"
-                                maxLength={11}
-                                placeholder=" 111.222.333-00 "
-                                value={cpf}
-                                onChange={(e)=> setCpf(e.target.value)}
-                                />
-                                <button type='button' onClick={validarCPF} className="auth-button">
-                                    validar CPF
-                                </button>
-                                <p>{resultado}</p>
+                                <div className="input-group items-center">
+                                    <label htmlFor="cpf">CPF:</label>
+                                    <input  
+                                    type="int"
+                                    maxLength={11}
+                                    placeholder=" 111.222.333-00 "
+                                    value={cpf}
+                                    onChange={(e)=> setCpf(e.target.value)}
+                                    />
+                                    <button type='button' onClick={validarCPF} className="auth-button">
+                                        validar CPF
+                                    </button>
+                                    <p>{resultado}</p>
+                                </div>
+
+                                <div className="input-group">
+                                    <label htmlFor="telefone">Telefone: </label>
+                                    <input type="tel" 
+                                    name="telefone" id="tel" 
+                                    placeholder="(81) 99999-9999"  
+                                    value={""}
+                                    onChange={(e) => {}}/>
+                                </div>
+                                
+                                <div className="input-group">
+                                    <label htmlFor="CEP: ">
+                                        CEP: 
+                                    </label>
+                                    <input type="text" 
+                                        name="cep" id="cep" 
+                                        placeholder="55555-000"
+                                        value={''}
+                                        onClick={(e) => {}}/>
+                                </div>
+
+                                <div className="input-group">
+                                    <label htmlFor="rua">Rua: </label>
+                                    <input type="text" 
+                                    name="rua" id="rua"
+                                    placeholder="Avenida Paulista" />
+                                </div>
+
+                                <div className="input-group">
+                                    <label htmlFor="numero">N°: </label>
+                                    <input type="number" placeholder="56" />
+                                </div>
+
+                                <div className="input-group">
+                                    <label htmlFor="Complemento">Complemento: </label>
+                                    <input type="text" name="complement" 
+                                    id="complement" 
+                                    placeholder="Bloco A"/>
+                                </div>
+
+                                <div className="input-group col-span-3 justify-self-center w-full max-w-xs">
+                                    <label htmlFor="bairro">Bairro: </label>
+                                    <input type="text" name="bairro" 
+                                    id="bairro" 
+                                    placeholder="Paulista"/>
+                                </div>
+                             
 
                             </div>
+                            
                         </div>
                         
                         
