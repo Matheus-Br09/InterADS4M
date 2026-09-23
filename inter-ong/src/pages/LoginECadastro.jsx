@@ -9,6 +9,14 @@ export default function LoginECadastro(){
     const [confirmPassword, setConfirmPassword] = useState('')
 
     const [cpf, setCpf] = useState('');
+
+    const [telefone, setTelefone] = useState('')
+    const [cep, setCep] = useState('')
+    const [rua, setRua] = useState('')
+    const [numero, setNumero] = useState('')
+    const [complemento, setComplemento] = useState('')
+    const [bairro, setBairro] = useState('')
+
     const [resultado, setResultado] = useState('');
 
     const [message, setMessage] = useState('')
@@ -50,7 +58,6 @@ export default function LoginECadastro(){
             setError('As senhas não coincidem')
             return;
         }
-
 
         // aqui que vai acontecer a parada toda pro back pegar os dados
 
@@ -162,8 +169,8 @@ export default function LoginECadastro(){
                                     <input type="tel" 
                                     name="telefone" id="tel" 
                                     placeholder="(81) 99999-9999"  
-                                    value={""}
-                                    onChange={(e) => {}}/>
+                                    value={telefone}
+                                    onChange={(e) => {setTelefone(e.target.value)}}/>
                                 </div>
                                 
                                 <div className="input-group">
@@ -173,43 +180,49 @@ export default function LoginECadastro(){
                                     <input type="text" 
                                         name="cep" id="cep" 
                                         placeholder="55555-000"
-                                        value={''}
-                                        onClick={(e) => {}}/>
+                                        value={cep}
+                                        onChange={(e) => {setCep(e.target.value)}}/>
                                 </div>
 
                                 <div className="input-group">
                                     <label htmlFor="rua">Rua: </label>
                                     <input type="text" 
                                     name="rua" id="rua"
-                                    placeholder="Avenida Paulista" />
+                                    placeholder="Avenida Paulista"
+                                    value={rua}
+                                    onChange={(e) => setRua(e.target.value)} />
                                 </div>
 
                                 <div className="input-group">
                                     <label htmlFor="numero">N°: </label>
-                                    <input type="number" placeholder="56" />
+                                    <input type="number" 
+                                    placeholder="56" 
+                                    value={numero}
+                                    onChange={(e) => setNumero(e.target.value)}/>
                                 </div>
 
                                 <div className="input-group">
                                     <label htmlFor="Complemento">Complemento: </label>
                                     <input type="text" name="complement" 
                                     id="complement" 
-                                    placeholder="Bloco A"/>
+                                    placeholder="Bloco A"
+                                    value={complemento}
+                                    onChange={(e) => {setComplemento(e.target.value)}}/>
                                 </div>
 
                                 <div className="input-group col-span-3 justify-self-center w-full max-w-xs">
                                     <label htmlFor="bairro">Bairro: </label>
                                     <input type="text" name="bairro" 
                                     id="bairro" 
-                                    placeholder="Paulista"/>
+                                    placeholder="Paulista"
+                                    value={bairro}
+                                    onChange={(e) => {setBairro(e.target.value)}}/>
                                 </div>
                              
 
                             </div>
                             
                         </div>
-                        
-                        
-                        
  
                     )}
 
