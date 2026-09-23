@@ -104,7 +104,7 @@ export default function LoginECadastro(){
                         Cadastrar
                     </button>
                 </div>
-                <form action="auth-form" onSubmit={handleSubmit}>
+                <form action="auth-form" onSubmit={handleSubmit} className="flex flex-col justify-center items-center mb-38.5">
 
                     <h2>
                         {isLogin ? 'Bem-vindo de volta!' 
@@ -227,7 +227,7 @@ export default function LoginECadastro(){
                     )}
 
                     <button type="submit" className="auth-button">
-                        {isLogin ? 'Entar' : 'Cadastrar'}
+                        {isLogin ? 'Entrar' : 'Cadastrar'}
                     </button>
 
                 </form>
