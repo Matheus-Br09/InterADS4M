@@ -118,11 +118,16 @@ O `backend/database/init.sql` (dump com CPF, e-mail, endereço, 12 hashes de sen
 e uma linha da tabela `sessions` de pessoas reais) e o `OngDadosSeeder` com
 credenciais de verdade ficaram versionados num repositório público. Isso foi
 corrigido: o dump saiu do repositório, os seeds passaram a usar e-mails de
-exemplo e senha inutilizável, e o histórico do git foi reescrito.
+exemplo e senha inutilizável, e o **histórico do git foi reescrito** — por isso
+todos os commits têm SHA novo. Quem já clonou precisa atualizar:
 
-**O que o rework não desfaz:** quem já clonou o repositório antes mantém os
-arquivos, e o GitHub guarda commits órfãos por um tempo. Por isso a rotação de
-senhas é a parte que realmente protege as contas:
+```bash
+git fetch origin && git reset --hard origin/main
+```
+
+**O que a reescrita não desfaz:** quem já clonou antes mantém os arquivos, e o
+GitHub guarda commits órfãos por um tempo. Por isso a rotação de senhas é a
+parte que realmente protege as contas:
 
 ```bash
 php artisan gestor:senha gestor@exemplo.org        # conta da gestão
@@ -188,9 +193,9 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 145 testes automatizados no backend
+- ✅ 152 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: rotacionar dados expostos no histórico do git, restringir CORS antes de publicar, upload de arquivos, endpoints REST restantes
+- ⏳ Pendente: rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
 
 ---
 

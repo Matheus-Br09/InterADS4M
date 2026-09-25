@@ -295,24 +295,26 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 70+ commits. O `origin/main` está em `73a6f2c`; o commit de ampliação de cobertura (CPF, inventário de rotas, integração com o site e CSS compilado) está apenas na máquina local.
-* **Sessão de 25/09/2026 (backend):**
-  * `8d53dfa test(backend): cria suite de testes do backend e corrige painel do apoiador`
-  * `e299f36 fix(backend): protege escrita do painel, liga seed da ONG e completa fillable`
-  * `01634ac fix(backend): restringe leitura do painel a gestao e remove views mortas`
-  * `deb6526 fix(backend): tira dados pessoais das APIs e cria comando de acesso do gestor`
-  * `b05c2b3 feat(backend): valida CPF no cadastro e guarda so digitos`
-  * `264ebbb refactor(backend): troca CDN do Tailwind por build local do Vite`
-  * `73a6f2c docs: atualiza relatorio do backend com testes, seguranca, Vite e CPF`
-  * `test(backend): amplia cobertura de CPF, rotas, integracao com o site e CSS compilado`
-  * `fix(backend): tira APIs do CSRF e configura CORS para desenvolvimento`
-  * `feat(backend): limita requisicoes por IP nas rotas de escrita`
-  * *(pendente de push)* `fix(backend): tira dado pessoal das APIs publicas`
+* **Estado:** repositório com 76 commits, `main` e `origin/main` no mesmo commit.
+* **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
+* **Sessão de 25/09/2026 (backend), do mais recente para o mais antigo:**
+  * `46724b5` fix(backend): tira credencial de pessoa real do repositorio
+  * `9c125af` fix(backend): tira dado pessoal das APIs publicas
+  * `78097d8` feat(backend): limita requisicoes por IP nas rotas de escrita
+  * `88796c9` fix(backend): tira APIs do CSRF e configura CORS para desenvolvimento
+  * `1ac32bd` test(backend): amplia cobertura de CPF, rotas, integracao com o site e CSS compilado
+  * `5c7f974` docs: atualiza relatorio do backend com testes, seguranca, Vite e CPF
+  * `b07c378` refactor(backend): troca CDN do Tailwind por build local do Vite
+  * `444f38d` feat(backend): valida CPF no cadastro e guarda so digitos
+  * `b77d984` fix(backend): tira dados pessoais das APIs e cria comando de acesso do gestor
+  * `a0ddf54` fix(backend): restringe leitura do painel a gestao e remove views mortas
+  * `806e8be` fix(backend): protege escrita do painel, liga seed da ONG e completa fillable
+  * `bb8fa53` test(backend): cria suite de testes do backend e corrige painel do apoiador
 * **Sessão de 15/09/2026 (backend):**
   * `conexão.php` (correção do nome do banco)
   * ~~`database/init.sql`~~ (removido do repositório em 25/09 — ver 4.5; o schema ficou só nas migrations)
   * Migrations novas: `2026_09_15_000001_create_ong_content_tables`, `2026_09_15_000002_create_ong_admin_tables`, `2026_09_15_000003_add_tipo_usuario_to_apoiadores_table`
   * `database/seeders/OngDadosSeeder.php`
   * `public/img/` (acervo de imagens da ONG)
-* **Commits do frontend (`inter-ong/`, mantidos intactos nesta sessão):** `c6b813b`, `ed228c2`, `be114ee`, `10e5890`, `09326a1`.
+* **Commits do frontend (`inter-ong/`, mantidos intactos nesta sessão):** `fefe70b` (centraliza itens do login), `5eff3c1` (endereço no login/Contato/Sobre), `0a08226` (useState por componente de endereço), `d665b30` (molde do `fetch` para o backend).
 * **Observação:** a suíte roda em SQLite e o build de assets é local; nenhum commit do backend depende de banco ou internet para ser validado.
