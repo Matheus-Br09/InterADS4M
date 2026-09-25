@@ -9,10 +9,11 @@ use Illuminate\Support\Facades\Route;
 // ==========================================
 // PAINEL PROVISÓRIO DE TESTES
 // ==========================================
-Route::get('/', [DashboardTesteController::class, 'index'])->name('dashboard');
-
-// Escritas do painel são exclusivas da gestão da ONG (guard + tipo_usuario = admin)
+// O painel mostra dados pessoais (crianças, apoiadores, valores),
+// então o acesso é exclusivo da gestão da ONG. As APIs JSON abaixo
+// continuam públicas porque alimentam o site em inter-ong/.
 Route::middleware('gestor')->group(function () {
+    Route::get('/', [DashboardTesteController::class, 'index'])->name('dashboard');
     Route::post('/seed-dados', [DashboardTesteController::class, 'seedData'])->name('seed.data');
     Route::post('/criancas/salvar', [DashboardTesteController::class, 'storeCrianca'])->name('criancas.store');
 });

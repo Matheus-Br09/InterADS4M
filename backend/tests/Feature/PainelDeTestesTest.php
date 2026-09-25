@@ -16,6 +16,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_painel_de_testes_abre_com_o_banco_conectado(): void
     {
+        $this->actingAsGestor();
+
         $this->get('/')
             ->assertOk()
             ->assertSee('Painel de Testes ONG SOS')
@@ -34,6 +36,8 @@ class PainelDeTestesTest extends TestCase
         $this->assertSame(1, Apoiador::count());
         $this->assertSame(1, Crianca::count());
 
+        $this->actingAsGestor();
+
         $this->get('/')
             ->assertOk()
             ->assertSee($crianca->nome)
@@ -43,10 +47,11 @@ class PainelDeTestesTest extends TestCase
 
     public function test_painel_de_testes_avisa_quando_o_banco_esta_vazio(): void
     {
+        $this->actingAsGestor();
+
         $this->get('/')
             ->assertOk()
             ->assertSee('Nenhuma criança cadastrada ainda.')
-            ->assertSee('Nenhum apoiador cadastrado ainda.')
             ->assertSee('Nenhum programa cadastrado.')
             ->assertSee('Nenhum apadrinhamento ativo.');
     }
@@ -85,7 +90,6 @@ class PainelDeTestesTest extends TestCase
         $this->get('/')->assertOk()->assertSee('Criança Visível');
         $this->getJson('/api/criancas')->assertJsonPath('total', 1);
     }
-
     public function test_cadastro_de_crianca_exige_nome_nascimento_e_status_valido(): void
     {
         $this->actingAsGestor();
@@ -176,6 +180,36 @@ class PainelDeTestesTest extends TestCase
         $this->get('/')->assertOk();
     }
 
+    public function test_visitante_nao_entra_no_painel_de_testes(): void
+    {
+        $this->actingAsGestor();
+        $crianca = $this->criarCrianca();
+
+        $this->post('/sair');
+
+        $this->assertGuest('apoiador');
+
+        $response = $this->get('/');
+
+        $response->assertRedirect('/entrar')->assertSessionHas('erro');
+        $this->assertStringNotContainsString($crianca->nome, (string) $response->getContent());
+    }
+
+    public function test_apis_publicas_continuam_abertas_para_o_site(): void
+    {
+        $this->actingAsGestor();
+        $crianca = $this->criarCrianca();
+
+        $this->post('/sair');
+
+        $this->getJson('/api/criancas')
+            ->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('dados.0.nome', $crianca->nome);
+
+        $this->getJson('/api/apoiadores')->assertOk();
+    }
+
     public function test_visitante_nao_pode_cadastrar_crianca_nem_gerar_dados_de_teste(): void
     {
         $this->assertGuest('apoiador');
@@ -215,13 +249,8 @@ class PainelDeTestesTest extends TestCase
 
         $this->actingAs($gestor, 'apoiador');
 
-        $this->post('/seed-dados')->assertRedirect('/')->assertSessionHas('success');
-    }
-
-    public function test_leitura_do_painel_continua_publica_para_o_site(): void
-    {
         $this->get('/')->assertOk();
 
-        $this->getJson('/api/criancas')->assertOk();
+        $this->post('/seed-dados')->assertRedirect('/')->assertSessionHas('success');
     }
 }
