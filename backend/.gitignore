@@ -3,6 +3,12 @@
 .env
 .env.backup
 .env.production
+
+# Dump do banco: carrega dado de pessoa real (CPF, e-mail, endereço e hash de
+# senha). Fica fora do git de propósito - o schema vem das migrations.
+# Para gerar um: mysqldump -u root -p ong > database/init.sql
+/database/init.sql
+/database/*.sql
 .phpactor.json
 .phpunit.result.cache
 /.codex

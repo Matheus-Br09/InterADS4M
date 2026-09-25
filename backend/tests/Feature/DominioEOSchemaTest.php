@@ -54,9 +54,9 @@ class DominioEOSchemaTest extends TestCase
 
     public function test_modelo_de_administrador_tem_a_sua_propria_tabela_e_oculta_a_senha(): void
     {
-        $this->assertSame('administradores', (new Administrador())->getTable());
+        $this->assertSame('administradores', (new Administrador)->getTable());
 
-        $administrador = new Administrador(['nome' => 'Carol', 'email' => 'gestor@exemplo.org', 'senha' => 'x']);
+        $administrador = new Administrador(['nome' => 'Gestão da ONG', 'email' => 'gestor@exemplo.org', 'senha' => 'x']);
         $administrador->senha = 'segredo';
 
         $this->assertArrayNotHasKey('senha', $administrador->toArray());
@@ -76,7 +76,7 @@ class DominioEOSchemaTest extends TestCase
     public function test_apoiador_usa_o_campo_de_senha_em_portugues(): void
     {
         $senha = Hash::make('senha123');
-        $apoiador = new Apoiador();
+        $apoiador = new Apoiador;
         $apoiador->senha = $senha;
 
         $this->assertSame($senha, $apoiador->getAuthPassword());
@@ -201,7 +201,7 @@ class DominioEOSchemaTest extends TestCase
     private function criarProgramaComCategoria(string $categoria): void
     {
         ProgramaAcao::create([
-            'titulo' => 'Programa ' . $categoria,
+            'titulo' => 'Programa '.$categoria,
             'resumo' => 'Resumo',
             'texto_completo' => 'Texto',
             'categoria' => $categoria,
@@ -217,8 +217,8 @@ class DominioEOSchemaTest extends TestCase
         $sequencia++;
 
         return Apoiador::create([
-            'nome_completo' => 'Apoiador ' . $sequencia,
-            'email' => 'apoio' . $sequencia . '@exemplo.com',
+            'nome_completo' => 'Apoiador '.$sequencia,
+            'email' => 'apoio'.$sequencia.'@exemplo.com',
             'senha' => Hash::make('senha123'),
             'cpf' => (string) $sequencia,
             'data_cadastro' => now()->toDateString(),

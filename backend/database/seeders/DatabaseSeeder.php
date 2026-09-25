@@ -2,15 +2,16 @@
 
 namespace Database\Seeders;
 
+use App\Models\Apadrinhamento;
 use App\Models\Apoiador;
 use App\Models\Crianca;
-use App\Models\Apadrinhamento;
-use App\Models\RecompensaApadrinhamento;
 use App\Models\DoacaoMensal;
 use App\Models\DoacaoUnica;
 use App\Models\Galeria;
 use App\Models\ProgramaAcao;
+use App\Models\RecompensaApadrinhamento;
 use App\Models\Voluntario;
+use App\Support\SenhaForte;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -59,13 +60,16 @@ class DatabaseSeeder extends Seeder
         );
 
         // 2. Apoiadores
+        // Senha nasce inutilizável (hash de um valor aleatório descartado): uma
+        // senha conhecida escrita aqui viraria credencial pública de qualquer
+        // instalação que rode o seed. Use `php artisan apoiador:senha <email>`.
         $apoiador1 = Apoiador::firstOrCreate(
             ['email' => 'mariana.costa@email.com'],
             [
                 'nome_completo' => 'Mariana Costa Ramos',
-                'senha' => Hash::make('senha123'),
+                'senha' => Hash::make(SenhaForte::gerar()),
                 'celular' => '(11) 98765-4321',
-                'cpf' => '123.456.789-00',
+                'cpf' => '12345678909',
                 'sexo' => 'Feminino',
                 'cep' => '01310-100',
                 'logradouro' => 'Avenida Paulista',
@@ -82,9 +86,9 @@ class DatabaseSeeder extends Seeder
             ['email' => 'roberto.almeida@email.com'],
             [
                 'nome_completo' => 'Roberto Carlos Almeida',
-                'senha' => Hash::make('senha123'),
+                'senha' => Hash::make(SenhaForte::gerar()),
                 'celular' => '(11) 97654-3210',
-                'cpf' => '987.654.321-99',
+                'cpf' => '98765432100',
                 'sexo' => 'Masculino',
                 'cep' => '04578-000',
                 'logradouro' => 'Rua Funchal',

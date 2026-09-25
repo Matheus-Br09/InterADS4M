@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Apoiador;
+use App\Support\SenhaForte;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 
@@ -17,7 +18,8 @@ class DefineSenhaDoGestor extends Command
     public function handle(): int
     {
         $email = mb_strtolower(trim((string) $this->argument('email')));
-        $senha = (string) ($this->argument('senha') ?: $this->gerarSenha());
+        $gerada = ! $this->argument('senha');
+        $senha = $gerada ? SenhaForte::gerar() : (string) $this->argument('senha');
 
         if (mb_strlen($senha) < 6) {
             $this->error('A senha precisa ter pelo menos 6 caracteres.');
@@ -43,10 +45,10 @@ class DefineSenhaDoGestor extends Command
 
         $this->info("Senha de {$apoiador->nome_completo} atualizada.");
         $this->line($jaEraGestor
-            ? "A conta já era de gestor."
-            : "A conta foi promovida a gestor da ONG.");
+            ? 'A conta já era de gestor.'
+            : 'A conta foi promovida a gestor da ONG.');
 
-        if (! $this->argument('senha')) {
+        if ($gerada) {
             $this->newLine();
             $this->line("Senha gerada: <info>{$senha}</info>");
         }
@@ -55,10 +57,5 @@ class DefineSenhaDoGestor extends Command
         $this->line('Entre em <info>/entrar</info> com este e-mail para acessar o painel.');
 
         return self::SUCCESS;
-    }
-
-    private function gerarSenha(): string
-    {
-        return 'Gestor'.random_int(1000, 9999).'!';
     }
 }

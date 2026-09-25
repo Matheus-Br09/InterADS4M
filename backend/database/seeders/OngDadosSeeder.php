@@ -2,35 +2,52 @@
 
 namespace Database\Seeders;
 
+use App\Models\Apadrinhamento;
 use App\Models\Apoiador;
 use App\Models\Crianca;
-use App\Models\Apadrinhamento;
-use App\Models\RecompensaApadrinhamento;
 use App\Models\DoacaoMensal;
 use App\Models\DoacaoUnica;
 use App\Models\Galeria;
 use App\Models\ProgramaAcao;
+use App\Models\RecompensaApadrinhamento;
 use App\Models\Voluntario;
+use App\Support\SenhaForte;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class OngDadosSeeder extends Seeder
 {
     public function run(): void
     {
+        /*
+        | Este seeder só cria dados de DEMONSTRAÇÃO: e-mails de exemplo (@exemplo.org,
+        | domínio reservado pela RFC 2606), telefones e CPFs sintéticos, e as
+        | crianças são personagens de desenho. Nenhum dado de pessoa real e,
+        | principalmente, nenhum hash de senha fica no repositório - a senha de
+        | cada conta nasce inutilizável e quem for usar o painel define a sua
+        | com o comando gestor:senha (gestão) ou apoiador:senha (apoiador).
+        |
+        | A senha é seedada como hash de um valor aleatório descartado: escrever
+        | aqui um hash de senha conhecida (mesmo que de um usuário de teste)
+        | publica a credencial de quem usa o banco, e foi assim que os hashes
+        | reais chegaram ao histórico do git.
+        */
+        $semSenhaUsavel = fn (): string => Hash::make(SenhaForte::gerar());
+
         $apoiador1 = Apoiador::firstOrCreate(
             ['email' => 'apoiador1@exemplo.org'],
             [
-                'nome_completo' => 'Matheus Figueiredo',
-                'senha' => 'HASH_REMOVIDO',
-                'celular' => '81985746105',
-                'cpf' => '12378945610',
-                'sexo' => 'Masculino',
-                'cep' => '54220140',
-                'logradouro' => 'avenida Dolores dura',
-                'numero' => '108',
+                'nome_completo' => 'AnaDemonstração',
+                'senha' => $semSenhaUsavel(),
+                'celular' => '81900000001',
+                'cpf' => '11144477735',
+                'sexo' => 'Feminino',
+                'cep' => '53000000',
+                'logradouro' => 'Rua de Exemplo',
+                'numero' => '100',
                 'complemento' => '',
-                'bairro' => 'curado',
-                'cidade' => 'Jaboatão dos Guararapes',
+                'bairro' => 'Exemplo',
+                'cidade' => 'Recife',
                 'estado' => 'PE',
                 'tipo_usuario' => 'apoiador',
                 'data_cadastro' => '2026-09-11 10:44:24',
@@ -40,17 +57,17 @@ class OngDadosSeeder extends Seeder
         $apoiador2 = Apoiador::firstOrCreate(
             ['email' => 'apoiador2@exemplo.org'],
             [
-                'nome_completo' => 'Danillo roger',
-                'senha' => 'HASH_REMOVIDO',
-                'celular' => '81900112233',
-                'cpf' => '12378945611',
-                'sexo' => 'Feminino',
-                'cep' => '54220140',
-                'logradouro' => 'avenida Dolores dura',
-                'numero' => '108',
+                'nome_completo' => 'Bruno Demonstração',
+                'senha' => $semSenhaUsavel(),
+                'celular' => '81900000002',
+                'cpf' => '52998224725',
+                'sexo' => 'Masculino',
+                'cep' => '53000000',
+                'logradouro' => 'Rua de Exemplo',
+                'numero' => '200',
                 'complemento' => '',
-                'bairro' => 'curado',
-                'cidade' => 'Jaboatão dos Guararapes',
+                'bairro' => 'Exemplo',
+                'cidade' => 'Recife',
                 'estado' => 'PE',
                 'tipo_usuario' => 'apoiador',
                 'data_cadastro' => '2026-09-11 10:58:27',
@@ -60,11 +77,11 @@ class OngDadosSeeder extends Seeder
         $admin = Apoiador::firstOrCreate(
             ['email' => 'gestor@exemplo.org'],
             [
-                'nome_completo' => 'Carol',
-                'senha' => 'HASH_REMOVIDO',
+                'nome_completo' => 'Gestão da ONG',
+                'senha' => $semSenhaUsavel(),
                 'celular' => '',
                 'cpf' => '',
-                'sexo' => 'Masculino',
+                'sexo' => '',
                 'cep' => '',
                 'logradouro' => '',
                 'numero' => '',
@@ -215,5 +232,10 @@ class OngDadosSeeder extends Seeder
             ['nome_imagem' => 'logo.png'],
             ['legenda' => 'Logo da ONG', 'data_upload' => '2026-09-15 16:00:00']
         );
+
+        $this->command?->info('Contas de demonstração criadas (senha inutilizável por segurança):');
+        $this->command?->line('  php artisan gestor:senha '.$admin->email.'   # acesso da gestão');
+        $this->command?->line('  php artisan apoiador:senha '.$apoiador1->email);
+        $this->command?->line('  php artisan apoiador:senha '.$apoiador2->email);
     }
 }

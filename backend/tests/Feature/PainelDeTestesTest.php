@@ -90,6 +90,7 @@ class PainelDeTestesTest extends TestCase
         $this->get('/')->assertOk()->assertSee('Criança Visível');
         $this->getJson('/api/criancas')->assertJsonPath('total', 1);
     }
+
     public function test_cadastro_de_crianca_exige_nome_nascimento_e_status_valido(): void
     {
         $this->actingAsGestor();

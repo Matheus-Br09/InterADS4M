@@ -10,7 +10,7 @@
 ## 1. Resumo do Progresso Nesta Sessão
 
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 145 testes (592 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 152 testes (651 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -102,7 +102,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **145 testes, 145 aprovados, 592 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -186,10 +186,34 @@ As listas passam a ser montadas **campo a campo** no controller, e não com `Mod
 
 `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` (3 testes) varre a resposta inteira dos 7 endpoints públicos, em qualquer nível de aninhamento, procurando 22 chaves proibidas (`senha`, `cpf`, `email`, `logradouro`, `historico`, `data_nascimento`, `valor`, `tipo_usuario`…): uma coluna ou relação nova não passa sem o teste reclamar.
 
-> **Decisão de produto pendente:** o nome das crianças continua público (o site precisa para apresentar o apadrinhamento). Publicar nome de menor exige autorização dos responsáveis — vale confirmar com a ONG e, se necessário, exibir só o primeiro nome. Também não há "mural de apoiadores" público; se a ONG quiser, isso deve ser uma lista curada, não a tabela inteira.
+> **Decisão de produto pendente:** o nome das crianças continua público (o site precisa para apresentar o apadrinhamento). Publicar nome de menor exige autorização dos responsáveis — a ONG confirmou que tem a autorização, mas ela precisa estar **registrada** (ficha de consentimento assinada, com data e prazo de uso), e não só no entendimento da equipe. Também não há "mural de apoiadores" público; se a ONG quiser, isso deve ser uma lista curada, não a tabela inteira.
+
+### 4.5 Credenciais de pessoas reais no repositório (25/09) — rotação de senha
+
+Pior que a API: o `backend/database/init.sql` e o `OngDadosSeeder` estavam versionados num repositório **público** com dados de pessoas reais — nome, CPF, celular, endereço e, o pior, **hash bcrypt da senha** (12 contas, incluindo a conta de gestão). Com o repositório aberto, esses hashes são hashes de senha como qualquer outro: dá para testar senha contra eles indefinidamente, e é assim que senhas reaproveitadas caem.
+
+Além disso, os dois seeders escreviam senha **conhecida** (`Hash::make('senha123')` no `DatabaseSeeder`), o que transformava qualquer instalação que rodasse o seed numa conta com senha pública.
+
+O que mudou:
+
+| Antes | Agora |
+|---|---|
+| E-mails reais (a conta da gestão e dois e-mails pessoais) e hash de senha fixo no seeder | e-mails de exemplo (`@exemplo.org`), nomes e CPFs sintéticos, celular/endereço fictício |
+| `Hash::make('senha123')` escrito no `DatabaseSeeder` | senha nasce **inutilizável** (`Hash::make(SenhaForte::gerar())`) e o seed imprime os comandos para definir a senha de cada conta |
+| `gestor:senha` gerava `Gestor` + 4 dígitos (9.000 combinações) | `SenhaForte::gerar()`: 16 caracteres de um alfabeto sem caractere ambíguo (`il1oO0`), ~96 bits |
+| Só existia `gestor:senha` (que **promove** a conta a admin) | novo `apoiador:senha <email> [senha]`, que redefine a senha **sem** mudar o papel e encerra as sessões que ainda valem com a senha antiga |
+| `backend/database/init.sql` versionado com PII, e `docker-compose.yml` montando esse dump no MySQL | dump removido do repositório (e do histórico) e `.gitignore` impedindo novo dump versionado; o schema passa a vir só de `php artisan migrate` |
+
+O dump também era uma **fonte de bug**: ele dizia `cep` NOT NULL sem default, enquanto a migration diz `cep` nullable. Quem instalou pelo Docker e rodou o seed em 11/09 tomou erro 1364 no cadastro público (`/cadastro`), e o Laravel logou o SQL com os valores — CPF e hash bcrypt de uma pessoa real foram parar no `storage/logs/laravel.log`. Ter duas definições de schema foi o que causou o erro; agora há uma só.
+
+A queda da sessão é feita decodificando o payload em base64 de `sessions` e procurando a chave `login_apoiador_<id>` — o `LIKE` no payload não funciona porque o `DatabaseSessionHandler` do Laravel grava base64 (achado no teste, que usa o mesmo formato do framework).
+
+`tests/Feature/RotacaoDeSenhaTest.php` (7 testes) cobre a senha gerada (16 caracteres, sem caractere ambíguo, e que entra no painel), a troca da senha antiga, o `apoiador:senha` sem promoção de papel, o encerramento da sessão alheia que **não** pode ser derrubada, a recusa de senha fraca, a garantia de que **nenhuma** conta criada pelo seed aceita senha previsível, e uma guarda que reprova qualquer `$2y$` ou e-mail de domínio real escrito em um seeder.
+
+> **O que o rework não desfaz:** quem já clonou o repositório antes mantém os arquivos, e o GitHub segura commits órfãos por um tempo. A rotação de senha é a parte que protege de fato — por isso ela é o passo obrigatório depois do push reescrito.
 
 
-### 4.5 Sessão de 15/09 — Importação de Dados e Endpoints
+### 4.6 Sessão de 15/09 — Importação de Dados e Endpoints
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -203,7 +227,7 @@ As listas passam a ser montadas **campo a campo** no controller, e não com `Mod
 | **Imagens em `public/img`** | 🟢 Aprovado | `ben10.jpg`, `chaves.jpg`, `bart.jpg`, `logo.png`, `materia_1789498189.jpg`, `recompensa_1789499207.png` servidas via `/img/*`. |
 | **`GET /api/voluntarios`** | 🟡 Não implementado | Rota inexistente (404). O frontend não consome API; rota fica para implementação. |
 
-### 4.6 Sessões anteriores — Autenticação
+### 4.7 Sessões anteriores — Autenticação
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -226,8 +250,8 @@ As listas passam a ser montadas **campo a campo** no controller, e não com `Mod
 6. **Importação dos dados reais da ONG via migrations + seeder** (crianças, apoiadores, apadrinhamentos, recompensas, doações mensais/únicas, programas, voluntários, galeria) (15/09).
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
-9. **Atualização do `database/init.sql`** com o estado completo (schema + dados), garantindo ambiente limpo via Docker com tudo pronto (15/09).
-10. **Suíte automatizada de 145 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
+10. **Suíte automatizada de 152 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
@@ -235,22 +259,24 @@ As listas passam a ser montadas **campo a campo** no controller, e não com `Mod
 15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
 16. **APIs movidas para `routes/api.php`** (sem CSRF) e **`config/cors.php` criado** liberando origem em desenvolvimento (25/09).
 17. **Rate limiting por IP** em todas as rotas: 120/min na API, 5/min na newsletter, 5/min no cadastro e 10/min no login (25/09).
-18. **Auditoria de segurança das 19 frentes** (SQLi, IDOR, XSS, SSRF, upload, cookies, CSRF, CORS, LGPD, força bruta, rate limit, arquivos expostos): sem SQL injection, IDOR, XSS, SSRF nem upload; 2 problemas críticos corrigidos (este item e o 12) (25/09).
+18. **Auditoria de segurança das 19 frentes** (SQLi, IDOR, XSS, SSRF, upload, cookies, CSRF, CORS, LGPD, força bruta, rate limit, arquivos expostos): sem SQL injection, IDOR, XSS, SSRF nem upload; 3 problemas críticos corrigidos (itens 12, 19 e 20) (25/09).
+19. **Credenciais de pessoas reais fora do repositório:** `database/init.sql` removido (do repositório e do histórico), seeds com e-mail de exemplo e senha inutilizável, `SenhaForte` (16 caracteres, sem caractere ambíguo) e novo comando `apoiador:senha` para redefinir senha sem promover a gestor e derrubar a sessão antiga (25/09).
 
 ---
 
 ### 🔴 Pendente — Alta Prioridade
-1. **Dados reais no histórico do git:** o repositório é público no GitHub e o `backend/database/init.sql` versionado tem CPF, celular, e-mail, endereço, 12 hashes de senha (inclusive o do admin) e uma linha da tabela `sessions` de pessoas reais. Precisam de rotação de senha e reescrita de histórico.
-2. **Nome público das crianças:** o nome completo continua na API pública (o site precisa para apresentar o apadrinhamento). Confirmar autorização dos responsáveis ou exibir só o primeiro nome.
+1. **Rotacionar as senhas de verdade:** o histórico do git foi reescrito e os seeds foram limpos, mas quem clonou o repositório antes ainda tem os hashes de 12 contas. Rodar `php artisan gestor:senha gestor@exemplo.org` e `php artisan apoiador:senha <email>` em cada conta real é o passo que fecha o problema — e vale avisar os apoiadores para trocarem a senha em outros serviços onde usaram a mesma.
+2. **Registrar a autorização dos responsáveis** das crianças, por escrito (nome da criança, finalidade, data e prazo), já que o nome completo segue público na API (25/09).
 3. **Fechar o CORS antes de publicar:** em desenvolvimento o `config/cors.php` libera qualquer origem (`allowed_origins: ['*']`). Trocar pela origem real do site antes de ir ao ar.
-4. **`APP_DEBUG=false`:** hoje está `true` no `.env` **e no `.env.example`**, e o `LOG_LEVEL=debug` grava CPF e hash de senha no `storage/logs/laravel.log` (que já tem 1,7 MB, sem rotação).
+4. **`APP_DEBUG=false`:** hoje está `true` no `.env` **e no `.env.example`**. O `LOG_LEVEL=debug` não é a causa do CPF no log: quem gravou foi o Laravel, ao logar o SQL com os valores quando um insert falhou (11/09). O `storage/logs/laravel.log` tem 1,7 MB com CPF e hash de senha de uma pessoa real, sem rotação — apagar e passar a limpar antes de compartilhar o pen drive.
 5. **Cookies e HTTPS:** `SESSION_SECURE_COOKIE` não existe no `.env` nem no `.env.example` (cookie sem flag `Secure`), sem HSTS, sem cabeçalhos de segurança e sem `trustProxies`.
-6. **Força bruta:** os limites são só por IP e não há bloqueio de conta; `gerarSenha()` do comando `gestor:senha` faz `Gestor` + 4 dígitos (9.000 combinações).
-7. **Upload de Arquivos:**
+6. **Força bruta:** os limites são só por IP e não há bloqueio de conta. A senha gerada pelo `gestor:senha` já passou a ter 16 caracteres, mas o `POST /entrar` ainda aceita senha de 6 caracteres e não trava a conta após X tentativas.
+7. **Revisar as fotos do acervo** que entram no repositório: `inter-ong/src/assets/hero-child.jpg` (674 KB) e `project-*.jpg` precisam ser foto de banco de imagem ou imagem sem pessoa identificável. Foto de criança real em repositório público é problema maior que nome.
+8. **Upload de Arquivos:**
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`. Nome de arquivo gerado pelo servidor (nunca do usuário), `mimes` + `max` e fora do `public/` quando não for para ser servido.
-8. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
-9. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
+9. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
+10. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
 
 ---
 
@@ -284,7 +310,7 @@ As listas passam a ser montadas **campo a campo** no controller, e não com `Mod
   * *(pendente de push)* `fix(backend): tira dado pessoal das APIs publicas`
 * **Sessão de 15/09/2026 (backend):**
   * `conexão.php` (correção do nome do banco)
-  * `database/init.sql` (schema + dados completos)
+  * ~~`database/init.sql`~~ (removido do repositório em 25/09 — ver 4.5; o schema ficou só nas migrations)
   * Migrations novas: `2026_09_15_000001_create_ong_content_tables`, `2026_09_15_000002_create_ong_admin_tables`, `2026_09_15_000003_add_tipo_usuario_to_apoiadores_table`
   * `database/seeders/OngDadosSeeder.php`
   * `public/img/` (acervo de imagens da ONG)

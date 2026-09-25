@@ -58,7 +58,7 @@ InterADS4M/
 ├── backend/             # API Laravel + garantias (Blade/Vite)
 │   ├── app/             # Controllers e Models
 │   ├── config/          # Guard custom "apoiador"
-│   ├── database/        # Migrations, seeders, init.sql
+│   ├── database/        # Migrations e seeders (dump do banco fica fora do git)
 │   ├── docker-compose.yml  # MySQL 8.0
 │   └── routes/web.php   # Todas as rotas
 ├── inter-ong/           # SPA React (Vite)
@@ -81,7 +81,7 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --force
-php artisan db:seed           # dados reais da ONG + dados de demonstração
+php artisan db:seed           # dados de demonstração da ONG
 npm install && npm run build  # assets (Vite/Tailwind)
 php artisan dev
 ```
@@ -89,16 +89,48 @@ php artisan dev
 ### Acesso ao painel de gestão
 
 O painel em `/` (indicadores, crianças, apoiadores, seed e cadastro de crianças) é
-**exclusivo da gestão da ONG** e exige um apoiador com `tipo_usuario = admin`. O seed
-cria a conta `gestor@exemplo.org`. Para definir a senha dela (ou de qualquer outro
-apoiador, promovendo a gestor):
+**exclusivo da gestão da ONG** e exige um apoiador com `tipo_usuario = admin`.
+
+O seed cria a conta `gestor@exemplo.org` **sem senha utilizável** — de propósito:
+escrever um hash de senha no repositório publica a credencial de quem for usar
+aquele banco (já aconteceu, ver "Credenciais expostas no histórico do git" mais
+abaixo). A senha é definida por comando:
 
 ```bash
 php artisan gestor:senha gestor@exemplo.org "minha-senha-forte"   # senha definida
-php artisan gestor:senha gestor@exemplo.org                        # gera uma senha
+php artisan gestor:senha gestor@exemplo.org                        # gera uma senha forte
 ```
 
-Depois é só entrar em `/entrar` com o e-mail e a senha.
+Para **redefinir a senha de um apoiador sem promover a gestor** (é o que a
+rotação de credenciais usa):
+
+```bash
+php artisan apoiador:senha apoiador1@exemplo.org     # gera e mostra a senha nova
+php artisan apoiador:senha marina.costa@email.com "outra-senha-forte"
+```
+
+O comando também encerra as sessões que ainda valem com a senha antiga. Depois é
+só entrar em `/entrar` com o e-mail e a senha.
+
+### Credenciais expostas no histórico do git
+
+O `backend/database/init.sql` (dump com CPF, e-mail, endereço, 12 hashes de senha
+e uma linha da tabela `sessions` de pessoas reais) e o `OngDadosSeeder` com
+credenciais de verdade ficaram versionados num repositório público. Isso foi
+corrigido: o dump saiu do repositório, os seeds passaram a usar e-mails de
+exemplo e senha inutilizável, e o histórico do git foi reescrito.
+
+**O que o rework não desfaz:** quem já clonou o repositório antes mantém os
+arquivos, e o GitHub guarda commits órfãos por um tempo. Por isso a rotação de
+senhas é a parte que realmente protege as contas:
+
+```bash
+php artisan gestor:senha gestor@exemplo.org        # conta da gestão
+php artisan apoiador:senha <email>                  # cada apoiador afetado
+```
+
+Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
+um e-mail de domínio real volte para qualquer seeder.
 
 As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
 `/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
@@ -137,7 +169,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 145 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições e assets offline
+php artisan test    # 152 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA

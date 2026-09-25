@@ -4,15 +4,21 @@ services:
     container_name: meu_mysql
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: minha_senha_root
-      MYSQL_DATABASE: ong
-      MYSQL_USER: meu_usuario
-      MYSQL_PASSWORD: minha_senha
+      # Senhas vindas do .env (que não vai para o git). O default existe só
+      # para o compose não quebrar num ambiente novo sem .env.
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-minha_senha_root}
+      MYSQL_DATABASE: ${DB_DATABASE:-ong}
+      MYSQL_USER: ${DB_USERNAME:-meu_usuario}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-minha_senha}
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # O schema NÃO vem de dump: quem cria as tabelas é
+      # `php artisan migrate --force`, que é a fonte da verdade do banco.
+      # O dump database/init.sql saiu do repositório porque carregava dados de
+      # pessoas reais, e ele já divergia das migrations (coluna `cep` NOT NULL
+      # no dump x nullable na migration), o que quebrava insert em MySQL.
 
 volumes:
   mysql_data:
