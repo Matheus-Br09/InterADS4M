@@ -20,8 +20,8 @@ class CadastroApoiadorTest extends TestCase
             'email' => 'joao@exemplo.com',
             'cpf' => '111.222.333-87',
             'celular' => '(81) 98888-7777',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
             'cidade' => 'Recife',
             'estado' => 'PE',
         ]);
@@ -42,14 +42,14 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao da Silva',
             'email' => 'joao@exemplo.com',
             'cpf' => '111.222.333-87',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ]);
 
         $apoiador = Apoiador::where('email', 'joao@exemplo.com')->firstOrFail();
 
-        $this->assertNotSame('senha123', $apoiador->senha);
-        $this->assertTrue(Hash::check('senha123', $apoiador->senha));
+        $this->assertNotSame('Senha123', $apoiador->senha);
+        $this->assertTrue(Hash::check('Senha123', $apoiador->senha));
     }
 
     public function test_cadastro_publico_nao_permite_se_registrar_como_administrador(): void
@@ -58,8 +58,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Falsa Administradora',
             'email' => 'falsa@exemplo.com',
             'cpf' => '555.666.777-10',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
             'tipo_usuario' => 'admin',
         ]);
 
@@ -77,17 +77,47 @@ class CadastroApoiadorTest extends TestCase
         $this->assertDatabaseCount('apoiadores', 0);
     }
 
-    public function test_recusa_cadastro_com_senha_menor_que_seis_caracteres(): void
+    public function test_recusa_cadastro_com_senha_curta(): void
     {
-        $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-87',
-            'senha' => '12345',
-            'senha_confirmation' => '12345',
-        ])->assertSessionHasErrors('senha');
+        $this->post('/cadastro', $this->dadosDeCadastro(['senha' => 'Ab1', 'senha_confirmation' => 'Ab1']))
+            ->assertSessionHasErrors('senha');
 
         $this->assertDatabaseCount('apoiadores', 0);
+    }
+
+    /*
+    | O tamanho sozinho não segura: "12345678" tem 8 caracteres e cai em
+    | segundos num ataque de dicionário. A regra exige variedade de classes.
+    */
+    public function test_recusa_cadastro_com_senha_fraca_mesmo_atingindo_o_tamanho_minimo(): void
+    {
+        $this->post('/cadastro', $this->dadosDeCadastro(['senha' => '12345678', 'senha_confirmation' => '12345678']))
+            ->assertSessionHasErrors('senha');
+
+        $this->assertDatabaseCount('apoiadores', 0);
+    }
+
+    public function test_a_senha_fraca_devolve_mensagem_que_explica_o_que_falta(): void
+    {
+        $resposta = $this->from('/cadastro')->post('/cadastro', $this->dadosDeCadastro([
+            'senha' => 'senhasenha',
+            'senha_confirmation' => 'senhasenha',
+        ]));
+
+        $resposta->assertSessionHasErrors('senha');
+        $resposta->assertSessionHasErrors([
+            'senha' => 'A senha precisa ter pelo menos 8 caracteres, com maiúscula, minúscula e número.',
+        ]);
+    }
+
+    public function test_aceita_senha_forte_no_cadastro(): void
+    {
+        $this->post('/cadastro', $this->dadosDeCadastro([
+            'senha' => 'Apadrinha1',
+            'senha_confirmation' => 'Apadrinha1',
+        ]))->assertRedirect('/minha-conta');
+
+        $this->assertTrue(Hash::check('Apadrinha1', Apoiador::first()->senha));
     }
 
     public function test_recusa_cadastro_quando_a_confirmacao_de_senha_nao_confere(): void
@@ -96,8 +126,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '111.222.333-87',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'outra999',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Outra123',
         ])->assertSessionHasErrors('senha');
 
         $this->assertDatabaseCount('apoiadores', 0);
@@ -111,8 +141,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Outro Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '999.888.777-05',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('email');
 
         $this->assertSame(1, Apoiador::where('email', 'joao@exemplo.com')->count());
@@ -126,8 +156,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '111.222.333-87',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('cpf');
 
         $this->assertDatabaseCount('apoiadores', 1);
@@ -150,8 +180,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '111.222.333-44',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('cpf');
 
         $this->assertDatabaseCount('apoiadores', 0);
@@ -163,8 +193,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '111.111.111-11',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('cpf');
 
         $this->assertDatabaseCount('apoiadores', 0);
@@ -176,8 +206,8 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
             'cpf' => '12345678908',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertRedirect(route('minha-conta'));
 
         $this->assertDatabaseHas('apoiadores', [
@@ -194,10 +224,29 @@ class CadastroApoiadorTest extends TestCase
             'nome_completo' => 'Segundo Joao',
             'email' => 'segundo@exemplo.com',
             'cpf' => '123.456.789-08',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('cpf');
 
         $this->assertDatabaseCount('apoiadores', 1);
+    }
+
+    /*
+    | Cada teste roda em banco novo (RefreshDatabase), então o e-mail pode
+    | repetir entre testes; dentro de um mesmo teste não, porque aí o erro seria
+    | de e-mail em vez do campo que está sob exame. O CPF precisa ser válido de
+    | verdade, senão a validação de dígito verificador reclama antes.
+    */
+    private function dadosDeCadastro(array $extra = []): array
+    {
+        static::$sequencia++;
+
+        return $extra + [
+            'nome_completo' => 'Joao da Silva',
+            'email' => 'apoio'.static::$sequencia.'@exemplo.com',
+            'cpf' => '111.222.333-87',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
+        ];
     }
 }

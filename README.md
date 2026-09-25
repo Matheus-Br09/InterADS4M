@@ -24,7 +24,7 @@ Plataforma web para a **ONG SOS** — divulgação de ações, angariação de d
 
 ### Backend / Área do apoiador (Laravel)
 
-- 📋 **Cadastro e login de apoiadores** (guard custom `apoiador`)
+- 📋 **Cadastro e login de apoiadores** (guard custom `apoiador`, senha forte e bloqueio por tentativas)
 - 🏠 **Painel `minha-conta`** — área protegida do apoiador
 - 💰 **Apoio único** — doação avulsa com autenticação
 - 📚 **Conteúdo da ONG** — crianças, programas, notícias, materiais didáticos e documentos de transparência
@@ -137,6 +137,27 @@ php artisan apoiador:senha <email>                  # cada apoiador afetado
 Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
 um e-mail de domínio real volte para qualquer seeder.
 
+### Senha e tentativas de login
+
+- **Senha forte em todo lugar**: o cadastro público (`/cadastro`) e os dois
+  comandos de rotação exigem no mínimo 8 caracteres com maiúscula, minúscula e
+  número. `min:6` aceitava `123456`, que cai em segundos num ataque de
+  dicionário. A regra está em `app/Rules/SenhaForte.php` e o critério em
+  `app/Support/SenhaForte.php` - os três lugares falam a mesma língua.
+- **Senha gerada nunca sai fraca**: o gerador garante uma maiúscula, uma
+  minúscula, um número e um símbolo por construção, e embaralha. Antes, uma em
+  cada dez senhas geradas não tinha nenhum dígito e era reprovada pela própria
+  regra - o comando falhava ao acaso.
+- **Bloqueio por conta, não só por IP**: 5 erros travam aquele e-mail por 5
+  minutos, com mensagem dizendo quando volta. O limite por IP (10/min)
+  continua valendo: ele protege o servidor, o bloqueio protege a conta. Login
+  certo zera o contador, e um e-mail inexistente trava igual a um existente
+  (senão a resposta revelaria quais e-mails têm conta). Chave em
+  `ApoiadorAuthController`, testes em `tests/Feature/BloqueioDeLoginTest.php`.
+
+Limites de requisição: `api` 120/min, `newsletter` 5/min, `cadastro` 5/min,
+`login` 10/min, `doacao-unica` 10/min (todos por IP, em `AppServiceProvider`).
+
 As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
 `/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
 `/api/transparencia` e `POST /api/newsletter`) continuam **públicas** porque
@@ -174,7 +195,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 152 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
+php artisan test    # 165 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA
@@ -193,9 +214,9 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 152 testes automatizados no backend
+- ✅ 165 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
+- ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela posta para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
 
 ---
 

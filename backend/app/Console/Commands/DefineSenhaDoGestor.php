@@ -11,7 +11,7 @@ class DefineSenhaDoGestor extends Command
 {
     protected $signature = 'gestor:senha
                             {email : E-mail do apoiador que será gestor}
-                            {senha? : Nova senha (mínimo 6 caracteres). Se omitir, gera uma senha forte}';
+                            {senha? : Nova senha (mínimo 8, com maiúscula, minúscula e número). Se omitir, gera uma senha forte}';
 
     protected $description = 'Define a senha de um apoiador e garante acesso de gestor da ONG';
 
@@ -21,8 +21,13 @@ class DefineSenhaDoGestor extends Command
         $gerada = ! $this->argument('senha');
         $senha = $gerada ? SenhaForte::gerar() : (string) $this->argument('senha');
 
-        if (mb_strlen($senha) < 6) {
-            $this->error('A senha precisa ter pelo menos 6 caracteres.');
+        // Rotação é a hora boa para exigir força: é o comando que o gestor roda
+        // na mão, e aceitar "123456" aqui desmente a regra do cadastro público.
+        // Só a senha digitada é conferida; a gerada já sai com uma de cada
+        // classe (ver App\Support\SenhaForte).
+        if (! $gerada && ! SenhaForte::temForcaSuficiente($senha)) {
+            $this->error('A senha precisa ter pelo menos 8 caracteres, com maiúscula, minúscula e número.');
+            $this->line('Para não escolher nada, rode o comando sem o segundo argumento: a senha é gerada e mostrada aqui.');
 
             return self::FAILURE;
         }

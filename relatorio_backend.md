@@ -10,7 +10,7 @@
 ## 1. Resumo do Progresso Nesta Sessão
 
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 152 testes (651 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 165 testes (651 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -100,9 +100,23 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ## 4. Testes e Validações Realizados
 
+### 4.8 Sessão de 26/09 — Senha forte, bloqueio de conta e limite na doação
+
+**Comando:** `cd backend && php artisan test` → **165 testes, 165 aprovados, 2.957 assertions**.
+
+| Arquivo de teste | Testes | O que trava |
+|---|---|---|
+| `tests/Feature/BloqueioDeLoginTest.php` | 7 | 5 erros travam a conta por 5 minutos (mesmo quando a senha está certa), login certo zera o contador, o bloqueio é por conta e não derruba o login dos outros, e-mail inexistente trava igual a existente (a resposta não vaza quem tem conta), a tela diz quando volta e o e-mail digitado volta no formulário. |
+| `tests/Feature/RotacaoDeSenhaTest.php` | 9 | As duas ferramentas de rotação, a senha gerada entra no painel, a antiga morre, sessão antiga é derrubada, seed sem hash previsível — e a regressão do gerador: 2.200 senhas seguidas sempre passam na regra de força, e o tamanho é 16 sem prefixo fixo. |
+| `tests/Feature/CadastroApoiadorTest.php` | 16 | Cadastro, senha criptografada, CPF de ponta a ponta e agora a senha forte: recusa `12345678` (tamanho ok, sem variedade) e diz o que falta. |
+| `tests/Feature/GestorDeAcessoTest.php` | 8 | `gestor:senha` promove e libera o painel, recusa senha curta e senha de 8 caracteres sem variedade, aceita e-mail com caixa alta e avisa quando a conta não existe. |
+| `tests/Feature/LimiteDeRequisicoesTest.php` | 4 | Os cinco limites nomeados. O teste do limite de IP do login passou a usar e-mail malformado: com senha errada, a partir da 5ª vez quem responde é o bloqueio por conta e o teste mediria duas coisas ao mesmo tempo. |
+
+**Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — posta para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`, que não existem, e valida CPF em `api.invertexto.com`. As proteções novas valem para o caminho Blade (`/cadastro`, `/entrar`), não para o formulário do site, e o CPF digitado ali está indo para um serviço de terceiro. Ver pendência 10 da seção 5.
+
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; a suite está em 165 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -251,16 +265,17 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
-10. **Suíte automatizada de 152 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 165 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
 14. **Telas Blade sem CDN**, com Tailwind 4 compilado pelo Vite e fontes do sistema (25/09).
 15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
 16. **APIs movidas para `routes/api.php`** (sem CSRF) e **`config/cors.php` criado** liberando origem em desenvolvimento (25/09).
-17. **Rate limiting por IP** em todas as rotas: 120/min na API, 5/min na newsletter, 5/min no cadastro e 10/min no login (25/09).
+17. **Rate limiting por IP** em todas as rotas: 120/min na API, 5/min na newsletter, 5/min no cadastro, 10/min no login e 10/min na doa\u00e7\u00e3o \u00fanica (25/09, doacao-unica em 26/09).
 18. **Auditoria de segurança das 19 frentes** (SQLi, IDOR, XSS, SSRF, upload, cookies, CSRF, CORS, LGPD, força bruta, rate limit, arquivos expostos): sem SQL injection, IDOR, XSS, SSRF nem upload; 3 problemas críticos corrigidos (itens 12, 19 e 20) (25/09).
 19. **Credenciais de pessoas reais fora do repositório:** `database/init.sql` removido (do repositório e do histórico), seeds com e-mail de exemplo e senha inutilizável, `SenhaForte` (16 caracteres, sem caractere ambíguo) e novo comando `apoiador:senha` para redefinir senha sem promover a gestor e derrubar a sessão antiga (25/09).
+20. **Senha forte e bloqueio de conta (26/09):** `min:6` no cadastro p\u00fablico aceitava `123456`; agora cadastro e os dois comandos de rota\u00e7\u00e3o exigem 8 caracteres com mai\u00fascula, min\u00fascula e n\u00famero (`app/Rules/SenhaForte.php`). O login trava a conta por 5 minutos depois de 5 erros, com mensagem dizendo quando volta, e o login certo zera o contador (`tests/Feature/BloqueioDeLoginTest.php`, 7 testes). Um e-mail inexistente trava igual a um existente, para a resposta n\u00e3o revelar quais contas existem. `POST /apoio-unico` ganhou limite de 10/min; `POST /sair` ficou sem limite de prop\u00f3sito (n\u00e3o consome recurso e um 429 ali deixaria o apoiador preso logado, com tela de erro no lugar do logout). Corrigido de passagem um **bug do gerador**: uma em cada dez senhas geradas sa\u00eda sem nenhum d\u00edgito (s\u00f3 8 dos 61 caracteres do alfabeto s\u00e3o n\u00famero) e era reprovada pela pr\u00f3pria regra de for\u00e7a, ent\u00e3o `gestor:senha` sem argumento falhava ao acaso; o gerador agora garante um caractere de cada classe e embaralha, com teste de 2.200 amostras.
 
 ---
 
@@ -270,13 +285,13 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 3. **Fechar o CORS antes de publicar:** em desenvolvimento o `config/cors.php` libera qualquer origem (`allowed_origins: ['*']`). Trocar pela origem real do site antes de ir ao ar.
 4. **`APP_DEBUG=false`:** hoje está `true` no `.env` **e no `.env.example`**. O `LOG_LEVEL=debug` não é a causa do CPF no log: quem gravou foi o Laravel, ao logar o SQL com os valores quando um insert falhou (11/09). O `storage/logs/laravel.log` tem 1,7 MB com CPF e hash de senha de uma pessoa real, sem rotação — apagar e passar a limpar antes de compartilhar o pen drive.
 5. **Cookies e HTTPS:** `SESSION_SECURE_COOKIE` não existe no `.env` nem no `.env.example` (cookie sem flag `Secure`), sem HSTS, sem cabeçalhos de segurança e sem `trustProxies`.
-6. **Força bruta:** os limites são só por IP e não há bloqueio de conta. A senha gerada pelo `gestor:senha` já passou a ter 16 caracteres, mas o `POST /entrar` ainda aceita senha de 6 caracteres e não trava a conta após X tentativas.
+6. **Força bruta e senha fraca (parcialmente resolvido em 26/09):** ver item 21 do que já foi feito - a senha fraca e o bloqueio por conta entraram. Continua de pé: o bloqueio é por IP **e** por conta, mas um atacante distribuído ainda tem 5 tentativas por IP.
 7. **Conferir duas fotos do acervo antes de publicar.** Nenhuma das 13 imagens do repositório tem EXIF (sem câmera, GPS ou data), o que é compatível com banco de imagens — mas não prova nada, porque exportar pelo WhatsApp/Instagram também remove metadado. As 7 da landing (`inter-ong/src/assets/`) entraram no `b2ea7d3 landing page 16/09`, antes de qualquer importação: origem duvidosa. As 6 do acervo (`backend/public/img/`) entraram no `ee1dfcc` e são da ONG — as duas que precisam de olhar humano são `materia_1789498189.jpg` (capa do programa, 1200x1600, formato retrato) e `recompensa_1789499207.png` (mídia de recompensa, 738x414). Se tiverem pessoa identificável, trocar por imagem genérica antes de ir ao ar.
 8. **Upload de Arquivos:**
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`. Nome de arquivo gerado pelo servidor (nunca do usuário), `mimes` + `max` e fora do `public/` quando não for para ser servido.
 9. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
-10. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
+10. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto). **Pior do que aparenta (achado em 26/09):** essa tela ainda não chama o backend - o `handleSubmit` faz `fetch('NomeDoArquivoLogin.php')` e `fetch('NomeDoArquivoParaCadastro.php')`, dois nomes de arquivo que não existem, e a validação de CPF vai para `https://api.interneto.com/api-validador-cpf-cnpj/`, um serviço de terceiro. Ou seja: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** - ele existe no Blade `/cadastro`; (b) o CPF de quem digita o formulário está indo para uma empresa externa, sem aviso e fora do padrão "100% offline" do projeto; (c) o `setIsLogin(true)` após o cadastro é estado que não existe no componente. Enquanto isso não for ligado, as proteções do item 21 protegem o caminho Blade, não o caminho do site.
 
 ---
 
@@ -295,8 +310,12 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 76 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 78 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
+* **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
+  * `a36b44d` docs: detalha a checagem das fotos do acervo
+  * `39f2804` docs: registro da auditoria, pendências e rotação de senha
+  * *(este commit)* feat(backend): senha forte, bloqueio de conta e limite na doação
 * **Sessão de 25/09/2026 (backend), do mais recente para o mais antigo:**
   * `46724b5` fix(backend): tira credencial de pessoa real do repositorio
   * `9c125af` fix(backend): tira dado pessoal das APIs publicas

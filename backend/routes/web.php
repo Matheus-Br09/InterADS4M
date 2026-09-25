@@ -35,5 +35,7 @@ Route::post('/sair', [ApoiadorAuthController::class, 'logout'])->name('logout');
 Route::middleware('auth:apoiador')->group(function () {
     Route::get('/minha-conta', [MinhaContaController::class, 'index'])->name('minha-conta');
     Route::get('/apoio-unico', [DoacaoUnicaController::class, 'show'])->name('apoio-unico.show');
-    Route::post('/apoio-unico', [DoacaoUnicaController::class, 'store'])->name('apoio-unico.store');
+    Route::post('/apoio-unico', [DoacaoUnicaController::class, 'store'])
+        ->middleware('throttle:doacao-unica')
+        ->name('apoio-unico.store');
 });

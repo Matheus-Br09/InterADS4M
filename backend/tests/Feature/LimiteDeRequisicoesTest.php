@@ -39,23 +39,25 @@ class LimiteDeRequisicoesTest extends TestCase
         $this->assertDatabaseCount('newsletter', 5);
     }
 
+    /*
+    | E-mails malformados: a validação barra antes do bloqueio por conta, então
+    | estes 10 pedidos são medidos só pelo limite de IP. Se usasse senha errada,
+    | a partir do 5o o bloqueio por conta assumiria a resposta e o teste estaria
+    | medindo duas coisas ao mesmo tempo.
+    */
     public function test_o_login_para_de_aceitar_tentativa_depois_de_dez_por_minuto(): void
     {
-        $apoiador = $this->criarApoiador();
-
         for ($i = 1; $i <= 10; $i++) {
             $this->from('/entrar')->post('/entrar', [
-                'email' => $apoiador->email,
+                'email' => 'nao-e-email',
                 'senha' => 'senha-errada',
             ])->assertRedirect();
         }
 
         $this->from('/entrar')->post('/entrar', [
-            'email' => $apoiador->email,
+            'email' => 'nao-e-email',
             'senha' => 'senha-errada',
         ])->assertStatus(429);
-
-        $this->assertGuest('apoiador');
     }
 
     public function test_o_login_ainda_deixa_entrar_dentro_do_limite(): void
@@ -77,6 +79,7 @@ class LimiteDeRequisicoesTest extends TestCase
         $this->assertContem('newsletter', $this->middlewareEfetivo('POST', '/api/newsletter'));
         $this->assertContem('cadastro', $this->middlewareEfetivo('POST', '/cadastro'));
         $this->assertContem('login', $this->middlewareEfetivo('POST', '/entrar'));
+        $this->assertContem('doacao-unica', $this->middlewareEfetivo('POST', '/apoio-unico'));
     }
 
     private function assertContem(string $limite, array $middleware): void

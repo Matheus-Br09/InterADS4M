@@ -42,8 +42,8 @@ class DominioEOSchemaTest extends TestCase
             'nome_completo' => 'Tentativa de(admin)',
             'email' => 'admin-falso@exemplo.com',
             'cpf' => '12345678908',
-            'senha' => 'senha123',
-            'senha_confirmation' => 'senha123',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
             'tipo_usuario' => 'admin',
         ]);
 
@@ -75,7 +75,7 @@ class DominioEOSchemaTest extends TestCase
 
     public function test_apoiador_usa_o_campo_de_senha_em_portugues(): void
     {
-        $senha = Hash::make('senha123');
+        $senha = Hash::make('Senha123');
         $apoiador = new Apoiador;
         $apoiador->senha = $senha;
 
@@ -219,7 +219,7 @@ class DominioEOSchemaTest extends TestCase
         return Apoiador::create([
             'nome_completo' => 'Apoiador '.$sequencia,
             'email' => 'apoio'.$sequencia.'@exemplo.com',
-            'senha' => Hash::make('senha123'),
+            'senha' => Hash::make('Senha123'),
             'cpf' => (string) $sequencia,
             'data_cadastro' => now()->toDateString(),
         ]);

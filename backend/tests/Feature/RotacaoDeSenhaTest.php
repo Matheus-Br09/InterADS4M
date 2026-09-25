@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Apoiador;
+use App\Support\SenhaForte;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
@@ -21,6 +22,42 @@ class RotacaoDeSenhaTest extends TestCase
 {
     use CriaCenarioOng;
     use RefreshDatabase;
+
+    /*
+    | Regressão do gerador: sem uma classe garantida por senha, uma em cada dez
+    | senhas geradas saía sem nenhum dígito (só 8 dos 61 caracteres do alfabeto
+    | são número) e era reprovada pela própria regra de força — o comando
+    | falhava ao acaso e o gestor ficava sem senha nova.
+    */
+    public function test_a_senha_gerada_nunca_chega_fraca_por_sorte(): void
+    {
+        for ($i = 0; $i < 2000; $i++) {
+            $senha = SenhaForte::gerar();
+
+            $this->assertTrue(
+                SenhaForte::temForcaSuficiente($senha),
+                "Senha gerada sem força: {$senha}",
+            );
+        }
+    }
+
+    public function test_a_senha_gerada_tem_o_tamanho_pedido_e_nao_compartilha_um_prefixo_fixo(): void
+    {
+        $primeiros = [];
+
+        for ($i = 0; $i < 200; $i++) {
+            $senha = SenhaForte::gerar();
+
+            $this->assertSame(16, mb_strlen($senha));
+            $primeiros[$senha[0]] = true;
+        }
+
+        // Com a classe garantida sempre na primeira posição, todo mundo receberia
+        // uma senha com começo idêntico; o embaralhamento existe para não criar
+        // um padrão próprio. Aqui se exige só que o começo não seja sempre igual
+        // (5 valores distintos em 200 sorteios é o piso, sem ser instável).
+        $this->assertGreaterThanOrEqual(5, count($primeiros), 'As senhas geradas estão comecando com o mesmo prefixo.');
+    }
 
     public function test_gestor_senha_agera_uma_senha_forte_e_ela_entra_no_painel(): void
     {
