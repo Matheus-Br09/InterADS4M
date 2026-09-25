@@ -41,7 +41,7 @@ class DominioEOSchemaTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Tentativa de(admin)',
             'email' => 'admin-falso@exemplo.com',
-            'cpf' => '12312312312',
+            'cpf' => '12345678908',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
             'tipo_usuario' => 'admin',

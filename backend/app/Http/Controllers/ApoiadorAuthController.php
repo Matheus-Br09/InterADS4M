@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Apoiador;
+use App\Rules\Cpf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,10 +17,12 @@ class ApoiadorAuthController extends Controller
 
     public function register(Request $request)
     {
+        $request->merge(['cpf' => Cpf::apenasDigitos($request->cpf)]);
+
         $request->validate([
             'nome_completo' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:apoiadores',
-            'cpf' => 'required|string|unique:apoiadores',
+            'cpf' => ['required', 'string', new Cpf, 'unique:apoiadores'],
             'celular' => 'nullable|string',
             'senha' => 'required|string|min:6|confirmed',
         ]);
@@ -60,6 +63,7 @@ class ApoiadorAuthController extends Controller
 
         if (Auth::guard('apoiador')->attempt(['email' => $credentials['email'], 'password' => $credentials['senha']])) {
             $request->session()->regenerate();
+
             return redirect()->intended('/minha-conta');
         }
 

@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use App\Rules\Cpf;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
 class Apoiador extends Authenticatable
 {
@@ -46,6 +48,15 @@ class Apoiador extends Authenticatable
     public function getAuthPassword()
     {
         return $this->senha;
+    }
+
+    // Guarda o CPF só com dígitos, venha ele mascarado ou não. Assim a
+    // unicidade do cadastro não depende de como a pessoa digitou.
+    protected function cpf(): Attribute
+    {
+        return Attribute::make(
+            set: fn (mixed $value) => Cpf::apenasDigitos($value),
+        );
     }
 
     public function apadrinhamentos(): HasMany

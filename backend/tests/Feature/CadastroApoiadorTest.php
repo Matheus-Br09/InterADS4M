@@ -18,7 +18,7 @@ class CadastroApoiadorTest extends TestCase
         $response = $this->post('/cadastro', [
             'nome_completo' => 'Joao da Silva',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '111.222.333-87',
             'celular' => '(81) 98888-7777',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
@@ -31,7 +31,7 @@ class CadastroApoiadorTest extends TestCase
         $this->assertDatabaseHas('apoiadores', [
             'nome_completo' => 'Joao da Silva',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '11122233387',
             'cidade' => 'Recife',
         ]);
     }
@@ -41,7 +41,7 @@ class CadastroApoiadorTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Joao da Silva',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '111.222.333-87',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
         ]);
@@ -57,7 +57,7 @@ class CadastroApoiadorTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Falsa Administradora',
             'email' => 'falsa@exemplo.com',
-            'cpf' => '555.666.777-88',
+            'cpf' => '555.666.777-10',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
             'tipo_usuario' => 'admin',
@@ -82,7 +82,7 @@ class CadastroApoiadorTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '111.222.333-87',
             'senha' => '12345',
             'senha_confirmation' => '12345',
         ])->assertSessionHasErrors('senha');
@@ -95,7 +95,7 @@ class CadastroApoiadorTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '111.222.333-87',
             'senha' => 'senha123',
             'senha_confirmation' => 'outra999',
         ])->assertSessionHasErrors('senha');
@@ -110,7 +110,7 @@ class CadastroApoiadorTest extends TestCase
         $this->post('/cadastro', [
             'nome_completo' => 'Outro Joao',
             'email' => 'joao@exemplo.com',
-            'cpf' => '999.888.777-66',
+            'cpf' => '999.888.777-05',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
         ])->assertSessionHasErrors('email');
@@ -120,12 +120,12 @@ class CadastroApoiadorTest extends TestCase
 
     public function test_recusa_cadastro_com_cpf_ja_utilizado(): void
     {
-        $this->criarApoiador(['cpf' => '111.222.333-44']);
+        $this->criarApoiador(['cpf' => '111.222.333-87']);
 
         $this->post('/cadastro', [
             'nome_completo' => 'Joao',
             'email' => 'joao@exemplo.com',
-            'cpf' => '111.222.333-44',
+            'cpf' => '111.222.333-87',
             'senha' => 'senha123',
             'senha_confirmation' => 'senha123',
         ])->assertSessionHasErrors('cpf');
@@ -142,5 +142,62 @@ class CadastroApoiadorTest extends TestCase
         $this->get('/entrar')
             ->assertOk()
             ->assertSee('Entrar no Sistema');
+    }
+
+    public function test_cadastro_recusa_cpf_invalido_com_mensagem_clara(): void
+    {
+        $this->post('/cadastro', [
+            'nome_completo' => 'Joao',
+            'email' => 'joao@exemplo.com',
+            'cpf' => '111.222.333-44',
+            'senha' => 'senha123',
+            'senha_confirmation' => 'senha123',
+        ])->assertSessionHasErrors('cpf');
+
+        $this->assertDatabaseCount('apoiadores', 0);
+    }
+
+    public function test_cadastro_recusa_cpf_com_digitos_repetidos(): void
+    {
+        $this->post('/cadastro', [
+            'nome_completo' => 'Joao',
+            'email' => 'joao@exemplo.com',
+            'cpf' => '111.111.111-11',
+            'senha' => 'senha123',
+            'senha_confirmation' => 'senha123',
+        ])->assertSessionHasErrors('cpf');
+
+        $this->assertDatabaseCount('apoiadores', 0);
+    }
+
+    public function test_cadastro_aceita_cpf_sem_mascara_e_guarda_so_digitos(): void
+    {
+        $this->post('/cadastro', [
+            'nome_completo' => 'Joao',
+            'email' => 'joao@exemplo.com',
+            'cpf' => '12345678908',
+            'senha' => 'senha123',
+            'senha_confirmation' => 'senha123',
+        ])->assertRedirect(route('minha-conta'));
+
+        $this->assertDatabaseHas('apoiadores', [
+            'email' => 'joao@exemplo.com',
+            'cpf' => '12345678908',
+        ]);
+    }
+
+    public function test_cpf_ja_cadastrado_e_recusado_mesmo_com_mascara_diferente(): void
+    {
+        $this->criarApoiador(['email' => 'primeiro@exemplo.com', 'cpf' => '12345678908']);
+
+        $this->post('/cadastro', [
+            'nome_completo' => 'Segundo Joao',
+            'email' => 'segundo@exemplo.com',
+            'cpf' => '123.456.789-08',
+            'senha' => 'senha123',
+            'senha_confirmation' => 'senha123',
+        ])->assertSessionHasErrors('cpf');
+
+        $this->assertDatabaseCount('apoiadores', 1);
     }
 }
