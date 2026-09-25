@@ -132,7 +132,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 109 testes: APIs, autenticação, painel, seeders, CPF e assets offline
+php artisan test    # 137 testes: APIs, autenticação, painel, seeders, CPF, rotas e assets offline
 ```
 
 ### Frontend SPA

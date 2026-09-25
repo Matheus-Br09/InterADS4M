@@ -9,9 +9,7 @@ class Cpf implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $cpf = static::apenasDigitos($value);
-
-        if (! static::valido($cpf)) {
+        if (! static::valido($value)) {
             $fail('O CPF informado é inválido. Confira os números e tente de novo.');
         }
     }
@@ -21,9 +19,11 @@ class Cpf implements ValidationRule
         return preg_replace('/\D/', '', (string) $value) ?? '';
     }
 
-    public static function valido(string $cpf): bool
+    public static function valido(mixed $cpf): bool
     {
-        if (strlen($cpf) !== 11 || ! ctype_digit($cpf)) {
+        $cpf = static::apenasDigitos($cpf);
+
+        if (strlen($cpf) !== 11) {
             return false;
         }
 
@@ -50,7 +50,7 @@ class Cpf implements ValidationRule
         return true;
     }
 
-    public static function formatar(string $cpf): string
+    public static function formatar(mixed $cpf): string
     {
         $cpf = static::apenasDigitos($cpf);
 
