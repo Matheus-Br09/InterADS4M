@@ -2,12 +2,15 @@
 
 **Projeto:** InterADS4M — Site da ONG SOS  
 **Responsável pelo Backend:** Carlos  
-**Data:** 11/09/2026; última atualização em **15/09/2026**  
-**Tecnologias:** Laravel (PHP 8.4), MySQL 8.0, Docker, Tailwind CSS, Blade  
+**Data:** 11/09/2026; última atualização em **25/09/2026**  
+**Tecnologias:** Laravel 13 (PHP 8.4), MySQL 8.0, Docker, Vite, Tailwind CSS 4, Blade  
 
 ---
 
 ## 1. Resumo do Progresso Nesta Sessão
+
+### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 109 testes (425 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive.
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -72,11 +75,57 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
   * `GET /minha-conta` (Área Restrita do Apoiador)
   * `POST /logout`
 
+### 3.4 Segurança do Painel de Gestão (25/09)
+* **Middleware `EhGestor`:** registrado como `gestor` em `bootstrap/app.php`; aplicado em `GET /`, `POST /seed-dados` e `POST /criancas/salvar`. Qualquer apoiador sem `tipo_usuario = admin` é redirecionado para `/entrar`.
+* **Views mortas removidas:** `minha-conta.blade.php` (raiz) e `auth/entrar.blade.php` ficavam duplicadas e sem rota; foram apagadas.
+* **APIs públicas sem dados pessoais:** `Apoiador::$hidden` passou a esconder `senha`, `cpf`, `celular` e `email` — inclusive em relações aninhadas (`/api/apoiadores`, `/api/criancas`, `/api/apadrinhamentos`).
+* **Comando `gestor:senha`:** `php artisan gestor:senha <email> [senha]` promove um apoiador existente a `admin`, aceita o e-mail com qualquer caixa e pode gerar uma senha forte. É a forma documentada de recuperar o acesso da gestão (conta do seed: `gestor@exemplo.org`).
+* **`$fillable` completados** em `Apoiador`, `DoacaoUnica`, `DoacaoMensal` e `Noticia`; o cadastro público passa a gravar `tipo_usuario = apoiador` de forma explícita, ignorando qualquer valor enviado no formulário.
+* **`DatabaseSeeder` chama `OngDadosSeeder`:** o seed padrão já entrega o banco com os dados reais da ONG.
+
+### 3.5 Validação de CPF no Cadastro (25/09)
+* **Regra `App\Rules\Cpf`:** confere comprimento (11 dígitos), dígitos verificadores e rejeita CPFs de dígitos repetidos (`111.111.111-11`). Traz `apenasDigitos()` e `formatar()` para reuso.
+* **`ApoiadorAuthController::register()`:** normaliza o CPF para apenas números antes de validar, aplica a regra e mantém `unique:apoiadores`. CPF inválido volta **422** com o erro no campo `cpf`.
+* **Model `Apoiador`:** mutator `cpf()` grava só dígitos, para a unicidade não depender de como a pessoa digitou (com ou sem máscara).
+
+### 3.6 Assets Locais com Vite (25/09)
+* As quatro telas Blade (`layouts/app`, `auth/login`, `auth/cadastro` e `welcome`) trocaram `<script src="https://cdn.tailwindcss.com">` por `@vite(['resources/css/app.css', 'resources/js/app.js'])`.
+* `resources/css/app.css` ganhou `@source '../../resources/views/**/*.blade.php'`, para o Tailwind 4 varrer as classes das telas.
+* O painel de testes perdeu o `<link>` do Google Fonts e passou a usar fontes do sistema.
+* `npm run build` gera `public/build` (CSS ~40 kB + JS). O diretório é ignorado pelo Git: **rodar `npm install && npm run build` é obrigatório** depois de criar ou renomear classes nas telas.
+* Os testes rodam com `withoutVite()` no `tests/TestCase.php`, então a suíte não depende do build.
+* *Observação:* o plugin gera um CSS de fontes separado (`_fonts-*.css`) que não entra automaticamente no HTML; por isso as telas ficam com a pilha de fontes do sistema.
+
 ---
 
 ## 4. Testes e Validações Realizados
 
-### 4.1 Sessão de 15/09 — Importação de Dados e Endpoints
+### 4.1 Sessão de 25/09 — Suíte Automatizada
+
+**Comando:** `cd backend && php artisan test` → **109 testes, 109 aprovados, 425 assertions** (banco SQLite em memória, sem depender do MySQL do Docker).
+
+| Arquivo de teste | Testes | O que trava |
+|---|---|---|
+| `tests/Feature/PainelDeTestesTest.php` | 18 | Painel exige gestor, seed por rota, cadastro de criança, APIs continuam abertas a visitantes. |
+| `tests/Feature/DominioEOSchemaTest.php` | 14 | Tabelas do banco, tipos de doação, seeders idempotentes, cadastro público nunca cria admin. |
+| `tests/Feature/CadastroApoiadorTest.php` | 13 | Cadastro, senha criptografada, CPF (válido, inválido, repetido, sem máscara, duplicado com máscara diferente). |
+| `tests/Feature/LoginLogoutApoiadorTest.php` | 11 | Guard `apoiador`, credenciais, sessão e logout. |
+| `tests/Feature/ApiConteudoPublicoTest.php` | 11 | Endpoints REST e ausência de `senha`, `cpf`, `celular` e `email` nas respostas. |
+| `tests/Feature/MinhaContaTest.php` | 10 | Tela logada e correções de `$mensal->valor` / `$voluntario->area_interesse`. |
+| `tests/Feature/AssetsOfflineTest.php` | 10 | Nenhuma tela carrega CDN/fonte externa; com build presente, o CSS local é obrigatório (5 telas × 2 verificações). |
+| `tests/Feature/ApoioUnicoTest.php` | 8 | Fluxo de doação única. |
+| `tests/Feature/GestorDeAcessoTest.php` | 7 | Comando `gestor:senha` (promoção, e-mail case-insensitive, senha gerada, e-mail inexistente). |
+| `tests/Feature/NewsletterTest.php` | 5 | `POST /api/newsletter` e validações. |
+| `tests/Feature/ExampleTest.php` + `tests/Unit/ExampleTest.php` | 2 | Testes de exemplo do Laravel. |
+| **Total** | **109** | |
+
+| Validação manual | Status | Resultado |
+|---|---|---|
+| `npm run build` | 🟢 Aprovado | `public/build` gerado sem erro (aviso do pacote opcional `fontaine`, não bloqueia). |
+| Renderização das telas com build | 🟢 Aprovado | `/entrar`, `/cadastro` e demais telas emitem `build/assets/app-*.css` e nenhum `cdn.tailwindcss`. |
+| `vendor/bin/pint` nos arquivos alterados | 🟢 Aprovado | Estilo corrigido apenas nos arquivos tocados (sem reescrever o projeto inteiro). |
+
+### 4.2 Sessão de 15/09 — Importação de Dados e Endpoints
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -90,7 +139,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 | **Imagens em `public/img`** | 🟢 Aprovado | `ben10.jpg`, `chaves.jpg`, `bart.jpg`, `logo.png`, `materia_1789498189.jpg`, `recompensa_1789499207.png` servidas via `/img/*`. |
 | **`GET /api/voluntarios`** | 🟡 Não implementado | Rota inexistente (404). O frontend não consome API; rota fica para implementação. |
 
-### 4.2 Sessões anteriores — Autenticação
+### 4.3 Sessões anteriores — Autenticação
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -114,39 +163,53 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Atualização do `database/init.sql`** com o estado completo (schema + dados), garantindo ambiente limpo via Docker com tudo pronto (15/09).
+10. **Suíte automatizada de 109 testes** cobrindo autenticação, painel, APIs, seeders, domínio e assets (25/09).
+11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
+12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`) (25/09).
+13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
+14. **Telas Blade sem CDN**, com Tailwind 4 compilado pelo Vite e fontes do sistema (25/09).
+15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
 
 ---
 
 ### 🔴 Pendente — Alta Prioridade
 1. **Configuração de CORS:** Liberar o backend para permitir requisições HTTP do frontend em React/Next.js.
-2. **Autenticação Admin (JWT / Sanctum):** Painel administrativo restrito para a gestão de conteúdos por Carol e Flávio.
-3. **Upload de Arquivos:**
+2. **Upload de Arquivos:**
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`.
-4. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
+3. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
+4. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
 
 ---
 
 ### 🟡 Pendente — Média Prioridade
 1. **Refatoração de Controllers:** Dividir o `DashboardTesteController.php` em controllers específicos por domínio (`NoticiaController`, `CriancaController`, `ApadrinhamentoController`).
 2. **Integração de Meios de Pagamento:** Preparar a estrutura/webhooks de PIX e Cartão para doações.
+3. **Autenticação Admin para a SPA (JWT / Sanctum):** o painel Blade já é protegido por sessão + `tipo_usuario = admin`; falta o equivalente para o frontend React (hoje não há endpoints administrativos de escrita expostos).
 
 ---
 
-### 🟢 Pendente — Baixa Prioridade
+### 🟡 Pendente — Baixa Prioridade
 1. **Paginação nas APIs REST:** Implementar paginação para listagens longas (ex.: notícias e galeria).
+2. **Publicar a fonte Instrument Sans:** o build já gera o CSS da fonte, mas ele não é ligado no HTML; é preciso incluí-lo no `@vite` para as telas usarem a tipografia pretendida.
 
 ---
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Commits Anteriores:** Configurações iniciais, scripts SQL e modelos.
-* **Commits Recentes:**
-  * `feat(auth): configuracao do guard de apoiador e controllers de autenticacao`
-  * `feat(views): ajuste na migration e telas de autenticação e painel do apoiador`
-* **Alterações em andamento (15/09, ainda não commitadas — aguardando revisão):**
+* **Estado:** repositório com 70+ commits. O `origin/main` está em `deb6526`; as commits de CPF, de Vite e esta atualização do relatório ainda estão apenas na máquina local.
+* **Sessão de 25/09/2026 (backend):**
+  * `8d53dfa test(backend): cria suite de testes do backend e corrige painel do apoiador`
+  * `e299f36 fix(backend): protege escrita do painel, liga seed da ONG e completa fillable`
+  * `01634ac fix(backend): restringe leitura do painel a gestao e remove views mortas`
+  * `deb6526 fix(backend): tira dados pessoais das APIs e cria comando de acesso do gestor`
+  * `b05c2b3 feat(backend): valida CPF no cadastro e guarda so digitos`
+  * `264ebbb refactor(backend): troca CDN do Tailwind por build local do Vite`
+* **Sessão de 15/09/2026 (backend):**
   * `conexão.php` (correção do nome do banco)
   * `database/init.sql` (schema + dados completos)
   * Migrations novas: `2026_09_15_000001_create_ong_content_tables`, `2026_09_15_000002_create_ong_admin_tables`, `2026_09_15_000003_add_tipo_usuario_to_apoiadores_table`
   * `database/seeders/OngDadosSeeder.php`
   * `public/img/` (acervo de imagens da ONG)
+* **Commits do frontend (`inter-ong/`, mantidos intactos nesta sessão):** `c6b813b`, `ed228c2`, `be114ee`, `10e5890`, `09326a1`.
+* **Observação:** a suíte roda em SQLite e o build de assets é local; nenhum commit do backend depende de banco ou internet para ser validado.
