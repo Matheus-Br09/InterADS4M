@@ -132,7 +132,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 137 testes: APIs, autenticação, painel, seeders, CPF, rotas e assets offline
+php artisan test    # 138 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF e assets offline
 ```
 
 ### Frontend SPA
@@ -151,9 +151,9 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 109 testes automatizados no backend
+- ✅ 138 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: CORS, auth admin, upload de arquivos, endpoints REST restantes
+- ⏳ Pendente: restringir CORS antes de publicar, rate limiting, upload de arquivos, endpoints REST restantes
 
 ---
 

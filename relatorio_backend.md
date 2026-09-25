@@ -10,7 +10,7 @@
 ## 1. Resumo do Progresso Nesta Sessão
 
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 137 testes (499 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou um bug de integração: **`POST /api/newsletter` exige token de CSRF e hoje leva 419 em produção** (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 138 testes (509 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -102,7 +102,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **137 testes, 137 aprovados, 499 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Um teste fica marcado como *incompleto* de propósito: é o contrato de CORS que ainda não existe (ver 4.4).
+**Comando:** `cd backend && php artisan test` → **138 testes, 138 aprovados, 509 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -118,9 +118,9 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 | `tests/Feature/GestorDeAcessoTest.php` | 7 | Comando `gestor:senha` (promoção, e-mail case-insensitive, senha gerada, e-mail inexistente). |
 | `tests/Feature/SuperficiePublicaDaApiTest.php` | 5 | Inventário das rotas: a lista de APIs públicas não muda por accidento e cada grupo de rota exige o middleware certo. |
 | `tests/Feature/NewsletterTest.php` | 5 | `POST /api/newsletter` e validações. |
-| `tests/Feature/ApiParaOSiteTest.php` | 4 | Leitura das APIs por outra origem e a pendência de CSRF/CORS. |
+| `tests/Feature/ApiParaOSiteTest.php` | 5 | Leitura das APIs por outra origem, envio da newsletter sem token de sessão, permissão de CORS e CSRF preservado nos formulários do backend. |
 | `tests/Feature/ExampleTest.php` + `tests/Unit/ExampleTest.php` | 2 | Testes de exemplo do Laravel. |
-| **Total** | **137** | |
+| **Total** | **138** | |
 
 | Validação manual | Status | Resultado |
 |---|---|---|
@@ -128,17 +128,30 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 | Renderização das telas com build | 🟢 Aprovado | `/entrar`, `/cadastro` e demais telas emitem `build/assets/app-*.css` e nenhum `cdn.tailwindcss`. |
 | `vendor/bin/pint` nos arquivos alterados | 🟢 Aprovado | Estilo corrigido apenas nos arquivos tocados (sem reescrever o projeto inteiro). |
 
-### 4.2 Pendência encontrada pelos testes: CSRF e CORS nas APIs
+### 4.2 CSRF e CORS: problema encontrado pelos testes e já corrigido
 
 Ao escrever os testes de integração com o site, apareceram três coisas concretas:
 
-1. **Não existe rota duplicada sem `/api`.** As linhas `/criancas`, `/apoiadores`… de `routes/web.php` estão dentro de `Route::prefix('api')`, ou seja, o caminho real já é `/api/criancas`. Nada está duplicado.
-2. **`POST /api/newsletter` exige token de sessão (CSRF).** As APIs foram declaradas em `routes/web.php`, então recebem o grupo `web`, que inclui `PreventRequestForgery`. Os testes não perceivebem isso porque o Laravel pula a checagem de CSRF quando está rodando em modo de teste — **em produção, o envio da newsletter pelo site leva 419 (Token Mismatch)**. O teste `test_post_da_newsletter_da_para_o_site_sem_token_csrf` já falha sozinho assim que a rota for corrigida.
-3. **CORS não está configurado** (não existe `config/cors.php`). Um site em outra origem não consegue ler a resposta do backend. O teste `test_origem_externa_recebe_permissao_cors` está marcado como *incompleto* até as origens permitidas serem definidas.
+1. **Não existe rota duplicada sem `/api`.** As linhas `/criancas`, `/apoiadores`… de `routes/web.php` estavam dentro de `Route::prefix('api')`, ou seja, o caminho real já era `/api/criancas`. Nada estava duplicado.
+2. **`POST /api/newsletter` exigia token de sessão (CSRF).** As APIs estavam declaradas em `routes/web.php`, então recebiam o grupo `web`, que inclui `PreventRequestForgery`. Os testes não percebiam isso porque o Laravel pula a checagem de CSRF quando está rodando em modo de teste — **em produção, o envio da newsletter pelo site levaria 419 (Token Mismatch)**.
+3. **CORS não existia** (não havia `config/cors.php`). Um site em outra origem não conseguia ler a resposta do backend.
 
-Correção sugerida (depende de decisão de produto: quais origens liberar):
-* `config/cors.php` com `paths: ['api/*']` e as origens do site (dev + produção);
-* tirar as rotas de API do grupo `web` (passá-las para `routes/api.php`) ou usar `$middleware->validateCsrfTokens(except: ['api/*'])`.
+Como o projeto ainda está em desenvolvimento, as duas pendências foram resolvidas agora:
+
+| Correção | O que foi feito |
+|---|---|
+| CSRF | As 8 rotas de API saíram do grupo `web` e foram para `backend/routes/api.php` (grupo `api`: sem cookie de sessão, sem token de CSRF). Os URLs continuam iguais (`/api/...`), o painel e os formulários Blade seguem com CSRF. |
+| CORS | Criado `backend/config/cors.php` com `paths: ['api/*']` liberando qualquer origem (`allowed_origins: ['*']`), próprio do desenvolvimento. |
+
+Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo da rota (grupos `web`/`api` abertos):
+
+* `test_o_site_nao_precisa_de_token_de_sessao_para_postar` — `POST /api/newsletter` **não** pode voltar a exigir CSRF;
+* `test_os_formularios_do_backend_continuam_com_protecao_de_csrf` — `POST /cadastro`, `/entrar`, `/apoio-unico` e `/criancas/salvar` **precisam** continuar protegidos;
+* `test_leitura_da_api_vem_com_permissao_para_o_site_leer` e `test_o_site_pode_enviar_a_newsletter_de_outra_origem` — resposta com `Access-Control-Allow-Origin`.
+
+> ⚠️ **Antes de publicar:** trocar `allowed_origins: ['*']` em `config/cors.php` pela origem real do site (ex.: `['https://ongsos.org.br']`). Sem isso, qualquer página da internet poderia ler as respostas da API.
+
+**Ainda pendente:** não existe limite de requisições (*rate limiting*) em nenhuma rota — inclusive na `POST /api/newsletter`, que é pública e grava no banco. Alguém (ou algum robô) pode enviar milhares de e-mails. Ver 5.
 
 ### 4.3 Sessão de 15/09 — Importação de Dados e Endpoints
 
@@ -178,18 +191,19 @@ Correção sugerida (depende de decisão de produto: quais origens liberar):
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Atualização do `database/init.sql`** com o estado completo (schema + dados), garantindo ambiente limpo via Docker com tudo pronto (15/09).
-10. **Suíte automatizada de 137 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 138 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`) (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
 14. **Telas Blade sem CDN**, com Tailwind 4 compilado pelo Vite e fontes do sistema (25/09).
 15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
+16. **APIs movidas para `routes/api.php`** (sem CSRF) e **`config/cors.php` criado** liberando origem em desenvolvimento (25/09).
 
 ---
 
 ### 🔴 Pendente — Alta Prioridade
-1. **Configuração de CORS:** não existe `config/cors.php`, então o site em outra origem não consegue ler as respostas do backend. Definir as origens permitidas (dev e produção) e criar o arquivo.
-2. **`POST /api/newsletter` retorna 419 em produção:** a rota está no grupo `web` e exige token de CSRF, que a SPA não tem como enviar. Mover as APIs para `routes/api.php` ou usar `$middleware->validateCsrfTokens(except: ['api/*'])`.
+1. **Fechar o CORS antes de publicar:** em desenvolvimento o `config/cors.php` libera qualquer origem (`allowed_origins: ['*']`). Trocar pela origem real do site antes de ir ao ar.
+2. **Rate limiting:** nenhuma rota tem limite de requisições, inclusive a `POST /api/newsletter` (pública e grava no banco). Adicionar `throttle` nas rotas de API e no login.
 3. **Upload de Arquivos:**
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`.
@@ -222,7 +236,8 @@ Correção sugerida (depende de decisão de produto: quais origens liberar):
   * `b05c2b3 feat(backend): valida CPF no cadastro e guarda so digitos`
   * `264ebbb refactor(backend): troca CDN do Tailwind por build local do Vite`
   * `73a6f2c docs: atualiza relatorio do backend com testes, seguranca, Vite e CPF`
-  * *(pendente de push)* `test(backend): amplia cobertura de CPF, rotas, integracao com o site e CSS compilado`
+  * `test(backend): amplia cobertura de CPF, rotas, integracao com o site e CSS compilado`
+  * *(pendente de push)* `fix(backend): tira APIs do CSRF e configura CORS para desenvolvimento`
 * **Sessão de 15/09/2026 (backend):**
   * `conexão.php` (correção do nome do banco)
   * `database/init.sql` (schema + dados completos)
