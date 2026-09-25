@@ -29,6 +29,7 @@ class Apoiador extends Authenticatable
         'bairro',
         'cidade',
         'estado',
+        'tipo_usuario',
         'data_cadastro',
     ];
 

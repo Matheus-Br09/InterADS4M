@@ -53,6 +53,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_gestor_cadastra_uma_crianca_atendida_pelo_painel(): void
     {
+        $this->actingAsGestor();
+
         $response = $this->post('/criancas/salvar', [
             'nome' => 'Criança Cadastrada',
             'data_nascimento' => '2016-03-05',
@@ -72,6 +74,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_crianca_cadastrada_aparece_no_painel_e_na_api(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/criancas/salvar', [
             'nome' => 'Criança Visível',
             'data_nascimento' => '2016-03-05',
@@ -84,6 +88,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_cadastro_de_crianca_exige_nome_nascimento_e_status_valido(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/criancas/salvar', [
             'nome' => '',
             'data_nascimento' => '',
@@ -95,6 +101,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_cadastro_de_crianca_recusa_data_de_nascimento_invalida(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/criancas/salvar', [
             'nome' => 'Data invalida',
             'data_nascimento' => '14/05/2016',
@@ -106,6 +114,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_rota_de_seed_e_disparada_pelo_painel_e_popula_o_banco(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/seed-dados')
             ->assertRedirect('/')
             ->assertSessionHas('success');
@@ -116,6 +126,8 @@ class PainelDeTestesTest extends TestCase
 
     public function test_rodar_o_seed_duas_vezes_nao_duplica_registros(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/seed-dados');
         $apoiadores = Apoiador::count();
         $criancas = Crianca::count();
@@ -145,14 +157,26 @@ class PainelDeTestesTest extends TestCase
         $this->assertSame(1, Apoiador::whereRaw('tipo_usuario = ?', ['admin'])->count());
     }
 
+    public function test_seed_padrao_tambem_carrega_os_dados_reais_da_ong(): void
+    {
+        Artisan::call('db:seed', ['--force' => true]);
+
+        $this->assertDatabaseHas('apoiadores', ['email' => 'gestor@exemplo.org', 'tipo_usuario' => 'admin']);
+        $this->assertSame(1, Apoiador::whereRaw('tipo_usuario = ?', ['admin'])->count());
+
+        $this->assertDatabaseHas('criancas', ['nome' => 'Lucas Gabriel Santos']);
+    }
+
     public function test_painel_continua_funcional_apos_um_cadastro_invalido(): void
     {
+        $this->actingAsGestor();
+
         $this->post('/criancas/salvar', [])->assertSessionHasErrors();
 
         $this->get('/')->assertOk();
     }
 
-    public function test_rotas_de_administracao_do_painel_hoje_respondem_sem_autenticacao(): void
+    public function test_visitante_nao_pode_cadastrar_crianca_nem_gerar_dados_de_teste(): void
     {
         $this->assertGuest('apoiador');
 
@@ -160,10 +184,44 @@ class PainelDeTestesTest extends TestCase
             'nome' => 'Criança sem login',
             'data_nascimento' => '2016-03-05',
             'status' => 'disponivel',
-        ])->assertRedirect('/');
+        ])->assertRedirect('/entrar');
 
-        $this->post('/seed-dados')->assertRedirect('/');
+        $this->post('/seed-dados')->assertRedirect('/entrar');
 
-        $this->assertSame(1, Crianca::where('nome', 'Criança sem login')->count());
+        $this->assertDatabaseCount('criancas', 0);
+        $this->assertDatabaseCount('apoiadores', 0);
+    }
+
+    public function test_apoiador_comum_nao_pode_usar_as_rotas_de_administracao_do_painel(): void
+    {
+        $this->actingAs($this->criarApoiador(), 'apoiador');
+
+        $this->post('/criancas/salvar', [
+            'nome' => 'Criança de apoiador comum',
+            'data_nascimento' => '2016-03-05',
+            'status' => 'disponivel',
+        ])->assertRedirect('/entrar')->assertSessionHas('erro');
+
+        $this->post('/seed-dados')->assertRedirect('/entrar');
+
+        $this->assertDatabaseCount('criancas', 0);
+    }
+
+    public function test_gestor_criado_pelo_seed_real_acessa_as_rotas_de_administracao(): void
+    {
+        Artisan::call('db:seed', ['--class' => 'OngDadosSeeder', '--force' => true]);
+
+        $gestor = Apoiador::whereRaw('tipo_usuario = ?', ['admin'])->firstOrFail();
+
+        $this->actingAs($gestor, 'apoiador');
+
+        $this->post('/seed-dados')->assertRedirect('/')->assertSessionHas('success');
+    }
+
+    public function test_leitura_do_painel_continua_publica_para_o_site(): void
+    {
+        $this->get('/')->assertOk();
+
+        $this->getJson('/api/criancas')->assertOk();
     }
 }

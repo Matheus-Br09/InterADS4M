@@ -21,6 +21,9 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // 0. Dados reais da ONG (base do acervo + administradora Carol)
+        $this->call(OngDadosSeeder::class);
+
         // 1. Criancas
         $crianca1 = Crianca::firstOrCreate(
             ['nome' => 'Lucas Gabriel Santos'],

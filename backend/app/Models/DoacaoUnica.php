@@ -18,6 +18,7 @@ class DoacaoUnica extends Model
         'apoiador_id',
         'valor',
         'metodo_pagamento',
+        'status',
         'data_doacao',
     ];
 

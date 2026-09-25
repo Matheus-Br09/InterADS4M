@@ -18,6 +18,7 @@ class DoacaoMensal extends Model
         'apoiador_id',
         'valor_mensal',
         'dia_vencimento',
+        'metodo_pagamento',
         'status',
         'data_assinatura',
     ];

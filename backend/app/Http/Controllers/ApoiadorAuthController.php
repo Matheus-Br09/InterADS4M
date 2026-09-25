@@ -37,6 +37,7 @@ class ApoiadorAuthController extends Controller
             'bairro' => $request->bairro ?? null,
             'cidade' => $request->cidade ?? null,
             'estado' => $request->estado ?? null,
+            'tipo_usuario' => 'apoiador',
             'data_cadastro' => now()->toDateString(),
         ]);
 

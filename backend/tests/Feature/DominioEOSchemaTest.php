@@ -221,4 +221,39 @@ class DominioEOSchemaTest extends TestCase
             'data_cadastro' => now()->toDateString(),
         ]);
     }
+
+    public function test_campos_de_massa_assignment_nao_sao_descartados_em_silencio(): void
+    {
+        $apoiador = $this->criarApoiadorUnico();
+        $apoiador->forceFill(['tipo_usuario' => 'admin'])->save();
+        $this->assertSame('admin', $apoiador->fresh()->tipo_usuario);
+
+        $doacao = DoacaoUnica::create([
+            'apoiador_id' => $apoiador->id,
+            'valor' => 50.00,
+            'metodo_pagamento' => 'Pix',
+            'status' => 'pendente',
+            'data_doacao' => now(),
+        ]);
+        $this->assertSame('pendente', $doacao->fresh()->status);
+
+        $mensal = DoacaoMensal::create([
+            'apoiador_id' => $apoiador->id,
+            'valor_mensal' => 40.00,
+            'dia_vencimento' => 5,
+            'metodo_pagamento' => 'Cartao de Credito',
+            'status' => 'ativo',
+            'data_assinatura' => now(),
+        ]);
+        $this->assertSame('Cartao de Credito', $mensal->fresh()->metodo_pagamento);
+
+        $noticia = Noticia::create([
+            'titulo' => 'Campanha de inverno',
+            'resumo' => 'Resumo da campanha.',
+            'texto_completo' => 'Texto da campanha.',
+            'tipo' => 'campanha',
+            'data_criacao' => now(),
+        ]);
+        $this->assertSame('campanha', $noticia->fresh()->tipo);
+    }
 }

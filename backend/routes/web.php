@@ -10,8 +10,12 @@ use Illuminate\Support\Facades\Route;
 // PAINEL PROVISÓRIO DE TESTES
 // ==========================================
 Route::get('/', [DashboardTesteController::class, 'index'])->name('dashboard');
-Route::post('/seed-dados', [DashboardTesteController::class, 'seedData'])->name('seed.data');
-Route::post('/criancas/salvar', [DashboardTesteController::class, 'storeCrianca'])->name('criancas.store');
+
+// Escritas do painel são exclusivas da gestão da ONG (guard + tipo_usuario = admin)
+Route::middleware('gestor')->group(function () {
+    Route::post('/seed-dados', [DashboardTesteController::class, 'seedData'])->name('seed.data');
+    Route::post('/criancas/salvar', [DashboardTesteController::class, 'storeCrianca'])->name('criancas.store');
+});
 
 // Rotas de API (JSON)
 Route::prefix('api')->group(function () {

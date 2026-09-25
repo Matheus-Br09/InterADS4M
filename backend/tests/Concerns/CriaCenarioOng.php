@@ -120,4 +120,18 @@ trait CriaCenarioOng
     {
         return ['email' => $apoiador->email, 'senha' => $senha];
     }
+
+    protected function criarGestor(array $atributos = []): Apoiador
+    {
+        return $this->criarApoiador(array_merge(['tipo_usuario' => 'admin'], $atributos));
+    }
+
+    protected function actingAsGestor(): Apoiador
+    {
+        $gestor = $this->criarGestor();
+
+        $this->actingAs($gestor, 'apoiador');
+
+        return $gestor;
+    }
 }

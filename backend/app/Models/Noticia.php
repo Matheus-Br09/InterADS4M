@@ -18,6 +18,8 @@ class Noticia extends Model
         'resumo',
         'texto_completo',
         'imagem',
+        'tipo',
+        'data_evento',
         'data_criacao',
     ];
 }
