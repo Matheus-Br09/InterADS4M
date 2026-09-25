@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Apoiador;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,13 +25,24 @@ class ApiParaOSiteTest extends TestCase
 
     public function test_o_site_le_as_apis_publicas_sem_login(): void
     {
-        $this->criarApoiador();
+        $apoiador = $this->criarApoiador();
+        $crianca = $this->criarCrianca(['nome' => 'Ben Tennyson']);
+        $this->criarApadrinhamento($apoiador, $crianca);
         $this->assertGuest('apoiador');
 
+        // Público para o site ler, mas só com o que ele mostra: a lista de
+        // apoiadores com nome e contato não é pública
+        // (ver ApiPublicaNaoExpoeDadoPessoalTest).
         $this->getJson('/api/apoiadores')
             ->assertOk()
             ->assertJsonPath('total', 1)
-            ->assertJsonPath('dados.0.nome_completo', Apoiador::first()->nome_completo);
+            ->assertJsonMissingPath('dados');
+
+        $this->getJson('/api/criancas')
+            ->assertOk()
+            ->assertJsonPath('total', 1)
+            ->assertJsonPath('dados.0.nome', 'Ben Tennyson')
+            ->assertJsonPath('dados.0.apadrinhada', true);
     }
 
     public function test_leitura_da_api_vem_com_permissao_para_o_site_leer(): void

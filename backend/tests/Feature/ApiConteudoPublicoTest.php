@@ -3,10 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Apoiador;
-use App\Models\DoacaoMensal;
-use App\Models\DoacaoUnica;
 use App\Models\RecompensaApadrinhamento;
-use App\Models\Voluntario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CriaCenarioOng;
 use Tests\TestCase;
@@ -16,11 +13,13 @@ class ApiConteudoPublicoTest extends TestCase
     use CriaCenarioOng;
     use RefreshDatabase;
 
-    public function test_site_precisa_expor_as_criancas_atendidas_com_total_e_relacionamento(): void
+    public function test_site_precisa_expor_as_criancas_atendidas_com_total_e_idade(): void
     {
-        $crianca = $this->criarCrianca(['nome' => 'Ben Tennyson']);
-        $apoiador = $this->criarApoiador();
-        $this->criarApadrinhamento($apoiador, $crianca);
+        $crianca = $this->criarCrianca([
+            'nome' => 'Ben Tennyson',
+            'data_nascimento' => now()->subYears(9)->toDateString(),
+        ]);
+        $this->criarApadrinhamento($this->criarApoiador(), $crianca);
 
         $response = $this->getJson('/api/criancas');
 
@@ -28,26 +27,30 @@ class ApiConteudoPublicoTest extends TestCase
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('total', 1)
             ->assertJsonPath('dados.0.nome', 'Ben Tennyson')
-            ->assertJsonPath('dados.0.status', 'disponivel')
-            ->assertJsonCount(1, 'dados.0.apadrinhamentos')
-            ->assertJsonPath('dados.0.apadrinhamentos.0.apoiador.nome_completo', $apoiador->nome_completo);
+            ->assertJsonPath('dados.0.status', 'apadrinhada')
+            ->assertJsonPath('dados.0.apadrinhada', true)
+            ->assertJsonPath('dados.0.idade', 9);
     }
 
-    public function test_site_precisa_expor_os_apoiadores_com_voluntariado_e_doacoes(): void
+    public function test_site_precisa_expor_apenas_os_numeros_dos_apoiadores(): void
     {
         $apoiador = $this->criarApoiador();
         $this->criarDoacaoUnica($apoiador, ['valor' => 75.00]);
         $this->criarDoacaoMensal($apoiador, ['valor_mensal' => 40.00]);
         $this->criarVoluntario($apoiador, ['status' => 'aprovado']);
 
+        // A lista com nome/voluntariado/doações não é pública: a API devolve só
+        // os números que o site usa na transparência.
         $response = $this->getJson('/api/apoiadores');
 
         $response->assertOk()
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('total', 1)
-            ->assertJsonCount(1, 'dados.0.doacoes_unicas')
-            ->assertJsonCount(1, 'dados.0.doacoes_mensais')
-            ->assertJsonPath('dados.0.voluntario.status', 'aprovado');
+            ->assertJsonPath('doadores_mensais', 1)
+            ->assertJsonPath('doadores_unicos', 1)
+            ->assertJsonPath('total_mensal', 40)
+            ->assertJsonPath('total_unico', 75)
+            ->assertJsonMissingPath('dados');
     }
 
     public function test_api_de_apoiadores_nunca_expoe_a_senha_criptografada(): void
@@ -61,28 +64,27 @@ class ApiConteudoPublicoTest extends TestCase
 
     public function test_apis_publicas_nao_expoem_dados_pessoais_do_apoiador(): void
     {
-        $apoiador = $this->criarApoiador(['cpf' => '12345678901', 'celular' => '(81) 91234-5678']);
+        $apoiador = $this->criarApoiador([
+            'cpf' => '12345678901',
+            'celular' => '(81) 91234-5678',
+            'logradouro' => 'Rua secretive 123',
+            'cidade' => 'Recife',
+        ]);
         $crianca = $this->criarCrianca();
         $this->criarApadrinhamento($apoiador, $crianca);
 
-        $this->getJson('/api/apoiadores')
-            ->assertOk()
-            ->assertJsonPath('dados.0.nome_completo', $apoiador->nome_completo)
-            ->assertJsonMissingPath('dados.0.cpf')
-            ->assertJsonMissingPath('dados.0.email')
-            ->assertJsonMissingPath('dados.0.celular')
-            ->assertJsonMissingPath('dados.0.senha');
-
         $this->getJson('/api/apadrinhamentos')
             ->assertOk()
-            ->assertJsonPath('dados.0.apoiador.nome_completo', $apoiador->nome_completo)
-            ->assertJsonMissingPath('dados.0.apoiador.cpf')
-            ->assertJsonMissingPath('dados.0.apoiador.email');
+            ->assertJsonMissingPath('dados.0.apoiador')
+            ->assertJsonMissingPath('dados.0.valor_mensal')
+            ->assertJsonMissingPath('dados.0.crianca.historico')
+            ->assertJsonMissingPath('dados.0.crianca.data_nascimento');
 
         $this->getJson('/api/criancas')
             ->assertOk()
-            ->assertJsonMissingPath('dados.0.apadrinhamentos.0.apoiador.cpf')
-            ->assertJsonMissingPath('dados.0.apadrinhamentos.0.apoiador.email');
+            ->assertJsonMissingPath('dados.0.apadrinhamentos')
+            ->assertJsonMissingPath('dados.0.historico')
+            ->assertJsonMissingPath('dados.0.data_nascimento');
     }
 
     public function test_site_precisa_expor_os_programas_sociais_da_ong(): void
@@ -97,7 +99,7 @@ class ApiConteudoPublicoTest extends TestCase
             ->assertJsonPath('dados.0.categoria', 'Assistência Social');
     }
 
-    public function test_site_precisa_expor_apadrinhamentos_com_apoiador_crianca_e_recompensas(): void
+    public function test_site_precisa_expor_apadrinhamentos_com_a_crianca_e_as_recompensas(): void
     {
         $apoiador = $this->criarApoiador();
         $crianca = $this->criarCrianca(['nome' => 'Bart Simpson']);
@@ -114,7 +116,7 @@ class ApiConteudoPublicoTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('total', 1)
-            ->assertJsonPath('dados.0.apoiador.nome_completo', $apoiador->nome_completo)
+            ->assertJsonPath('dados.0.status', 'ativo')
             ->assertJsonPath('dados.0.crianca.nome', 'Bart Simpson')
             ->assertJsonCount(1, 'dados.0.recompensas')
             ->assertJsonPath('dados.0.recompensas.0.arquivo_midia', 'recompensa.png');

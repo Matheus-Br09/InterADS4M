@@ -103,8 +103,13 @@ Depois é só entrar em `/entrar` com o e-mail e a senha.
 As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
 `/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
 `/api/transparencia` e `POST /api/newsletter`) continuam **públicas** porque
-alimentam o site. Nenhuma delas devolve `senha`, `cpf`, `celular` ou `email` de
-apoiador.
+alimentam o site, mas devolvem só o que o site precisa mostrar:
+
+- `/api/apoiadores`: apenas números — total de apoiadores, doadores e valores agregados;
+- `/api/criancas`: nome, idade, imagem e se já tem padrinheiro (sem data de nascimento nem histórico);
+- `/api/apadrinhamentos`: a criança e as recompensas enviadas (sem dizer quem apadrinha nem quanto paga).
+
+Nada de `senha`, `cpf`, `email`, `celular`, endereço, valor pago ou papel na gestão sai dessas rotas. As listas são montadas campo a campo e `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` varre a resposta inteira de todas elas para travar isso.
 
 ### Assets do backend (Vite + Tailwind, sem internet)
 
@@ -132,7 +137,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 142 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições e assets offline
+php artisan test    # 145 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições e assets offline
 ```
 
 ### Frontend SPA
@@ -151,9 +156,9 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 142 testes automatizados no backend
+- ✅ 145 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: restringir CORS antes de publicar, upload de arquivos, endpoints REST restantes
+- ⏳ Pendente: rotacionar dados expostos no histórico do git, restringir CORS antes de publicar, upload de arquivos, endpoints REST restantes
 
 ---
 

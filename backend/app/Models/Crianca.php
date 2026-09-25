@@ -23,6 +23,15 @@ class Crianca extends Model
         'data_cadastro',
     ];
 
+    // 'historico' é texto sobre a criança (às vezes clínico) e
+    // 'data_nascimento' é dado de menor: nenhum dos dois sai em JSON, nem
+    // por engano. A data de nascimento continua acessível no Blade e a API
+    // pública calcula a idade a partir dela.
+    protected $hidden = [
+        'historico',
+        'data_nascimento',
+    ];
+
     public function apadrinhamentos(): HasMany
     {
         return $this->hasMany(Apadrinhamento::class, 'crianca_id');

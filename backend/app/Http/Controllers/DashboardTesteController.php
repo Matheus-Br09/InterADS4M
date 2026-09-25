@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Apadrinhamento;
 use App\Models\Apoiador;
 use App\Models\Crianca;
-use App\Models\Apadrinhamento;
 use App\Models\DoacaoMensal;
 use App\Models\DoacaoUnica;
-use App\Models\ProgramaAcao;
-use App\Models\Voluntario;
-use App\Models\Galeria;
-use App\Models\Noticia;
-use App\Models\MaterialDidatico;
 use App\Models\DocumentoTransparencia;
+use App\Models\MaterialDidatico;
 use App\Models\Newsletter;
+use App\Models\Noticia;
+use App\Models\ProgramaAcao;
+use App\Models\RecompensaApadrinhamento;
+use App\Models\Voluntario;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 
 class DashboardTesteController extends Controller
 {
@@ -53,6 +54,7 @@ class DashboardTesteController extends Controller
     public function seedData()
     {
         Artisan::call('db:seed', ['--force' => true]);
+
         return redirect('/')->with('success', 'Dados de teste gerados com sucesso no MySQL do Docker!');
     }
 
@@ -78,21 +80,44 @@ class DashboardTesteController extends Controller
     }
 
     // API JSON Endpoints
+    //
+    // Estas rotas são públicas (alimentam o site), então respondem com o que
+    // o site precisa mostrar e nada mais: sem nome, contato, endereço, valor
+    // de doação ou dado sensível de apoiador e de criança. As listas são
+    // montadas campo a campo de propósito - devolver o model inteiro faria
+    // qualquer coluna nova vazar sem querer.
     public function apiCriancas()
     {
+        $dados = Crianca::with('apadrinhamentos')->get()->map(fn (Crianca $crianca) => [
+            'nome' => $crianca->nome,
+            // O status guardado no banco só muda quando alguém mexe no painel,
+            // então o site recebe o estado real (apadrinhamento ativo) para não
+            // mostrar "disponível" para uma criança que já tem padrinheiro.
+            'status' => $crianca->apadrinhamentos->contains('status', 'ativo') ? 'apadrinhada' : $crianca->status,
+            'imagem_perfil' => $crianca->imagem_perfil,
+            // A idade serve para o site; a data de nascimento, não.
+            'idade' => $crianca->data_nascimento ? Carbon::parse($crianca->data_nascimento)->age : null,
+            'apadrinhada' => $crianca->apadrinhamentos->contains('status', 'ativo'),
+        ]);
+
         return response()->json([
             'status' => 'success',
             'total' => Crianca::count(),
-            'dados' => Crianca::with('apadrinhamentos.apoiador')->get()
+            'dados' => $dados,
         ]);
     }
 
     public function apiApoiadores()
     {
+        // Apoiador é pessoa física: a API pública devolve só os números da
+        // transparência, nunca a lista com nome, endereço ou valores pagos.
         return response()->json([
             'status' => 'success',
             'total' => Apoiador::count(),
-            'dados' => Apoiador::with('voluntario', 'doacoesMensais', 'doacoesUnicas')->get()
+            'doadores_mensais' => DoacaoMensal::where('status', 'ativo')->distinct('apoiador_id')->count('apoiador_id'),
+            'doadores_unicos' => DoacaoUnica::distinct('apoiador_id')->count('apoiador_id'),
+            'total_mensal' => (float) DoacaoMensal::where('status', 'ativo')->sum('valor_mensal'),
+            'total_unico' => (float) DoacaoUnica::sum('valor'),
         ]);
     }
 
@@ -101,25 +126,41 @@ class DashboardTesteController extends Controller
         return response()->json([
             'status' => 'success',
             'total' => ProgramaAcao::count(),
-            'dados' => ProgramaAcao::all()
+            'dados' => ProgramaAcao::all(),
         ]);
     }
 
     public function apiApadrinhamentos()
     {
+        // Quem apadrinha e quanto paga não é público. Fica a criança
+        // apadrinhada, o status do apadrinhamento e as recompensas enviadas.
+        $dados = Apadrinhamento::with('crianca', 'recompensas')->get()->map(fn (Apadrinhamento $apadrinhamento) => [
+            'status' => $apadrinhamento->status,
+            'data_inicio' => $apadrinhamento->data_inicio,
+            'crianca' => [
+                'nome' => $apadrinhamento->crianca->nome,
+                'status' => $apadrinhamento->crianca->status,
+                'imagem_perfil' => $apadrinhamento->crianca->imagem_perfil,
+            ],
+            'recompensas' => $apadrinhamento->recompensas->map(fn (RecompensaApadrinhamento $recompensa) => [
+                'titulo' => $recompensa->titulo,
+                'arquivo_midia' => $recompensa->arquivo_midia,
+            ]),
+        ]);
+
         return response()->json([
             'status' => 'success',
             'total' => Apadrinhamento::count(),
-            'dados' => Apadrinhamento::with('apoiador', 'crianca', 'recompensas')->get()
+            'dados' => $dados,
         ]);
     }
 
-        public function apiNoticias()
+    public function apiNoticias()
     {
         return response()->json([
             'status' => 'success',
             'total' => Noticia::count(),
-            'dados' => Noticia::latest('id')->get()
+            'dados' => Noticia::latest('id')->get(),
         ]);
     }
 
@@ -128,7 +169,7 @@ class DashboardTesteController extends Controller
         return response()->json([
             'status' => 'success',
             'total' => MaterialDidatico::count(),
-            'dados' => MaterialDidatico::latest('id')->get()
+            'dados' => MaterialDidatico::latest('id')->get(),
         ]);
     }
 
@@ -137,7 +178,7 @@ class DashboardTesteController extends Controller
         return response()->json([
             'status' => 'success',
             'total' => DocumentoTransparencia::count(),
-            'dados' => DocumentoTransparencia::latest('ano_referencia')->get()
+            'dados' => DocumentoTransparencia::latest('ano_referencia')->get(),
         ]);
     }
 
@@ -157,7 +198,7 @@ class DashboardTesteController extends Controller
         return response()->json([
             'status' => 'success',
             'mensagem' => 'E-mail cadastrado com sucesso na newsletter!',
-            'dados' => $lead
+            'dados' => $lead,
         ], 201);
     }
 }
