@@ -21,11 +21,14 @@ Route::middleware('gestor')->group(function () {
 // ==========================================
 // AUTENTICAÇÃO E ÁREA DO APOIADOR
 // ==========================================
+// Limites por IP: impedem alguém de ficar tentando senha ou criando
+// cadastros em massa (10 tentativas de login e 5 cadastros por minuto).
+// Os limites são nomeados no AppServiceProvider.
 Route::get('/cadastro', [ApoiadorAuthController::class, 'showRegister'])->name('register');
-Route::post('/cadastro', [ApoiadorAuthController::class, 'register']);
+Route::post('/cadastro', [ApoiadorAuthController::class, 'register'])->middleware('throttle:cadastro');
 
 Route::get('/entrar', [ApoiadorAuthController::class, 'showLogin'])->name('login');
-Route::post('/entrar', [ApoiadorAuthController::class, 'login']);
+Route::post('/entrar', [ApoiadorAuthController::class, 'login'])->middleware('throttle:login');
 Route::post('/sair', [ApoiadorAuthController::class, 'logout'])->name('logout');
 
 // Área Restrita (Exige login do Apoiador)

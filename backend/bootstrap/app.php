@@ -17,6 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'gestor' => EhGestor::class,
         ]);
+
+        // Nenhuma rota da API pode ser usada sem limite: o grupo inteiro usa o
+        // limite 'api' (120 por minuto por IP, definido no AppServiceProvider).
+        // A newsletter tem o seu próprio, bem mais apertado, porque grava no banco.
+        $middleware->throttleApi('api');
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(

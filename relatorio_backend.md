@@ -10,7 +10,7 @@
 ## 1. Resumo do Progresso Nesta Sessão
 
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 138 testes (509 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 142 testes (540 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -102,7 +102,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **138 testes, 138 aprovados, 509 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **142 testes, 142 aprovados, 540 assertions** (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -119,8 +119,9 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 | `tests/Feature/SuperficiePublicaDaApiTest.php` | 5 | Inventário das rotas: a lista de APIs públicas não muda por accidento e cada grupo de rota exige o middleware certo. |
 | `tests/Feature/NewsletterTest.php` | 5 | `POST /api/newsletter` e validações. |
 | `tests/Feature/ApiParaOSiteTest.php` | 5 | Leitura das APIs por outra origem, envio da newsletter sem token de sessão, permissão de CORS e CSRF preservado nos formulários do backend. |
+| `tests/Feature/LimiteDeRequisicoesTest.php` | 4 | Limite por IP na newsletter, no cadastro e no login, e limite geral das APIs. |
 | `tests/Feature/ExampleTest.php` + `tests/Unit/ExampleTest.php` | 2 | Testes de exemplo do Laravel. |
-| **Total** | **138** | |
+| **Total** | **142** | |
 
 | Validação manual | Status | Resultado |
 |---|---|---|
@@ -151,9 +152,22 @@ Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo d
 
 > ⚠️ **Antes de publicar:** trocar `allowed_origins: ['*']` em `config/cors.php` pela origem real do site (ex.: `['https://ongsos.org.br']`). Sem isso, qualquer página da internet poderia ler as respostas da API.
 
-**Ainda pendente:** não existe limite de requisições (*rate limiting*) em nenhuma rota — inclusive na `POST /api/newsletter`, que é pública e grava no banco. Alguém (ou algum robô) pode enviar milhares de e-mails. Ver 5.
+**Ainda pendente:** antes de publicar, trocar `allowed_origins: ['*']` pela origem real do site (ver 5).
 
-### 4.3 Sessão de 15/09 — Importação de Dados e Endpoints
+### 4.3 Rate limiting — nenhuma rota escrevia sem limite
+
+A instalação não tinha limite de requisições em lugar nenhum: a `POST /api/newsletter` (pública, grava no banco) aceitava chamadas infinitas e o `POST /entrar` permitia testar senha em massa. Agora os limites ficam nomeados em `backend/app/Providers/AppServiceProvider.php`:
+
+| Limite | Onde | Valor | Motivo |
+|---|---|---|---|
+| `api` | grupo `api` inteiro (`$middleware->throttleApi('api')`) | 120/min por IP | rede de segurança para todas as leituras públicas |
+| `newsletter` | `POST /api/newsletter` | 5/min por IP | é pública e grava no banco |
+| `cadastro` | `POST /cadastro` | 5/min por IP | evita cadastro em massa |
+| `login` | `POST /entrar` | 10/min por IP | evita tentativa de senha em massa |
+
+Os limites são **nomeados** de propósito: dois `throttle:5,1` inline na mesma rota usam a mesma chave de cache, o contador é somado duas vezes por requisição e o limite efetivo cai pela metade. Isso aconteceu na primeira versão desta implementação (o 3o envio da newsletter já levava 429 em vez do 6o) e o teste da newsletter pega a regressão.
+
+### 4.4 Sessão de 15/09 — Importação de Dados e Endpoints
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -167,7 +181,7 @@ Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo d
 | **Imagens em `public/img`** | 🟢 Aprovado | `ben10.jpg`, `chaves.jpg`, `bart.jpg`, `logo.png`, `materia_1789498189.jpg`, `recompensa_1789499207.png` servidas via `/img/*`. |
 | **`GET /api/voluntarios`** | 🟡 Não implementado | Rota inexistente (404). O frontend não consome API; rota fica para implementação. |
 
-### 4.4 Sessões anteriores — Autenticação
+### 4.5 Sessões anteriores — Autenticação
 
 | Teste | Status | Resultado |
 |---|---|---|
@@ -191,24 +205,24 @@ Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo d
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Atualização do `database/init.sql`** com o estado completo (schema + dados), garantindo ambiente limpo via Docker com tudo pronto (15/09).
-10. **Suíte automatizada de 138 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 142 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`) (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
 14. **Telas Blade sem CDN**, com Tailwind 4 compilado pelo Vite e fontes do sistema (25/09).
 15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
 16. **APIs movidas para `routes/api.php`** (sem CSRF) e **`config/cors.php` criado** liberando origem em desenvolvimento (25/09).
+17. **Rate limiting por IP** em todas as rotas: 120/min na API, 5/min na newsletter, 5/min no cadastro e 10/min no login (25/09).
 
 ---
 
 ### 🔴 Pendente — Alta Prioridade
 1. **Fechar o CORS antes de publicar:** em desenvolvimento o `config/cors.php` libera qualquer origem (`allowed_origins: ['*']`). Trocar pela origem real do site antes de ir ao ar.
-2. **Rate limiting:** nenhuma rota tem limite de requisições, inclusive a `POST /api/newsletter` (pública e grava no banco). Adicionar `throttle` nas rotas de API e no login.
-3. **Upload de Arquivos:**
+2. **Upload de Arquivos:**
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`.
-4. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
-5. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
+3. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
+4. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto).
 
 ---
 
@@ -237,7 +251,8 @@ Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo d
   * `264ebbb refactor(backend): troca CDN do Tailwind por build local do Vite`
   * `73a6f2c docs: atualiza relatorio do backend com testes, seguranca, Vite e CPF`
   * `test(backend): amplia cobertura de CPF, rotas, integracao com o site e CSS compilado`
-  * *(pendente de push)* `fix(backend): tira APIs do CSRF e configura CORS para desenvolvimento`
+  * `fix(backend): tira APIs do CSRF e configura CORS para desenvolvimento`
+  * *(pendente de push)* `feat(backend): limita requisicoes por IP nas rotas de escrita`
 * **Sessão de 15/09/2026 (backend):**
   * `conexão.php` (correção do nome do banco)
   * `database/init.sql` (schema + dados completos)

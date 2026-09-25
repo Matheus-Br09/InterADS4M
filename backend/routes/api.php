@@ -22,4 +22,8 @@ Route::get('/apadrinhamentos', [DashboardTesteController::class, 'apiApadrinhame
 Route::get('/noticias', [DashboardTesteController::class, 'apiNoticias']);
 Route::get('/materiais-didaticos', [DashboardTesteController::class, 'apiMateriaisDidaticos']);
 Route::get('/transparencia', [DashboardTesteController::class, 'apiTransparencia']);
-Route::post('/newsletter', [DashboardTesteController::class, 'storeNewsletter']);
+
+// A newsletter grava no banco e é pública, então tem o limite mais apertado
+// (5 por minuto por IP). O grupo 'api' já limita todas as rotas em 120/min.
+Route::post('/newsletter', [DashboardTesteController::class, 'storeNewsletter'])
+    ->middleware('throttle:newsletter');
