@@ -102,17 +102,20 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.8 Sessão de 26/09 — Senha forte, bloqueio de conta e limite na doação
 
-**Comando:** `cd backend && php artisan test` → **165 testes, 165 aprovados, 2.957 assertions**.
+**Comando:** `cd backend && php artisan test` → **171 testes, 171 aprovados, 2.970 assertions**.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
+| `tests/Feature/ListaDeApoiadoresTest.php` | 6 | A lista que o gestor usa para rotacionar: mostra e-mail e papel de cada conta, imprime o comando de rotação de cada uma (`gestor:senha` na gestão, `apoiador:senha` nas demais), marca quem ainda responde a senha pública do seed, e o `--rotacionar` esconde as já resolvidas. |
 | `tests/Feature/BloqueioDeLoginTest.php` | 7 | 5 erros travam a conta por 5 minutos (mesmo quando a senha está certa), login certo zera o contador, o bloqueio é por conta e não derruba o login dos outros, e-mail inexistente trava igual a existente (a resposta não vaza quem tem conta), a tela diz quando volta e o e-mail digitado volta no formulário. |
 | `tests/Feature/RotacaoDeSenhaTest.php` | 9 | As duas ferramentas de rotação, a senha gerada entra no painel, a antiga morre, sessão antiga é derrubada, seed sem hash previsível — e a regressão do gerador: 2.200 senhas seguidas sempre passam na regra de força, e o tamanho é 16 sem prefixo fixo. |
 | `tests/Feature/CadastroApoiadorTest.php` | 16 | Cadastro, senha criptografada, CPF de ponta a ponta e agora a senha forte: recusa `12345678` (tamanho ok, sem variedade) e diz o que falta. |
 | `tests/Feature/GestorDeAcessoTest.php` | 8 | `gestor:senha` promove e libera o painel, recusa senha curta e senha de 8 caracteres sem variedade, aceita e-mail com caixa alta e avisa quando a conta não existe. |
 | `tests/Feature/LimiteDeRequisicoesTest.php` | 4 | Os cinco limites nomeados. O teste do limite de IP do login passou a usar e-mail malformado: com senha errada, a partir da 5ª vez quem responde é o bloqueio por conta e o teste mediria duas coisas ao mesmo tempo. |
 
-**Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — posta para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`, que não existem, e valida CPF em `api.invertexto.com`. As proteções novas valem para o caminho Blade (`/cadastro`, `/entrar`), não para o formulário do site, e o CPF digitado ali está indo para um serviço de terceiro. Ver pendência 10 da seção 5.
+**Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — posta para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`. Esse é o molde que o `d665b30` deixou de propósito, e a pendência 10 da seção 5 já pedia a ligação; o que a auditoria acrescenta é o resto do diagnóstico: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** — ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário — diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora — e sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin(true)` após o cadastro é estado que não existe no componente. Enquanto a ligação não for feita, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
+
+**Comando novo (26/09):** `php artisan apoiadores:listar` — a rotação era manual, conta por conta, e o e-mail digitado errado deixava a conta com a senha antiga. A lista sai do banco, marca quem ainda responde à senha pública do seed e imprime o comando pronto de cada conta (`--rotacionar` mostra só as pendentes).
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
@@ -280,7 +283,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 ---
 
 ### 🔴 Pendente — Alta Prioridade
-1. **Rotacionar as senhas de verdade:** o histórico do git foi reescrito e os seeds foram limpos, mas quem clonou o repositório antes ainda tem os hashes de 12 contas. Rodar `php artisan gestor:senha gestor@exemplo.org` e `php artisan apoiador:senha <email>` em cada conta real é o passo que fecha o problema — e vale avisar os apoiadores para trocarem a senha em outros serviços onde usaram a mesma.
+1. **Rotacionar as senhas de verdade:** o histórico do git foi reescrito e os seeds foram limpos, mas quem clonou o repositório antes ainda tem os hashes de 12 contas. Rodar `php artisan apoiadores:listar` e depois o comando que ele imprime para cada conta (`gestor:senha` na conta da gestão, `apoiador:senha` nas demais) é o passo que fecha o problema — e vale avisar os apoiadores para trocarem a senha em outros serviços onde usaram a mesma.
 2. **Registrar a autorização dos responsáveis** das crianças, por escrito (nome da criança, finalidade, data e prazo), já que o nome completo segue público na API (25/09).
 3. **Fechar o CORS antes de publicar:** em desenvolvimento o `config/cors.php` libera qualquer origem (`allowed_origins: ['*']`). Trocar pela origem real do site antes de ir ao ar.
 4. **`APP_DEBUG=false`:** hoje está `true` no `.env` **e no `.env.example`**. O `LOG_LEVEL=debug` não é a causa do CPF no log: quem gravou foi o Laravel, ao logar o SQL com os valores quando um insert falhou (11/09). O `storage/logs/laravel.log` tem 1,7 MB com CPF e hash de senha de uma pessoa real, sem rotação — apagar e passar a limpar antes de compartilhar o pen drive.
@@ -310,7 +313,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 78 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 82 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
   * `a36b44d` docs: detalha a checagem das fotos do acervo

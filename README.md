@@ -130,8 +130,17 @@ GitHub guarda commits órfãos por um tempo. Por isso a rotação de senhas é a
 parte que realmente protege as contas:
 
 ```bash
-php artisan gestor:senha gestor@exemplo.org        # conta da gestão
-php artisan apoiador:senha <email>                  # cada apoiador afetado
+php artisan apoiadores:listar                        # lista as contas e o comando de cada uma
+php artisan apoiadores:listar --rotacionar            # só as que ainda precisam de senha nova
+```
+
+A lista sai do próprio banco, marca quem ainda responde `senha123` (a senha
+pública que estava no seed e no dump removidos) e imprime o comando exato de
+cada conta, para não sobrar dígito de e-mail digitado errado:
+
+```bash
+php artisan gestor:senha gestor@exemplo.org        # conta da gestão (promove a gestor)
+php artisan apoiador:senha <email>                  # cada apoiador, mantendo o papel dele
 ```
 
 Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
@@ -195,7 +204,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 165 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
+php artisan test    # 171 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA
@@ -214,7 +223,7 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 165 testes automatizados no backend
+- ✅ 171 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
 - ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela posta para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
 
