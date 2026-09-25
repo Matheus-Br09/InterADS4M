@@ -61,7 +61,7 @@
             <h3 class="font-bold text-lg text-gray-700 mb-3">Doações Mensais</h3>
             @forelse($doacoesMensais as $mensal)
                 <div class="text-sm border-b py-2 flex justify-between">
-                    <span>R$ {{ number_format($mensal->valor, 2, ',', '.') }}/mês</span>
+                    <span>R$ {{ number_format($mensal->valor_mensal, 2, ',', '.') }}/mês</span>
                     <span class="text-blue-600 font-semibold">{{ ucfirst($mensal->status) }}</span>
                 </div>
             @empty
@@ -74,7 +74,7 @@
             <h3 class="font-bold text-lg text-gray-700 mb-3">Voluntariado</h3>
             @if($voluntario)
                 <div class="text-sm py-2">
-                    <p><span class="font-medium">Área de Atuação:</span> {{ $voluntario->area_interesse ?? 'Inscrito' }}</p>
+                    <p><span class="font-medium">Área de Atuação:</span> {{ $voluntario->area_atuacao ?? 'Inscrito' }}</p>
                     <p><span class="font-medium">Status:</span> {{ $voluntario->status ?? 'Ativo' }}</p>
                 </div>
             @else
