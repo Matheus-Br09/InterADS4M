@@ -106,11 +106,33 @@ As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
 alimentam o site. Nenhuma delas devolve `senha`, `cpf`, `celular` ou `email` de
 apoiador.
 
+### Assets do backend (Vite + Tailwind, sem internet)
+
+As telas Blade são compiladas por `npm run build` e servidas de `public/build`.
+Nenhuma tela usa CDN ou fonte externa, porque o sistema roda offline no pen drive.
+
+```bash
+cd backend
+npm install
+npm run build      # rode de novo sempre que criar/renomear classes nas telas
+npm run dev        # opcional: recompila sozinho enquanto vc programa
+```
+
+Os testes não dependem do build. Para conferir o build de verdade, rode
+`php artisan test --filter=AssetsOfflineTest` depois de `npm run build`.
+
+### Cadastro de apoiador
+
+`POST /cadastro` valida o CPF no servidor (dígitos verificadores, sem dígitos
+repetidos) e guarda o valor só com números, mesmo que a pessoa digite com
+máscara. CPF inválido volta `422` com o erro no campo `cpf`, então a tela de
+cadastro da SPA deve mostrar a mensagem que o backend devolver.
+
 ### Testes
 
 ```bash
 cd backend
-php artisan test    # 95 testes: APIs, autenticação, painel, seeders e domínio do banco
+php artisan test    # 109 testes: APIs, autenticação, painel, seeders, CPF e assets offline
 ```
 
 ### Frontend SPA
@@ -127,7 +149,9 @@ npm run dev
 
 - ✅ Backend: autenticação do apoiador, dados da ONG importados
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
-- ✅ 95 testes automatizados no backend
+- ✅ Cadastro público com validação de CPF no servidor
+- ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
+- ✅ 109 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
 - ⏳ Pendente: CORS, auth admin, upload de arquivos, endpoints REST restantes
 
