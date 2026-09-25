@@ -30,7 +30,7 @@ class ApiConteudoPublicoTest extends TestCase
             ->assertJsonPath('dados.0.nome', 'Ben Tennyson')
             ->assertJsonPath('dados.0.status', 'disponivel')
             ->assertJsonCount(1, 'dados.0.apadrinhamentos')
-            ->assertJsonPath('dados.0.apadrinhamentos.0.apoiador.email', $apoiador->email);
+            ->assertJsonPath('dados.0.apadrinhamentos.0.apoiador.nome_completo', $apoiador->nome_completo);
     }
 
     public function test_site_precisa_expor_os_apoiadores_com_voluntariado_e_doacoes(): void
@@ -57,6 +57,32 @@ class ApiConteudoPublicoTest extends TestCase
         $this->getJson('/api/apoiadores')
             ->assertOk()
             ->assertJsonMissingPath('dados.0.senha');
+    }
+
+    public function test_apis_publicas_nao_expoem_dados_pessoais_do_apoiador(): void
+    {
+        $apoiador = $this->criarApoiador(['cpf' => '12345678901', 'celular' => '(81) 91234-5678']);
+        $crianca = $this->criarCrianca();
+        $this->criarApadrinhamento($apoiador, $crianca);
+
+        $this->getJson('/api/apoiadores')
+            ->assertOk()
+            ->assertJsonPath('dados.0.nome_completo', $apoiador->nome_completo)
+            ->assertJsonMissingPath('dados.0.cpf')
+            ->assertJsonMissingPath('dados.0.email')
+            ->assertJsonMissingPath('dados.0.celular')
+            ->assertJsonMissingPath('dados.0.senha');
+
+        $this->getJson('/api/apadrinhamentos')
+            ->assertOk()
+            ->assertJsonPath('dados.0.apoiador.nome_completo', $apoiador->nome_completo)
+            ->assertJsonMissingPath('dados.0.apoiador.cpf')
+            ->assertJsonMissingPath('dados.0.apoiador.email');
+
+        $this->getJson('/api/criancas')
+            ->assertOk()
+            ->assertJsonMissingPath('dados.0.apadrinhamentos.0.apoiador.cpf')
+            ->assertJsonMissingPath('dados.0.apadrinhamentos.0.apoiador.email');
     }
 
     public function test_site_precisa_expor_os_programas_sociais_da_ong(): void
@@ -88,7 +114,7 @@ class ApiConteudoPublicoTest extends TestCase
             ->assertOk()
             ->assertJsonPath('status', 'success')
             ->assertJsonPath('total', 1)
-            ->assertJsonPath('dados.0.apoiador.email', $apoiador->email)
+            ->assertJsonPath('dados.0.apoiador.nome_completo', $apoiador->nome_completo)
             ->assertJsonPath('dados.0.crianca.nome', 'Bart Simpson')
             ->assertJsonCount(1, 'dados.0.recompensas')
             ->assertJsonPath('dados.0.recompensas.0.arquivo_midia', 'recompensa.png');

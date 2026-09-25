@@ -81,8 +81,36 @@ composer install
 cp .env.example .env
 php artisan key:generate
 php artisan migrate --force
+php artisan db:seed           # dados reais da ONG + dados de demonstração
 npm install && npm run build  # assets (Vite/Tailwind)
 php artisan dev
+```
+
+### Acesso ao painel de gestão
+
+O painel em `/` (indicadores, crianças, apoiadores, seed e cadastro de crianças) é
+**exclusivo da gestão da ONG** e exige um apoiador com `tipo_usuario = admin`. O seed
+cria a conta `gestor@exemplo.org`. Para definir a senha dela (ou de qualquer outro
+apoiador, promovendo a gestor):
+
+```bash
+php artisan gestor:senha gestor@exemplo.org "minha-senha-forte"   # senha definida
+php artisan gestor:senha gestor@exemplo.org                        # gera uma senha
+```
+
+Depois é só entrar em `/entrar` com o e-mail e a senha.
+
+As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
+`/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
+`/api/transparencia` e `POST /api/newsletter`) continuam **públicas** porque
+alimentam o site. Nenhuma delas devolve `senha`, `cpf`, `celular` ou `email` de
+apoiador.
+
+### Testes
+
+```bash
+cd backend
+php artisan test    # 95 testes: APIs, autenticação, painel, seeders e domínio do banco
 ```
 
 ### Frontend SPA
@@ -98,6 +126,8 @@ npm run dev
 ## 🔄 Status atual
 
 - ✅ Backend: autenticação do apoiador, dados da ONG importados
+- ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
+- ✅ 95 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
 - ⏳ Pendente: CORS, auth admin, upload de arquivos, endpoints REST restantes
 

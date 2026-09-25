@@ -68,6 +68,9 @@ class DominioEOSchemaTest extends TestCase
         $apoiador->senha = Hash::make('segredo');
 
         $this->assertArrayNotHasKey('senha', $apoiador->toArray());
+        $this->assertArrayNotHasKey('cpf', $apoiador->toArray());
+        $this->assertArrayNotHasKey('email', $apoiador->toArray());
+        $this->assertArrayNotHasKey('celular', $apoiador->toArray());
     }
 
     public function test_apoiador_usa_o_campo_de_senha_em_portugues(): void

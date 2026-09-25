@@ -33,8 +33,13 @@ class Apoiador extends Authenticatable
         'data_cadastro',
     ];
 
+    // Campos que nunca podem sair em JSON. As views Blade leem os atributos
+    // direto, então o painel do próprio apoiador continua mostrando os dados dele.
     protected $hidden = [
         'senha',
+        'cpf',
+        'celular',
+        'email',
     ];
 
     // Diz ao Laravel que o campo de senha da tabela é 'senha' e não 'password'
