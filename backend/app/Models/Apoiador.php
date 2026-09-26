@@ -17,10 +17,22 @@ class Apoiador extends Authenticatable
 
     public $timestamps = false;
 
+    /**
+     * `senha_alterada_em` é a data da última rotação de senha da conta. A
+     * tabela `apoiadores` nunca teve `created_at`/`updated_at` (o model desliga
+     * timestamp de propósito), então não existia nenhuma forma de responder
+     * "essa conta já foi rotacionada?" — que era a pergunta que sobrava depois
+     * de Exposure de hashes no histórico do git.
+     */
+    protected $casts = [
+        'senha_alterada_em' => 'datetime',
+    ];
+
     protected $fillable = [
         'nome_completo',
         'email',
         'senha',
+        'senha_alterada_em',
         'celular',
         'cpf',
         'sexo',
@@ -51,6 +63,9 @@ class Apoiador extends Authenticatable
         'cidade',
         'estado',
         'tipo_usuario',
+        // Quando a senha foi trocada é informação de segurança: quem controla a
+        // conta não precisa publicá-la, e quem lê a API menos ainda.
+        'senha_alterada_em',
     ];
 
     // Diz ao Laravel que o campo de senha da tabela é 'senha' e não 'password'

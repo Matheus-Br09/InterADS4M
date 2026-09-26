@@ -52,6 +52,27 @@ class CadastroApoiadorTest extends TestCase
         $this->assertTrue(Hash::check('Senha123', $apoiador->senha));
     }
 
+    /*
+     * A data da última rotação precisa nascer junto com a conta: se o cadastro
+     * deixasse a coluna vazia, toda conta nova nasceria na lista de pendências
+     * de `apoiadores:listar --rotacionar` sem ter senha nenhuma para trocar.
+     */
+    public function test_o_cadastro_registra_a_data_da_senha(): void
+    {
+        $this->post('/cadastro', [
+            'nome_completo' => 'Apoiante Demonstracao',
+            'email' => 'apoiante@exemplo.com',
+            'cpf' => '555.666.777-10',
+            'senha' => 'Senha123',
+            'senha_confirmation' => 'Senha123',
+        ]);
+
+        $apoiador = Apoiador::where('email', 'apoiante@exemplo.com')->firstOrFail();
+
+        $this->assertNotNull($apoiador->senha_alterada_em);
+        $this->assertTrue($apoiador->senha_alterada_em->isToday());
+    }
+
     public function test_cadastro_publico_nao_permite_se_registrar_como_administrador(): void
     {
         $this->post('/cadastro', [

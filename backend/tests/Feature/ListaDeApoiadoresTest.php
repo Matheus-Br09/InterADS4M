@@ -78,7 +78,11 @@ class ListaDeApoiadoresTest extends TestCase
 
     public function test_o_filtro_rotacionar_esconde_as_contas_ja_resolvidas(): void
     {
-        $this->criarApoiador(['email' => 'ana@ong.org.br', 'senha' => Hash::make('Outra-Senha-9')]);
+        $this->criarApoiador([
+            'email' => 'ana@ong.org.br',
+            'senha' => Hash::make('Outra-Senha-9'),
+            'senha_alterada_em' => now(),
+        ]);
         $this->criarApoiador(['email' => 'velha@ong.org.br', 'senha' => Hash::make('senha123')]);
 
         Artisan::call('apoiadores:listar', ['--rotacionar' => true]);
@@ -86,6 +90,46 @@ class ListaDeApoiadoresTest extends TestCase
 
         $this->assertStringContainsString('velha@ong.org.br', $saida);
         $this->assertStringNotContainsString('ana@ong.org.br', $saida);
+    }
+
+    public function test_mostra_a_data_da_ultima_rotacao_de_cada_conta(): void
+    {
+        $this->criarApoiador([
+            'email' => 'ana@ong.org.br',
+            'senha' => Hash::make('Outra-Senha-9'),
+            'senha_alterada_em' => now()->subDays(3),
+        ]);
+
+        Artisan::call('apoiadores:listar');
+        $saida = Artisan::output();
+
+        $this->assertStringContainsString(now()->subDays(3)->format('d/m/Y'), $saida);
+    }
+
+    public function test_conta_sem_rotacao_registrada_aparece_como_nunca(): void
+    {
+        $this->criarApoiador(['email' => 'ana@ong.org.br', 'senha' => Hash::make('Outra-Senha-9')]);
+
+        Artisan::call('apoiadores:listar');
+        $saida = Artisan::output();
+
+        $this->assertStringContainsString('nunca', $saida);
+    }
+
+    /*
+     * Senha que não é a do seed mas também sem data: a rotação do histórico do
+     * git pode ter sido feita fora do sistema, e sem carimbo não há prova. Se
+     * essa conta sumisse do filtro, o gestor fecharia o trabalho sem saber
+     * que o registro falta.
+     */
+    public function test_conta_com_senha_nova_mas_sem_data_continua_na_lista_de_pendencias(): void
+    {
+        $this->criarApoiador(['email' => 'ana@ong.org.br', 'senha' => Hash::make('Outra-Senha-9')]);
+
+        Artisan::call('apoiadores:listar', ['--rotacionar' => true]);
+        $saida = Artisan::output();
+
+        $this->assertStringContainsString('ana@ong.org.br', $saida);
     }
 
     public function test_avisa_quando_nao_ha_nenhuma_conta(): void

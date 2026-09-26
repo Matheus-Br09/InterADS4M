@@ -24,12 +24,13 @@ class GestorDeAcessoTest extends TestCase
         $saida = Artisan::output();
 
         $this->assertSame(0, $codigo);
-        $this->assertStringContainsString('Senha de '.$apoiador->nome_completo.' atualizada.', $saida);
+        $this->assertStringContainsString('Senha de '.$apoiador->nome_completo.' atualizada em ', $saida);
         $this->assertStringContainsString('promovida a gestor', $saida);
 
         $atualizado = $apoiador->fresh();
         $this->assertSame('admin', $atualizado->tipo_usuario);
         $this->assertTrue(Hash::check('Nova-senha-123', $atualizado->senha));
+        $this->assertNotNull($atualizado->senha_alterada_em, 'definir a senha do gestor tambem e uma rotacao');
     }
 
     public function test_gestor_definido_pelo_comando_entra_no_painel(): void

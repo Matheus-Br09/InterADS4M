@@ -47,7 +47,10 @@ class RedefineSenhaDoApoiador extends Command
 
         $papel = $apoiador->tipo_usuario;
 
-        $apoiador->forceFill(['senha' => Hash::make($senha)])->save();
+        $apoiador->forceFill([
+            'senha' => Hash::make($senha),
+            'senha_alterada_em' => now(),
+        ])->save();
 
         // A sessão guardada em `sessions` continua valendo com a senha antiga;
         // derrubar as sessões do próprio apoiador fecha a janela de quem já
@@ -66,7 +69,7 @@ class RedefineSenhaDoApoiador extends Command
             }
         }
 
-        $this->info("Senha de {$apoiador->nome_completo} redefinida (papel mantido: {$papel}).");
+        $this->info("Senha de {$apoiador->nome_completo} redefinida em ".now()->format('d/m/Y H:i')." (papel mantido: {$papel}).");
         $this->line($derrubadas > 0
             ? "{$derrubadas} sessão(ões) aberta(s) com a senha antiga foram encerradas."
             : 'Nenhuma sessão aberta com a senha antiga.');

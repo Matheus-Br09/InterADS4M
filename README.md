@@ -131,17 +131,37 @@ parte que realmente protege as contas:
 
 ```bash
 php artisan apoiadores:listar                        # lista as contas e o comando de cada uma
-php artisan apoiadores:listar --rotacionar            # só as que ainda precisam de senha nova
+php artisan apoiadores:listar --rotacionar           # só as contas com pendência de senha
 ```
 
 A lista sai do próprio banco, marca quem ainda responde `senha123` (a senha
-pública que estava no seed e no dump removidos) e imprime o comando exato de
-cada conta, para não sobrar dígito de e-mail digitado errado:
+pública que estava no seed e no dump removidos), imprime o comando exato de
+cada conta (para não sobrar dígito de e-mail digitado errado) e mostra em
+`senha em` a data da última rotação — a tabela `apoiadores` nunca teve
+`created_at`/`updated_at`, então essa data é gravada em `senha_alterada_em` por
+cada rotação. `nunca` significa "ninguém rotacionou esta conta por aqui" e
+conta como pendência no `--rotacionar`.
 
 ```bash
 php artisan gestor:senha gestor@exemplo.org        # conta da gestão (promove a gestor)
 php artisan apoiador:senha <email>                  # cada apoiador, mantendo o papel dele
 ```
+
+**Rotacionou as contas antes de 26/09?** A coluna `senha_alterada_em` só
+existe a partir dessa migration, então quem já entregou senha nova às pessoas
+não tem a data gravada. Este comando carimba a data **sem trocar senha
+nenhuma** — o contrário seria obrigar a reentregar senha a quem já recebeu a
+sua:
+
+```bash
+php artisan apoiadores:marcar-senha carol@sos.org.br    # uma conta
+php artisan apoiadores:marcar-senha --todos             # todas que ainda estão sem data
+php artisan apoiadores:marcar-senha --todos --reforcar  # sobrescreve as datas (use com cuidado)
+```
+
+Sem `--reforcar`, nenhum comando sobrescreve a data de quem já tem — é a
+proteção contra um `--todos` acidental apagar o histórico de quem rotacionou
+quando.
 
 Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
 um e-mail de domínio real volte para qualquer seeder.
@@ -204,7 +224,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 171 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
+php artisan test    # 182 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA

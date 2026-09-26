@@ -45,10 +45,11 @@ class DefineSenhaDoGestor extends Command
 
         $apoiador->forceFill([
             'senha' => Hash::make($senha),
+            'senha_alterada_em' => now(),
             'tipo_usuario' => 'admin',
         ])->save();
 
-        $this->info("Senha de {$apoiador->nome_completo} atualizada.");
+        $this->info("Senha de {$apoiador->nome_completo} atualizada em ".now()->format('d/m/Y H:i').'.');
         $this->line($jaEraGestor
             ? 'A conta já era de gestor.'
             : 'A conta foi promovida a gestor da ONG.');

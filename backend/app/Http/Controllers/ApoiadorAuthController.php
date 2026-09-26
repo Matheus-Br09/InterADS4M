@@ -45,6 +45,7 @@ class ApoiadorAuthController extends Controller
             'cpf' => $request->cpf,
             'celular' => $request->celular,
             'senha' => Hash::make($request->senha),
+            'senha_alterada_em' => now(),
             'cep' => $request->cep ?? null,
             'logradouro' => $request->logradouro ?? null,
             'numero' => $request->numero ?? null,

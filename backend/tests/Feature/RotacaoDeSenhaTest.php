@@ -75,6 +75,7 @@ class RotacaoDeSenhaTest extends TestCase
         $this->assertSame(16, mb_strlen($senha));
         $this->assertDoesNotMatchRegularExpression('/[iIlL1oO0]/', $senha);
         $this->assertTrue(Hash::check($senha, $apoiador->refresh()->senha));
+        $this->assertNotNull($apoiador->senha_alterada_em, 'a rotacao da gestao tambem fica com data');
 
         $this->post('/entrar', ['email' => $apoiador->email, 'senha' => $senha])
             ->assertRedirect('/minha-conta');
@@ -103,6 +104,7 @@ class RotacaoDeSenhaTest extends TestCase
         $this->assertSame(0, $codigo);
         $this->assertStringContainsString('papel mantido: apoiador', $saida);
         $this->assertSame('apoiador', $apoiador->refresh()->tipo_usuario);
+        $this->assertNotNull($apoiador->senha_alterada_em, 'a rotacao tem que ficar com data');
 
         preg_match('/Senha gerada: (\S+)/', $saida, $achado);
         $this->post('/entrar', ['email' => $apoiador->email, 'senha' => $achado[1]])

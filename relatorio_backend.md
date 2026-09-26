@@ -105,24 +105,27 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.8 Sessão de 26/09 — Senha forte, bloqueio de conta e limite na doação
 
-**Comando:** `cd backend && php artisan test` → **171 testes, 171 aprovados, 2.970 assertions**.
+**Comando:** `cd backend && php artisan test` → **182 testes, 182 aprovados, 2.992 assertions**.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
-| `tests/Feature/ListaDeApoiadoresTest.php` | 6 | A lista que o gestor usa para rotacionar: mostra e-mail e papel de cada conta, imprime o comando de rotação de cada uma (`gestor:senha` na gestão, `apoiador:senha` nas demais), marca quem ainda responde a senha pública do seed, e o `--rotacionar` esconde as já resolvidas. |
+| `tests/Feature/MarcaSenhaApoiadoresTest.php` | 7 | O carimbo grava a data sem mexer no hash; `--todos` só marca quem não tem data; `--reforcar` sobrescreve; e-mail inexistente falha sem alterar nada; a rotação real (`apoiador:senha`) também grava data. |
+| `tests/Feature/ListaDeApoiadoresTest.php` | 9 | A lista que o gestor usa para rotacionar: mostra e-mail, papel e `senha em` de cada conta, imprime o comando de rotação de cada uma (`gestor:senha` na gestão, `apoiador:senha` nas demais), marca quem ainda responde a senha pública do seed, escreve `nunca` quando falta a data, e o `--rotacionar` esconde só quem tem senha nova **e** data. |
 | `tests/Feature/BloqueioDeLoginTest.php` | 7 | 5 erros travam a conta por 5 minutos (mesmo quando a senha está certa), login certo zera o contador, o bloqueio é por conta e não derruba o login dos outros, e-mail inexistente trava igual a existente (a resposta não vaza quem tem conta), a tela diz quando volta e o e-mail digitado volta no formulário. |
-| `tests/Feature/RotacaoDeSenhaTest.php` | 9 | As duas ferramentas de rotação, a senha gerada entra no painel, a antiga morre, sessão antiga é derrubada, seed sem hash previsível — e a regressão do gerador: 2.200 senhas seguidas sempre passam na regra de força, e o tamanho é 16 sem prefixo fixo. |
-| `tests/Feature/CadastroApoiadorTest.php` | 16 | Cadastro, senha criptografada, CPF de ponta a ponta e agora a senha forte: recusa `12345678` (tamanho ok, sem variedade) e diz o que falta. |
-| `tests/Feature/GestorDeAcessoTest.php` | 8 | `gestor:senha` promove e libera o painel, recusa senha curta e senha de 8 caracteres sem variedade, aceita e-mail com caixa alta e avisa quando a conta não existe. |
+| `tests/Feature/RotacaoDeSenhaTest.php` | 9 | As duas ferramentas de rotação (as duas gravam a data), a senha gerada entra no painel, a antiga morre, sessão antiga é derrubada, seed sem hash previsível — e a regressão do gerador: 2.200 senhas seguidas sempre passam na regra de força, e o tamanho é 16 sem prefixo fixo. |
+| `tests/Feature/CadastroApoiadorTest.php` | 17 | Cadastro, senha criptografada, CPF de ponta a ponta, a senha forte (recusa `12345678`, que tem tamanho mas não variedade) e a data da senha — sem ela, toda conta nova nasceria na lista de pendências sem ter senha para trocar. |
+| `tests/Feature/GestorDeAcessoTest.php` | 8 | `gestor:senha` promove e libera o painel, recusa senha curta e senha de 8 caracteres sem variedade, aceita e-mail com caixa alta, avisa quando a conta não existe e grava a data da rotação. |
 | `tests/Feature/LimiteDeRequisicoesTest.php` | 4 | Os cinco limites nomeados. O teste do limite de IP do login passou a usar e-mail malformado: com senha errada, a partir da 5ª vez quem responde é o bloqueio por conta e o teste mediria duas coisas ao mesmo tempo. |
 
 **Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — posta para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`. Esse é o molde que o `d665b30` deixou de propósito, e a pendência 10 da seção 5 já pedia a ligação; o que a auditoria acrescenta é o resto do diagnóstico: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** — ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário — diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora — e sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin(true)` após o cadastro é estado que não existe no componente. Enquanto a ligação não for feita, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
 
 **Comando novo (26/09):** `php artisan apoiadores:listar` — a rotação era manual, conta por conta, e o e-mail digitado errado deixava a conta com a senha antiga. A lista sai do banco, marca quem ainda responde à senha pública do seed e imprime o comando pronto de cada conta (`--rotacionar` mostra só as pendentes).
 
+**Comando novo (26/09, 2ª rodada):** `php artisan apoiadores:marcar-senha`. A primeira versão da lista só conseguia dizer "não é a senha do seed" — o que é verdade mesmo numa conta que nunca foi rotacionada, e portanto não provava nada. Pior: a tabela `apoiadores` **não tem `created_at`/`updated_at`** (o model tem `public $timestamps = false` desde a criação), então não existia campo nenhum de data para responder "essa conta já foi rotacionada?". A migration `2026_09_26_000001` cria `senha_alterada_em`, gravada por `gestor:senha`, `apoiador:senha` e pelo cadastro público; a lista passou a mostrar a coluna `senha em`, com `nunca` quando vazia, e `--rotacionar` passou a tratar "sem data" como pendência — senão o gestor fecharia o trabalho sem saber que o registro faltava. Como as contas já rotacionadas antes dessa migration não têm data, `apoiadores:marcar-senha` carimba a data **sem trocar senha** (o contrário obrigaria a reentregar senha nova a quem já recebeu a sua); sem `--reforcar` ele não sobrescreve data existente.
+
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; ã suite está em 171 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; a suíte está em 182 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -271,7 +274,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
-10. **Suíte automatizada de 171 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 182 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
@@ -316,11 +319,13 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 84 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 85 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
 * **Risco residual aceito (decisão do responsável em 26/09):** sobraram **três nomes próprios** em dois commits antigos — `ee1dfcc` (importação dos dados da ONG, no `OngDadosSeeder.php`) e `bb8fa53` (suíte de testes, que copiou nome e e-mail da base real para uma fixture). O repositório é público, e a auditoria de 26/09 confirmou o que **não** está exposto: nenhum e-mail real, nenhum CPF válido (os `12378945610/11` do seeder antigo são placeholders e reprovam no dígito verificador) e nenhum endereço residencial — o `CEP 54220-140` é um logradouro público do Recife. Ficam só nomes, sem contato junto, e um deles é o próprio coautor do projeto, já creditado no `README`. **Reescrever o histórico de novo foi descartado**: trocaria todos os SHAs uma segunda vez, exigiria reclonar em todas as máquinas e o GitHub pode manter os commits antigos em cache. A árvore atual (`main`) está limpa disso desde `12e5502`. A proteção que de fato importa para as contas é a **rotação de senha** (item 1 da seção 5).
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
+  * *(este commit)* feat(backend): data da rotacao de senha por conta
   * `12e5502` fix(backend): tira nome de pessoa real do codigo e do relatorio
+  * `d70f45a` docs: registra o risco residual aceito dos nomes em commits antigos
   * `4b2d919` feat(backend): comando apoiadores:listar para a rotacao de senha
   * `371db8b` docs: corrige referencia de item no relatorio
   * `27fe744` docs: corrige o enquadramento da pendencia do CPF da SPA

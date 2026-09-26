@@ -17,7 +17,8 @@ use Illuminate\Support\Facades\Hash;
  */
 class ListaApoiadores extends Command
 {
-    protected $signature = 'apoiadores:listar {--rotacionar : mostra so as contas que ainda precisam de senha nova}';
+    protected $signature = 'apoiadores:listar
+                            {--rotacionar : mostra so as contas com pendencia de senha (senha publica ainda ativa ou rotacao nunca registrada)}';
 
     protected $description = 'Lista os apoiadores, a situacao da senha de cada um e o comando para rotacionar';
 
@@ -32,7 +33,7 @@ class ListaApoiadores extends Command
 
     public function handle(): int
     {
-        $contas = Apoiador::orderBy('id')->get(['id', 'nome_completo', 'email', 'tipo_usuario', 'senha']);
+        $contas = Apoiador::orderBy('id')->get(['id', 'nome_completo', 'email', 'tipo_usuario', 'senha', 'senha_alterada_em']);
 
         if ($contas->isEmpty()) {
             $this->warn('Nenhum apoiador no banco.');
@@ -44,7 +45,7 @@ class ListaApoiadores extends Command
         $linhas = $contas->map(fn (Apoiador $apoiador) => $this->linha($apoiador));
 
         if ($this->option('rotacionar')) {
-            $linhas = $linhas->filter(fn (array $linha) => $linha['situacao'] !== 'ok');
+            $linhas = $linhas->filter(fn (array $linha) => $linha['pendencia']);
         }
 
         if ($linhas->isEmpty()) {
@@ -56,13 +57,14 @@ class ListaApoiadores extends Command
         }
 
         $this->table(
-            ['id', 'nome', 'papel', 'e-mail', 'situacao'],
+            ['id', 'nome', 'papel', 'e-mail', 'situacao', 'senha em'],
             $linhas->map(fn (array $linha) => [
                 $linha['id'],
                 $linha['nome'],
                 $linha['papel'],
                 $linha['email'],
                 $linha['situacao'],
+                $linha['senha_em'],
             ])->all(),
         );
 
@@ -87,12 +89,20 @@ class ListaApoiadores extends Command
         // password_verify e o erro de PDO não é o que o gestor precisa ler.
         $senhaPublica = $apoiador->senha && Hash::check(self::SENHA_PUBLICA, $apoiador->senha);
 
+        // A tabela `apoiadores` não tem `updated_at`, então "senha em" vem da
+        // coluna que a rotação grava. Vazio = ninguém nunca rotacionou essa
+        // conta por aqui, o que também é pendência: sem data não há como provar
+        // que a rotação do histórico do git foi feita.
+        $rotacionadaEm = $apoiador->senha_alterada_em;
+
         return [
             'id' => $apoiador->id,
             'nome' => $apoiador->nome_completo,
             'papel' => $papel,
             'email' => $apoiador->email,
             'situacao' => $senhaPublica ? '<options=bold>senha publica do seed</>' : 'ok',
+            'senha_em' => $rotacionadaEm ? $rotacionadaEm->format('d/m/Y H:i') : '<fg=yellow>nunca</>',
+            'pendencia' => $senhaPublica || ! $rotacionadaEm,
             'comando' => $papel === 'admin'
                 ? "php artisan gestor:senha {$apoiador->email}"
                 : "php artisan apoiador:senha {$apoiador->email}",
