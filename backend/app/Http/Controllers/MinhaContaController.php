@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Validation\ValidationException;
 
 class MinhaContaController extends Controller
 {
@@ -52,8 +53,9 @@ class MinhaContaController extends Controller
         */
         if (Hash::check($credentials['senha'], $apoiador->senha)) {
             if ($request->is('api/v1/*')) {
-                throw \Illuminate\Validation\ValidationException::withMessages(['senha' => 'A nova senha precisa ser diferente da senha atual.']);
+                throw ValidationException::withMessages(['senha' => 'A nova senha precisa ser diferente da senha atual.']);
             }
+
             return back()
                 ->withErrors(['senha' => 'A nova senha precisa ser diferente da senha que você está usando.']);
         }

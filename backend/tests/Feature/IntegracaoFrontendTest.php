@@ -2,7 +2,6 @@
 
 namespace Tests\Feature;
 
-use App\Models\Apoiador;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Tests\Concerns\CriaCenarioOng;
@@ -18,7 +17,7 @@ class IntegracaoFrontendTest extends TestCase
         $this->getJson('/api/v1/csrf')->assertOk()->assertJsonStructure(['token']);
 
         $response = $this->postJson('/api/v1/auth/cadastro', [
-            'nome_completo' => 'Pessoa Frontend', 'email' => 'frontend@example.org', 'cpf' => '52998224725',
+            'nome_completo' => 'Pessoa Frontend', 'email' => 'frontend@example.org', 'cpf' => '11122233387',
             'senha' => 'SenhaFrontend123', 'senha_confirmation' => 'SenhaFrontend123',
         ]);
 

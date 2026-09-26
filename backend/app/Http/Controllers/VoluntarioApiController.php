@@ -25,6 +25,7 @@ class VoluntarioApiController extends Controller
         $dados['status'] = 'em_analise';
         $dados['data_inscricao'] = now();
         $voluntario = Voluntario::updateOrCreate(['apoiador_id' => $dados['apoiador_id']], $dados);
+
         return ['dados' => $voluntario];
     }
 
@@ -37,6 +38,7 @@ class VoluntarioApiController extends Controller
     {
         $voluntario = Voluntario::findOrFail($id);
         $voluntario->update($request->validate(['status' => ['required', 'in:em_analise,entrevista_marcada,aprovado,recusado'], 'data_entrevista' => ['nullable', 'date'], 'mensagem_entrevista' => ['nullable', 'string']]));
+
         return ['dados' => $voluntario->refresh()];
     }
 
@@ -44,6 +46,7 @@ class VoluntarioApiController extends Controller
     {
         $voluntario = Voluntario::findOrFail($id);
         abort_unless($voluntario->arquivo_curriculo && Storage::disk('local')->exists($voluntario->arquivo_curriculo), 404);
+
         return response()->download(Storage::disk('local')->path($voluntario->arquivo_curriculo));
     }
 }

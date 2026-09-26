@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Apadrinhamento;
 use App\Models\DoacaoMensal;
+use App\Models\DoacaoUnica;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class ApoiosApiController extends Controller
@@ -14,6 +16,7 @@ class ApoiosApiController extends Controller
         $dados['apoiador_id'] = $request->user('apoiador')->id;
         $dados['status'] = 'pendente';
         $dados['data_assinatura'] = now();
+
         return ['dados' => DoacaoMensal::create($dados), 'message' => 'Intenção de doação mensal registrada; nenhum pagamento foi realizado.'];
     }
 
@@ -23,14 +26,18 @@ class ApoiosApiController extends Controller
         $dados['apoiador_id'] = $request->user('apoiador')->id;
         $dados['status'] = 'pendente';
         $dados['data_inicio'] = now();
+
         return ['dados' => Apadrinhamento::create($dados), 'message' => 'Intenção de apadrinhamento registrada; nenhum pagamento foi realizado.'];
     }
 
-    public function cancelar(Request $request, string $tipo, int $id): \Illuminate\Http\JsonResponse
+    public function cancelar(Request $request, string $tipo, int $id): JsonResponse
     {
-        $model = match ($tipo) { 'doacoes' => \App\Models\DoacaoUnica::class, 'mensalidades' => DoacaoMensal::class, 'apadrinhamentos' => Apadrinhamento::class };
+        $model = match ($tipo) {
+            'doacoes' => DoacaoUnica::class, 'mensalidades' => DoacaoMensal::class, 'apadrinhamentos' => Apadrinhamento::class
+        };
         $item = $model::where('apoiador_id', $request->user('apoiador')->id)->findOrFail($id);
         $item->update(['status' => 'cancelado']);
+
         return response()->json(status: 204);
     }
 }

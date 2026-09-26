@@ -4,9 +4,10 @@ use App\Http\Controllers\ApoiadorAuthController;
 use App\Http\Controllers\DashboardTesteController;
 use App\Http\Controllers\DoacaoUnicaController;
 use App\Http\Controllers\MinhaContaController;
+use App\Http\Middleware\RespostaJson;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('api/v1')->middleware([\App\Http\Middleware\RespostaJson::class, 'throttle:api'])->group(__DIR__.'/integracao.php');
+Route::prefix('api/v1')->middleware([RespostaJson::class, 'throttle:api'])->group(__DIR__.'/integracao.php');
 
 // ==========================================
 // PAINEL PROVISÓRIO DE TESTES

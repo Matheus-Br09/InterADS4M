@@ -24,6 +24,7 @@ class ContaApiController extends Controller
         ]);
         $apoiador = $request->user('apoiador');
         $apoiador->forceFill($validated)->save();
+
         return ['dados' => DadosDaConta::de($apoiador->refresh())];
     }
 
@@ -38,6 +39,7 @@ class ContaApiController extends Controller
                 'data_inicio' => $item->data_inicio, 'recompensas' => $item->recompensas->map->only(['id', 'titulo', 'arquivo_midia']),
             ]),
         };
+
         return ['dados' => $dados];
     }
 }
