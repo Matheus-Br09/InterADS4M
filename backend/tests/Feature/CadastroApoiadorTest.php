@@ -16,8 +16,8 @@ class CadastroApoiadorTest extends TestCase
     public function test_novo_apoio_se_cadastra_e_entra_no_painel_automaticamente(): void
     {
         $response = $this->post('/cadastro', [
-            'nome_completo' => 'Joao da Silva',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante Demonstracao',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.222.333-87',
             'celular' => '(81) 98888-7777',
             'senha' => 'Senha123',
@@ -29,8 +29,8 @@ class CadastroApoiadorTest extends TestCase
         $response->assertRedirect(route('minha-conta'));
         $this->assertAuthenticated('apoiador');
         $this->assertDatabaseHas('apoiadores', [
-            'nome_completo' => 'Joao da Silva',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante Demonstracao',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '11122233387',
             'cidade' => 'Recife',
         ]);
@@ -39,14 +39,14 @@ class CadastroApoiadorTest extends TestCase
     public function test_senha_do_apoio_e_gravada_criptografada(): void
     {
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao da Silva',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante Demonstracao',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.222.333-87',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
         ]);
 
-        $apoiador = Apoiador::where('email', 'joao@exemplo.com')->firstOrFail();
+        $apoiador = Apoiador::where('email', 'apoiante@exemplo.com')->firstOrFail();
 
         $this->assertNotSame('Senha123', $apoiador->senha);
         $this->assertTrue(Hash::check('Senha123', $apoiador->senha));
@@ -123,8 +123,8 @@ class CadastroApoiadorTest extends TestCase
     public function test_recusa_cadastro_quando_a_confirmacao_de_senha_nao_confere(): void
     {
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.222.333-87',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Outra123',
@@ -135,17 +135,17 @@ class CadastroApoiadorTest extends TestCase
 
     public function test_recusa_cadastro_com_e_mail_ja_utilizado(): void
     {
-        $this->criarApoiador(['email' => 'joao@exemplo.com']);
+        $this->criarApoiador(['email' => 'apoiante@exemplo.com']);
 
         $this->post('/cadastro', [
-            'nome_completo' => 'Outro Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Outro Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '999.888.777-05',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
         ])->assertSessionHasErrors('email');
 
-        $this->assertSame(1, Apoiador::where('email', 'joao@exemplo.com')->count());
+        $this->assertSame(1, Apoiador::where('email', 'apoiante@exemplo.com')->count());
     }
 
     public function test_recusa_cadastro_com_cpf_ja_utilizado(): void
@@ -153,8 +153,8 @@ class CadastroApoiadorTest extends TestCase
         $this->criarApoiador(['cpf' => '111.222.333-87']);
 
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.222.333-87',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
@@ -177,8 +177,8 @@ class CadastroApoiadorTest extends TestCase
     public function test_cadastro_recusa_cpf_invalido_com_mensagem_clara(): void
     {
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.222.333-44',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
@@ -190,8 +190,8 @@ class CadastroApoiadorTest extends TestCase
     public function test_cadastro_recusa_cpf_com_digitos_repetidos(): void
     {
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '111.111.111-11',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
@@ -203,15 +203,15 @@ class CadastroApoiadorTest extends TestCase
     public function test_cadastro_aceita_cpf_sem_mascara_e_guarda_so_digitos(): void
     {
         $this->post('/cadastro', [
-            'nome_completo' => 'Joao',
-            'email' => 'joao@exemplo.com',
+            'nome_completo' => 'Apoiante',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '12345678908',
             'senha' => 'Senha123',
             'senha_confirmation' => 'Senha123',
         ])->assertRedirect(route('minha-conta'));
 
         $this->assertDatabaseHas('apoiadores', [
-            'email' => 'joao@exemplo.com',
+            'email' => 'apoiante@exemplo.com',
             'cpf' => '12345678908',
         ]);
     }
@@ -221,7 +221,7 @@ class CadastroApoiadorTest extends TestCase
         $this->criarApoiador(['email' => 'primeiro@exemplo.com', 'cpf' => '12345678908']);
 
         $this->post('/cadastro', [
-            'nome_completo' => 'Segundo Joao',
+            'nome_completo' => 'Segundo Apoiante',
             'email' => 'segundo@exemplo.com',
             'cpf' => '123.456.789-08',
             'senha' => 'Senha123',
@@ -242,7 +242,7 @@ class CadastroApoiadorTest extends TestCase
         static::$sequencia++;
 
         return $extra + [
-            'nome_completo' => 'Joao da Silva',
+            'nome_completo' => 'Apoiante Demonstracao',
             'email' => 'apoio'.static::$sequencia.'@exemplo.com',
             'cpf' => '111.222.333-87',
             'senha' => 'Senha123',

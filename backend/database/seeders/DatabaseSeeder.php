@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 0. Dados reais da ONG (base do acervo + administradora Carol)
+        // 0. Dados de demonstracao da ONG (base do acervo + conta de administracao)
         $this->call(OngDadosSeeder::class);
 
         // 1. Criancas

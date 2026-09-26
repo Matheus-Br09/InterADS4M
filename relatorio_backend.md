@@ -41,9 +41,9 @@ Dados reais extraídos do `ong.sql` e inseridos com sucesso (contagens verificad
 
 | Tabela | Total | Observações |
 |---|---|---|
-| `criancas` | 3 | Ben Tennyson, Bart Simpson, Chaves (com `imagem_perfil`) |
-| `apoiadores` | 4 | Matheus Figueiredo, Danillo roger, João Silva, Carol (`admin`) |
-| `apadrinhamentos` | 1 | Ben Tennyson → Matheus (R$100/mês, ativo) |
+| `criancas` | 3 | Nomes das três crianças do acervo (com `imagem_perfil`) |
+| `apoiadores` | 4 | Quatro contas reais: três com papel `apoiador` e a conta de administração (`admin`) |
+| `apadrinhamentos` | 1 | Um benfeitor → um apoiador (R$100/mês, ativo) |
 | `recompensas_apadrinhamento` | 1 | Vídeo/mensagem do Ben 10 (PNG) |
 | `doacoes_unicas` | 3 | Valores em Pix, concluídas |
 | `doacoes_mensais` | 3 | Pix Automático e Cartão de Crédito recorrente |

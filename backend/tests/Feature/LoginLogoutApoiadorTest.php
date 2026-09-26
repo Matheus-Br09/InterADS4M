@@ -98,12 +98,12 @@ class LoginLogoutApoiadorTest extends TestCase
 
     public function test_apoio_logado_acessa_o_painel_e_enxerga_o_proprio_nome(): void
     {
-        $apoiador = $this->criarApoiador(['nome_completo' => 'Matheus Figueiredo']);
+        $apoiador = $this->criarApoiador(['nome_completo' => 'Apoiante Demonstracao']);
         $this->actingAs($apoiador, 'apoiador');
 
         $this->get('/minha-conta')
             ->assertOk()
-            ->assertSee('Matheus Figueiredo')
+            ->assertSee('Apoiante Demonstracao')
             ->assertSee($apoiador->email);
     }
 
