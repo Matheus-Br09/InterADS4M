@@ -263,7 +263,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 182 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
+php artisan test    # 191 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA
@@ -282,7 +282,7 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 171 testes automatizados no backend
+- ✅ 191 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
 - ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela posta para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
 
