@@ -344,11 +344,12 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 89 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 90 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
 * **Risco residual aceito (decisão do responsável em 26/09):** sobraram **três nomes próprios** em dois commits antigos — `ee1dfcc` (importação dos dados da ONG, no `OngDadosSeeder.php`) e `bb8fa53` (suíte de testes, que copiou nome e e-mail da base real para uma fixture). O repositório é público, e a auditoria de 26/09 confirmou o que **não** está exposto: nenhum e-mail real, nenhum CPF válido (os `12378945610/11` do seeder antigo são placeholders e reprovam no dígito verificador) e nenhum endereço residencial — o `CEP 54220-140` é um logradouro público do Recife. Ficam só nomes, sem contato junto, e um deles é o próprio coautor do projeto, já creditado no `README`. **Reescrever o histórico de novo foi descartado**: trocaria todos os SHAs uma segunda vez, exigiria reclonar em todas as máquinas e o GitHub pode manter os commits antigos em cache. A árvore atual (`main`) está limpa disso desde `12e5502`. A proteção que de fato importa para as contas é a **rotação de senha** (item 1 da seção 5).
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
-  * *(este commit)* feat(backend): troca de senha obrigatoria no primeiro acesso
+  * `9c26f10` feat(backend): troca de senha obrigatoria no primeiro acesso
+  * `4e5840a` docs: rotacao executada nas 4 contas e o que ela nao garante
 * `1734b2a` docs: consolida o relatorio e corrige texto corrompido
   * `3f9b7e8` docs(backend): checklist de publicacao e CORS vindo do .env
   * `0157631` feat(backend): data da rotacao de senha por conta
