@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EhGestor;
+use App\Http\Middleware\TrocaSenhaObrigatoria;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'gestor' => EhGestor::class,
+            'troca-senha' => TrocaSenhaObrigatoria::class,
         ]);
 
         // Nenhuma rota da API pode ser usada sem limite: o grupo inteiro usa o

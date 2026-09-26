@@ -12,12 +12,17 @@
                 @endif
             </p>
         </div>
-        <form action="{{ route('logout') }}" method="POST">
-            @csrf
-            <button type="submit" class="text-red-600 hover:text-red-800 font-semibold text-sm transition-colors">
-                Sair
-            </button>
-        </form>
+        <div class="flex items-center gap-4">
+            <a href="{{ route('senha.edit') }}" class="text-blue-600 hover:text-blue-800 font-semibold text-sm transition-colors">
+                Alterar senha
+            </a>
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="text-red-600 hover:text-red-800 font-semibold text-sm transition-colors">
+                    Sair
+                </button>
+            </form>
+        </div>
     </div>
 
     @if (session('success'))

@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Route;
 // O painel mostra dados pessoais (crianças, apoiadores, valores),
 // então o acesso é exclusivo da gestão da ONG. As APIs JSON abaixo
 // continuam públicas porque alimentam o site em inter-ong/.
-Route::middleware('gestor')->group(function () {
+Route::middleware(['gestor', 'troca-senha'])->group(function () {
     Route::get('/', [DashboardTesteController::class, 'index'])->name('dashboard');
     Route::post('/seed-dados', [DashboardTesteController::class, 'seedData'])->name('seed.data');
     Route::post('/criancas/salvar', [DashboardTesteController::class, 'storeCrianca'])->name('criancas.store');
@@ -32,10 +32,20 @@ Route::post('/entrar', [ApoiadorAuthController::class, 'login'])->middleware('th
 Route::post('/sair', [ApoiadorAuthController::class, 'logout'])->name('logout');
 
 // Área Restrita (Exige login do Apoiador)
-Route::middleware('auth:apoiador')->group(function () {
+Route::middleware(['auth:apoiador', 'troca-senha'])->group(function () {
     Route::get('/minha-conta', [MinhaContaController::class, 'index'])->name('minha-conta');
     Route::get('/apoio-unico', [DoacaoUnicaController::class, 'show'])->name('apoio-unico.show');
     Route::post('/apoio-unico', [DoacaoUnicaController::class, 'store'])
         ->middleware('throttle:doacao-unica')
         ->name('apoio-unico.store');
+});
+
+// Troca da própria senha. Fica de fora do grupo acima de propósito: enquanto a
+// conta está presa na troca obrigatória, estas são as únicas rotas que podem
+// responder — se entrassem no 'troca-senha', a conta ficaria sem saída.
+Route::middleware('auth:apoiador')->group(function () {
+    Route::get('/minha-conta/senha', [MinhaContaController::class, 'editSenha'])->name('senha.edit');
+    Route::post('/minha-conta/senha', [MinhaContaController::class, 'updateSenha'])
+        ->middleware('throttle:troca-senha-post')
+        ->name('senha.update');
 });

@@ -26,6 +26,7 @@ class Apoiador extends Authenticatable
      */
     protected $casts = [
         'senha_alterada_em' => 'datetime',
+        'trocar_senha_obrigatorio' => 'boolean',
     ];
 
     protected $fillable = [
@@ -33,6 +34,7 @@ class Apoiador extends Authenticatable
         'email',
         'senha',
         'senha_alterada_em',
+        'trocar_senha_obrigatorio',
         'celular',
         'cpf',
         'sexo',
@@ -66,6 +68,9 @@ class Apoiador extends Authenticatable
         // Quando a senha foi trocada é informação de segurança: quem controla a
         // conta não precisa publicá-la, e quem lê a API menos ainda.
         'senha_alterada_em',
+        // Estado interno: se a conta está presa na troca de senha. Não interessa
+        // a ninguém fora do sistema, e a tela de troca lê o atributo direto.
+        'trocar_senha_obrigatorio',
     ];
 
     // Diz ao Laravel que o campo de senha da tabela é 'senha' e não 'password'

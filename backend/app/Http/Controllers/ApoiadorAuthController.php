@@ -91,6 +91,14 @@ class ApoiadorAuthController extends Controller
             RateLimiter::clear($chave);
             $request->session()->regenerate();
 
+            // Conta com troca de senha pendente vai direto para ela: cair no
+            // painel e ser jogada de volta pela metade só confunde. Quem
+            // cadastrou agora nunca entra neste caminho — conta nova nasce com
+            // a senha que a pessoa escolheu.
+            if (Auth::guard('apoiador')->user()->trocar_senha_obrigatorio) {
+                return redirect()->route('senha.edit');
+            }
+
             return redirect()->intended('/minha-conta');
         }
 

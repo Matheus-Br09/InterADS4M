@@ -9,10 +9,10 @@
 
 ## 1. Resumo do Progresso Nesta Sessão
 
-### Sessão de 26/09/2026 — Senha forte, bloqueio de conta, data da rotação, CORS e limpeza de dados reais
-Fechamos o ciclo de segurança do painel e limpamos o que tinha entrado da base real. Agora **toda senha de apoio é forte por definição** (8+ caracteres, com maiúscula, minúscula e número — regra `App\Rules\SenhaForte`, aplicada no cadastro público e no `gestor:senha`); **5 tentativas erradas travam a conta por 5 minutos**, com resposta igual para e-mail existente e inexistente, para o formulário não servir de lista de quem tem cadastro; e o `POST /apoio-unico`, que grava uma linha no banco a cada clique, ganhou **limite de 10 por minuto por IP** (o `/sair` ficou de fora de propósito, porque limiter em logout só produziria 419 na cara do usuário). A suíte está em **191 testes / 3.012 assertions** e, no caminho, foi corrigido um bug no gerador de senhas: ele nem sempre sorteava dígito, o que fazia `gestor:senha` falhar ao acaso.
+### Sessão de 26/09/2026 — Senha forte, bloqueio de conta, data da rotação, troca obrigatória, CORS e limpeza de dados reais
+Fechamos o ciclo de segurança do painel e limpamos o que tinha entrado da base real. Agora **toda senha de apoio é forte por definição** (8+ caracteres, com maiúscula, minúscula e número — regra `App\Rules\SenhaForte`, aplicada no cadastro público e no `gestor:senha`); **5 tentativas erradas travam a conta por 5 minutos**, com resposta igual para e-mail existente e inexistente, para o formulário não servir de lista de quem tem cadastro; e o `POST /apoio-unico`, que grava uma linha no banco a cada clique, ganhou **limite de 10 por minuto por IP** (o `/sair` ficou de fora de propósito, porque limiter em logout só produziria 419 na cara do usuário). A suíte está em **207 testes / 3.067 assertions** e, no caminho, foi corrigido um bug no gerador de senhas: ele nem sempre sorteava dígito, o que fazia `gestor:senha` falhar ao acaso.
 
-A rotação deixou de ser cega em dois pontos. Primeiro, `php artisan apoiadores:listar` tira a digitação de e-mail do caminho e marca quem ainda responde à senha pública do seed. Segundo — e esse só apareceu porque a tabela `apoiadores` nunca teve `created_at`/`updated_at` — não existia **nenhuma** forma de responder "essa conta já foi rotacionada?". A migration `2026_09_26_000001` cria `senha_alterada_em`, gravada por `gestor:senha`, `apoiador:senha` e pelo cadastro público; a lista mostra a coluna `senha em` e o `--rotacionar` trata conta sem data como pendência; e `apoiadores:marcar-senha` carimba a data de quem já rotacionou sem trocar senha, para não obrigar a reentregar senha nova a quem já recebeu a sua.
+A rotação deixou de ser cega em três pontos. Primeiro, `php artisan apoiadores:listar` tira a digitação de e-mail do caminho e marca quem ainda responde à senha pública do seed. Segundo — e esse só apareceu porque a tabela `apoiadores` nunca teve `created_at`/`updated_at` — não existia **nenhuma** forma de responder "essa conta já foi rotacionada?". A migration `2026_09_26_000001` cria `senha_alterada_em`, gravada por `gestor:senha`, `apoiador:senha` e pelo cadastro público; a lista mostra a coluna `senha em` e o `--rotacionar` trata conta sem data como pendência; e `apoiadores:marcar-senha` carimba a data de quem já rotacionou sem trocar senha, para não obrigar a reentregar senha nova a quem já recebeu a sua. O terceiro ponto é o que faltava e só apareceu na hora de entregar: **a rotação sozinha não fecha nada, porque a senha entregue é a senha que a pessoa vai ter até trocar** — e ela vai por WhatsApp. A migration `2026_09_26_000002` e o comando `apoiadores:exigir-troca` prendem a conta numa tela de troca obrigatória até a pessoa criar senha própria, que é a única janela em que dá para forçar isso (item 25).
 
 Como o projeto **não está em produção**, a parte que depende de domínio não foi feita e sim **preparada**: a lista de origens do CORS saiu do `config/cors.php` fixo para `CORS_ALLOWED_ORIGINS` no `.env` (publicar é mexer em `.env`, não em PHP versionado), o `.env.example` passou a `APP_DEBUG=false` com `SESSION_SECURE_COOKIE` documentado, e o README ganhou a seção "Publicando" com os valores, os comandos na ordem e os dois erros que não dão mensagem nenhuma. A auditoria de dados reais em cima disso achou nomes próprios usados como fixture de teste e na tabela de inventário deste relatório: foram removidos da árvore atual, e o que sobrou no histórico antigo foi convertido em **risco residual aceito e documentado** na seção 6. A checagem de fotos do acervo continua com dois arquivos para olhar com olho humano.
 
@@ -38,7 +38,7 @@ O banco de dados continua rodando em ambiente isolado via Docker:
 
 ### 2.2 Estrutura de Tabelas e Modificações
 **Schema mesclado (15/09)** — o banco agora contém todas as tabelas, mesclando o schema antigo do `init.sql` com o novo `ong.sql`:
-* **Tabela `apoiadores`:** Ajustada e sincronizada para suporte à autenticação própria; ganhou a coluna `tipo_usuario` (`apoiador` | `admin`) via migration `2026_09_15_000003`. Em 26/09 ganhou `senha_alterada_em` (timestamp, nullable) pela migration `2026_09_26_000001`: a tabela nunca teve `created_at`/`updated_at`, e sem uma data não dava para saber se a rotção de senha já tinha sido feita.
+* **Tabela `apoiadores`:** Ajustada e sincronizada para suporte à autenticação própria; ganhou a coluna `tipo_usuario` (`apoiador` | `admin`) via migration `2026_09_15_000003`. Em 26/09 ganhou `senha_alterada_em` (timestamp, nullable) pela migration `2026_09_26_000001`: a tabela nunca teve `created_at`/`updated_at`, e sem uma data não dava para saber se a rotação de senha já tinha sido feita. Na mesma data a migration `2026_09_26_000002` acrescentou `trocar_senha_obrigatorio` (boolean, default false), que prende a conta na tela de troca até a pessoa criar uma senha própria.
 * **Tabelas de conteúdo da ONG (novas, migration `2026_09_15_000001`):** `criancas`, `apadrinhamentos`, `recompensas_apadrinhamento`, `doacoes_unicas`, `doacoes_mensais`, `galeria`, `programas_acoes`, `voluntarios`.
 * **Tabelas administrativas (migration `2026_09_15_000002`):** `administradores`, `noticias`, `materiais_didaticos`, `documentos_transparencia`, `newsletter`.
 * A tabela `apadrinhamentos` antiga (schema inicial, vazia e sem AUTO_INCREMENT) e a `criancas` parcialmente criada por uma migration antiga foram **dropadas** e recriadas pelas novas migrations.
@@ -107,12 +107,25 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ## 4. Testes e Validações Realizados
 
+### 4.9 Sessão de 26/09 — Troca obrigatória de senha
+
+**Comando:** `cd backend && php artisan test` — **207 testes, 207 aprovados, 3.067 assertions** (16 deles de `TrocaSenhaObrigatoriaTest`).
+
+**O que a sessão fechou:** a senha que a ONG entrega na rotação dos hashes expostos é a mesma que vai trafegar por WhatsApp/e-mail. Nada no sistema impedia que ela continuasse valendo: a conta usaria a senha entregue para sempre. A migration `2026_09_26_000002` cria `trocar_senha_obrigatorio`, o middleware `TrocaSenhaObrigatoria` segura a conta até a pessoa criar senha própria, e `apoiadores:exigir-troca` é quem marca.
+
+**Dois detalhes que evitam a conta ficar presa sem saída:** as rotas `senha.edit`, `senha.update` e `logout` ficam de fora do próprio middleware, senão a conta ficaria sem caminho para sair; e o login aponta direto para a troca, em vez de deixar a pessoa chegar no painel e ser jogada de volta.
+
+**A conta da gestão fica de fora do `--todos`:** travar o admin é a forma mais rápida de a ONG ficar sem acesso ao próprio painel, e o e-mail do admin nem aparece na impressão do comando.
+
+**O teste mais importante do arquivo:** a troca recusa a senha que a conta já está usando. Sem essa trava a pessoa cola de volta a senha temporária, o formulário aceita, e o pedido de "senha nova" vira enfeite — o recurso inteiro perde o sentido.
+
 ### 4.8 Sessão de 26/09 — Senha forte, bloqueio de conta e limite na doação
 
-**Comando:** `cd backend && php artisan test` → **191 testes, 191 aprovados, 3.012 assertions**.
+**Comando:** `cd backend && php artisan test` → **207 testes, 207 aprovados, 3.067 assertions**.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
+| `tests/Feature/TrocaSenhaObrigatoriaTest.php` | 16 | A conta marcada não passa do login sem trocar a senha (o painel, a doação e o admin também caem no mesmo middleware); a troca libera o acesso e derruba a senha entregue; **recusa a senha que a conta já usa**; exige senha forte e confirmação; `--todos` não marca a gestão e `--desfazer` cancela; a lista mostra a exigência; o cadastro público não se marca sozinho. |
 | `tests/Unit/OrigensCorsTest.php` | 6 | A leitura da lista de origens do `.env` (CORS_ALLOWED_ORIGINS): separador vírgula, espaço sobrando, vírgulas vazias e lista só com vírgulas caindo em `*` em vez de lista vazia. |
 | `tests/Feature/ApiParaOSiteTest.php` | 8 | O contrato CORS por HTTP: em desenvolvimento o header é `*`; com a lista real preenchida o header deixa de ser coringa, cada origem da lista recebe a própria permissão e origem de fora não recebe header nenhum. |
 | `tests/Feature/MarcaSenhaApoiadoresTest.php` | 7 | O carimbo grava a data sem mexer no hash; `--todos` só marca quem não tem data; `--reforcar` sobrescreve; e-mail inexistente falha sem alterar nada; a rotação real (`apoiador:senha`) também grava data. |
@@ -133,7 +146,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; a suíte está em 191 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; a suíte está em 207 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -243,7 +256,6 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 > **O que o rework não desfaz:** quem já clonou o repositório antes mantém os arquivos, e o GitHub segura commits órfãos por um tempo. A rotação de senha é a parte que protege de fato — por isso ela é o passo obrigatório depois do push reescrito.
 
-
 ### 4.6 Sessão de 15/09 — Importação de Dados e Endpoints
 
 | Teste | Status | Resultado |
@@ -282,7 +294,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
-10. **Suíte automatizada de 191 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 207 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
@@ -297,10 +309,11 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 22. **Origem do CORS no .env e checklist de publicação (26/09):** com o projeto fora de produção, a lista de origens saiu de `config/cors.php` (fixo) para `CORS_ALLOWED_ORIGINS`, e o `.env.example` passou a `APP_DEBUG=false` com `SESSION_SECURE_COOKIE` documentado. O README ganhou a seção "Publicando" com os valores, os comandos na ordem e os dois erros silenciosos (cookie `Secure` em HTTP desloga todo mundo; a origem do CORS é a do site, não a do backend). A leitura da lista tem teste próprio (`tests/Unit/OrigensCorsTest.php`, 6 testes) e o contrato HTTP foi travado no comportamento real do php-cors: quem barra origem não permitida é o navegador, não o servidor.
 23. **Nomes próprios fora do código (26/09):** a auditoria achou nomes reais da ONG usados como fixture de teste e na tabela de inventário deste relatório; saíram da árvore atual em `12e5502`. O que sobrou em dois commits antigos está registrado na seção 6 como risco residual aceito.
 24. **Rotação executada no banco de verdade (26/09):** as 4 contas (3 apoiadores + 1 admin) foram rotacionadas e a data ficou registrada, conferida com `php artisan apoiadores:listar` (`senha em` = 26/09). Duas ressalvas que valem para qualquer rotação futura. **A data é a única prova:** o sistema não guarda hash do hash de propósito, então `apoiadores:marcar-senha` consegue registrar uma rotação que não aconteceu — foi o que aconteceu aqui de fato (o carimbo rodou antes da rotação, e a rotação sobrescreveu o horário). Confere o *resultado* do comando, não o carimbo. E **rotacionar só protege quando a senha nova chega à pessoa:** os hashes antigos continuam nas cópias do repositório feitas antes da limpeza, e senha reutilizada em outro serviço continua valendo lá.
+25. **Troca obrigatória de senha no primeiro acesso (26/09):** a rotação entrega uma senha que vai trafegar por WhatsApp/e-mail, e nada no sistema impedia que essa senha continuasse valendo para sempre. A migration `2026_09_26_000002` cria `trocar_senha_obrigatorio`; o middleware `TrocaSenhaObrigatoria` prende a conta na tela de troca até a pessoa criar senha própria, e `apoiadores:exigir-troca` é quem marca (o `--todos` ignora a conta da gestão, porque travar o admin é a forma mais rápida de a ONG ficar sem o próprio painel). Dois detalhes que só os testes garantiram: a troca **recusa a senha que a conta já usa** (senão a pessoa cola de volta a temporária e o pedido de "senha nova" vira enfeite) e a sessão é regenerada depois da troca (`tests/Feature/TrocaSenhaObrigatoriaTest.php`, 16 testes).
 ---
 
 ### 🔴 Pendente — Alta Prioridade
-1. **Entregar as senhas novas e avisar sobre reuso:** a rotação em si está feita (item 24), mas as senhas novas **ainda não foram entregues** — elas só existem no terminal onde foram geradas, então se forem perdidas é `gestor:senha` / `apoiador:senha` de novo. A entrega precisa ser por canal privado (e nada de print de tela: o terminal com a senha é exatamente o que não deve circular), e vale pedir que troquem a senha nos outros serviços onde usavam a mesma, porque senha reutilizada não é afetada por nada que tenhamos feito aqui.
+1. **Entregar as senhas novas e avisar sobre reuso:** a rotação em si está feita (item 24), mas as senhas novas **ainda não foram entregues** — elas só existem no terminal onde foram geradas, então se forem perdidas é `gestor:senha` / `apoiador:senha` de novo. Antes de entregar, rode `php artisan apoiadores:exigir-troca --todos` (item 25): a conta fica presa na tela de troca até a pessoa criar senha própria, que é o que faz a senha de WhatsApp morrer no primeiro acesso. A entrega precisa ser por canal privado (e nada de print de tela: o terminal com a senha é exatamente o que não deve circular), e vale pedir que troquem a senha nos outros serviços onde usavam a mesma, porque senha reutilizada não é afetada por nada que tenhamos feito aqui. Quem não entrar nunca destrava sozinho: o `--desfazer` do mesmo comando é o caminho de volta.
 2. **Registrar a autorização dos responsáveis** das crianças, por escrito (nome da criança, finalidade, data e prazo), já que o nome completo segue público na API (25/09).
 3. **Fechar o CORS antes de publicar (preparado em 26/09, falta o valor):** a lista de origens não está mais fixa em `config/cors.php` — vem do `.env`, em `CORS_ALLOWED_ORIGINS`, interpretada por `App\Support\OrigensCors` (aceita várias origens separadas por vírgula e tira espaço sobrando). Em desenvolvimento o padrão continua `*`. Na publicação é só colocar a origem do **site** (não a do backend) e rodar `php artisan config:cache`. Enquanto o `*` estiver no `.env` de produção, qualquer página da internet consegue ler as respostas da API. A seção "Publicando" do README tem o passo a passo.
 4. **`APP_DEBUG=false`:** o `.env.example` já vem com `false` (26/09), então quem publicar a partir do repositório não herda tela de erro com valor de variável de ambiente; o `.env` local de desenvolvimento continua em `true`, de propósito. Falta só garantir no servidor. O `LOG_LEVEL=debug` não é a causa do CPF no log: quem gravou foi o Laravel, ao logar o SQL com os valores quando um insert falhou (11/09). O `storage/logs/laravel.log` tem 1,7 MB com CPF e hash de senha de uma pessoa real, sem rotação — apagar e passar a limpar antes de compartilhar o pen drive.
@@ -316,9 +329,10 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 ---
 
 ### 🟡 Pendente — Média Prioridade
-1. **Refatoração de Controllers:** Dividir o `DashboardTesteController.php` em controllers específicos por domínio (`NoticiaController`, `CriancaController`, `ApadrinhamentoController`).
-2. **Integração de Meios de Pagamento:** Preparar a estrutura/webhooks de PIX e Cartão para doações.
-3. **Autenticação Admin para a SPA (JWT / Sanctum):** o painel Blade já é protegido por sessão + `tipo_usuario = admin`; falta o equivalente para o frontend React (hoje não há endpoints administrativos de escrita expostos).
+1. **`pint --test` reprova 9 arquivos do projeto (achado em 26/09):** rodando no projeto inteiro — e não só nos arquivos tocados, que é como vinha sendo conferido — o Pint reprova `conexao.php`, `config/auth.php`, as quatro migrations de 15/09, `DoacaoUnicaController.php`, `MinhaContaController.php` e o trait `CriaCenarioOng.php`. **Nenhum deles é desta sessão** (o `MinhaContaController` foi conferido contra o `HEAD` antes de mexer e já reprovava com os mesmos dois fixers). São espaços em operador, ordem de import e fim-de-arquivo, nada que mude comportamento. Deixou de ser feito de propósito: `conexao.php` é o arquivo de conexão com o banco, e o ganho não paga o risco de mexer em arquivo legado no meio de uma entrega. Fecha numa sessão só de `pint` no projeto inteiro, conferindo o diff antes de commitar.
+2. **Refatoração de Controllers:** Dividir o `DashboardTesteController.php` em controllers específicos por domínio (`NoticiaController`, `CriancaController`, `ApadrinhamentoController`).
+3. **Integração de Meios de Pagamento:** Preparar a estrutura/webhooks de PIX e Cartão para doações.
+4. **Autenticação Admin para a SPA (JWT / Sanctum):** o painel Blade já é protegido por sessão + `tipo_usuario = admin`; falta o equivalente para o frontend React (hoje não há endpoints administrativos de escrita expostos).
 
 ---
 
@@ -330,11 +344,12 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 87 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 89 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
 * **Risco residual aceito (decisão do responsável em 26/09):** sobraram **três nomes próprios** em dois commits antigos — `ee1dfcc` (importação dos dados da ONG, no `OngDadosSeeder.php`) e `bb8fa53` (suíte de testes, que copiou nome e e-mail da base real para uma fixture). O repositório é público, e a auditoria de 26/09 confirmou o que **não** está exposto: nenhum e-mail real, nenhum CPF válido (os `12378945610/11` do seeder antigo são placeholders e reprovam no dígito verificador) e nenhum endereço residencial — o `CEP 54220-140` é um logradouro público do Recife. Ficam só nomes, sem contato junto, e um deles é o próprio coautor do projeto, já creditado no `README`. **Reescrever o histórico de novo foi descartado**: trocaria todos os SHAs uma segunda vez, exigiria reclonar em todas as máquinas e o GitHub pode manter os commits antigos em cache. A árvore atual (`main`) está limpa disso desde `12e5502`. A proteção que de fato importa para as contas é a **rotação de senha** (item 1 da seção 5).
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
-  * *(este commit)* docs: consolida o relatorio e corrige texto corrompido
+  * *(este commit)* feat(backend): troca de senha obrigatoria no primeiro acesso
+* `1734b2a` docs: consolida o relatorio e corrige texto corrompido
   * `3f9b7e8` docs(backend): checklist de publicacao e CORS vindo do .env
   * `0157631` feat(backend): data da rotacao de senha por conta
   * `12e5502` fix(backend): tira nome de pessoa real do codigo e do relatorio

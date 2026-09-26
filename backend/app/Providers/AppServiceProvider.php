@@ -37,5 +37,12 @@ class AppServiceProvider extends ServiceProvider
         // A doação única grava pedido e intenção no banco: 10 por minuto por IP
         // é folga para o uso real e corta o robô que fica spammando o formulário.
         RateLimiter::for('doacao-unica', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+
+        // A troca de senha é POST e quem chega nela já está autenticado, então o
+        // alvo do limite não é o IP (compartilhado pela ONG inteira) e sim a
+        // conta: chave por e-mail + IP, para um apoiador não conseguir trancar a
+        // troca dos outros que entram pelo mesmo endereço.
+        RateLimiter::for('troca-senha-post', fn (Request $request) => Limit::perMinute(10)
+            ->by(mb_strtolower((string) $request->user('apoiador')?->email).'|'.$request->ip()));
     }
 }

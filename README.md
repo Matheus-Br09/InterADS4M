@@ -166,6 +166,28 @@ quando.
 Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
 um e-mail de domínio real volte para qualquer seeder.
 
+**A senha que você entrega é a senha que a pessoa vai ter até ela trocar.** Se
+ela vai por WhatsApp ou e-mail, quem leu a conversa tem a conta — e o código não
+tem como encerrar isso sozinho. Este comando trava a conta na tela de troca até
+a pessoa criar uma senha própria, que é a única janela em que dá para forçar
+isso: depois que ela já entrou com a senha temporária, não dá mais para obrigar
+sem resetar a conta.
+
+```bash
+php artisan apoiadores:exigir-troca carol@sos.org.br   # uma conta
+php artisan apoiadores:exigir-troca --todos            # todas as contas de apoiador
+php artisan apoiadores:exigir-troca --todos --desfazer # cancela (ninguém entrou ainda)
+```
+
+`--todos` **ignora a conta da gestão** e avisa no terminal: travar o admin é a
+forma mais rápida de a ONG ficar sem acesso ao próprio painel. Para a conta da
+gestão, use o e-mail. A coluna `troca` de `php artisan apoiadores:listar` mostra
+quem está presa na troca (`obrigatoria`), separada da coluna `senha em` — conta
+rotacionada e conta que já trocou a senha são coisas diferentes.
+
+Um detalhe que só o teste pega: a troca **recusa** a senha que a conta já está
+usando. Sem isso a pessoa cola de volta a senha temporária, o formulário aceita
+e a senha entregue continua valendo — o pedido de "senha nova" vira enfeite.
 ### Senha e tentativas de login
 
 - **Senha forte em todo lugar**: o cadastro público (`/cadastro`) e os dois

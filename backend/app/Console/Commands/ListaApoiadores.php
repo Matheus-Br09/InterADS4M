@@ -33,7 +33,7 @@ class ListaApoiadores extends Command
 
     public function handle(): int
     {
-        $contas = Apoiador::orderBy('id')->get(['id', 'nome_completo', 'email', 'tipo_usuario', 'senha', 'senha_alterada_em']);
+        $contas = Apoiador::orderBy('id')->get(['id', 'nome_completo', 'email', 'tipo_usuario', 'senha', 'senha_alterada_em', 'trocar_senha_obrigatorio']);
 
         if ($contas->isEmpty()) {
             $this->warn('Nenhum apoiador no banco.');
@@ -57,7 +57,7 @@ class ListaApoiadores extends Command
         }
 
         $this->table(
-            ['id', 'nome', 'papel', 'e-mail', 'situacao', 'senha em'],
+            ['id', 'nome', 'papel', 'e-mail', 'situacao', 'senha em', 'troca'],
             $linhas->map(fn (array $linha) => [
                 $linha['id'],
                 $linha['nome'],
@@ -65,6 +65,7 @@ class ListaApoiadores extends Command
                 $linha['email'],
                 $linha['situacao'],
                 $linha['senha_em'],
+                $linha['troca'],
             ])->all(),
         );
 
@@ -95,6 +96,13 @@ class ListaApoiadores extends Command
         // que a rotação do histórico do git foi feita.
         $rotacionadaEm = $apoiador->senha_alterada_em;
 
+        // "Troca" é uma exigência separada da rotação: a conta já tem senha nova
+        // e data, mas está presa até a pessoa criar uma senha própria
+        // (`apoiadores:exigir-troca`). Sem esta coluna as duas coisas se confundem
+        // na mesma tela, porque conta rotacionada e conta que já trocou aparecem
+        // igual pela coluna de data.
+        $trocaPendente = (bool) $apoiador->trocar_senha_obrigatorio;
+
         return [
             'id' => $apoiador->id,
             'nome' => $apoiador->nome_completo,
@@ -102,6 +110,7 @@ class ListaApoiadores extends Command
             'email' => $apoiador->email,
             'situacao' => $senhaPublica ? '<options=bold>senha publica do seed</>' : 'ok',
             'senha_em' => $rotacionadaEm ? $rotacionadaEm->format('d/m/Y H:i') : '<fg=yellow>nunca</>',
+            'troca' => $trocaPendente ? '<fg=yellow>obrigatoria</>' : 'nao',
             'pendencia' => $senhaPublica || ! $rotacionadaEm,
             'comando' => $papel === 'admin'
                 ? "php artisan gestor:senha {$apoiador->email}"
