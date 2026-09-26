@@ -2,7 +2,8 @@
 
 @section('content')
 <div class="max-w-md mx-auto my-8 p-6 bg-white rounded shadow">
-    <h2 class="text-2xl font-bold mb-6 text-gray-800">Fazer Doação Única</h2>
+    <h2 class="text-2xl font-bold mb-6 text-gray-800">Registrar intenção de doação</h2>
+    <p class="mb-4 text-sm text-gray-700">Este formulário registra seu interesse em doar. Nenhum pagamento ou cobrança é realizado; a integração de pagamentos ainda não está disponível.</p>
 
     @if ($errors->any())
         <div class="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -36,7 +37,7 @@
                 Voltar
             </a>
             <button type="submit" class="w-1/2 bg-green-600 text-white py-2 rounded font-semibold hover:bg-green-700 transition duration-200">
-                Confirmar
+                Registrar intenção
             </button>
         </div>
     </form>

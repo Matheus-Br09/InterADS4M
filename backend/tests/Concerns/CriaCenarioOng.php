@@ -21,8 +21,8 @@ trait CriaCenarioOng
         static::$sequencia++;
 
         return Apoiador::create(array_merge([
-            'nome_completo' => 'Apoiador Teste ' . static::$sequencia,
-            'email' => 'apoiador' . static::$sequencia . '@teste.com',
+            'nome_completo' => 'Apoiador Teste '.static::$sequencia,
+            'email' => 'apoiador'.static::$sequencia.'@teste.com',
             'senha' => Hash::make('senha123'),
             'cpf' => sprintf('%011d', static::$sequencia),
             'celular' => '(81) 90000-0000',
@@ -35,7 +35,7 @@ trait CriaCenarioOng
         static::$sequencia++;
 
         return Crianca::create(array_merge([
-            'nome' => 'Crianca Teste ' . static::$sequencia,
+            'nome' => 'Crianca Teste '.static::$sequencia,
             'data_nascimento' => '2015-05-05',
             'historico' => 'Historico de teste.',
             'imagem_perfil' => 'crianca.jpg',
@@ -49,7 +49,7 @@ trait CriaCenarioOng
         static::$sequencia++;
 
         return ProgramaAcao::create(array_merge([
-            'titulo' => 'Programa Teste ' . static::$sequencia,
+            'titulo' => 'Programa Teste '.static::$sequencia,
             'resumo' => 'Resumo do programa de teste.',
             'texto_completo' => 'Texto completo do programa de teste.',
             'categoria' => 'Neuropedagogia',
@@ -108,7 +108,7 @@ trait CriaCenarioOng
         static::$sequencia++;
 
         return Noticia::create(array_merge([
-            'titulo' => 'Noticia Teste ' . static::$sequencia,
+            'titulo' => 'Noticia Teste '.static::$sequencia,
             'resumo' => 'Resumo da noticia de teste.',
             'texto_completo' => 'Texto completo da noticia de teste.',
             'imagem' => 'noticia.jpg',

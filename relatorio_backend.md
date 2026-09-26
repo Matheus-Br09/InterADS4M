@@ -7,17 +7,66 @@
 
 ---
 
+## Estado atual após a correção da auditoria — 26/09/2026
+
+**Validação:** 239 testes aprovados e 3.211 assertions, em SQLite em memória. Os 207 testes/3.067 assertions das seções históricas eram o resultado anterior, não a cobertura dos novos casos.
+
+### Corrigido nesta revisão
+
+- **Revogação de sessões:** `EncerraSessoesDoApoiador` lê sessões pelo formato nativo do Laravel e identifica o ID no valor da chave fornecida pelo guard. `apoiador:senha`, `gestor:senha` e a troca pela tela revogam as sessões da conta, preservando outros usuários e outros guards. A tela destrói o identificador anterior e mantém uma nova sessão. Cobertura inclui várias sessões, JSON/PHP e sessão criptografada. O teste antigo fabricava uma chave incorreta; foi corrigido para usar armazenamento real do framework.
+- **Senhas fora de `_old_input`:** exclusão global de `senha`/`senha_confirmation` nos erros de validação, remoção do `withInput()` na recusa da senha atual e limpeza dos dados antigos ao concluir a troca.
+- **Rehash no login:** o model informa `senha` como nome da coluna de autenticação. Login com aumento do custo bcrypt atualiza o hash e continua funcionando.
+- **Doação única:** o formulário registra intenção com `status=pendente`, informa que não realiza cobrança e valida o tamanho/precisão do valor. Somente registros `concluido` entram no total e na contagem pública de doadores únicos. Não foi implementado provedor de pagamento nem confirmação automática.
+- **Seeder:** a recompensa usa o ID do apadrinhamento efetivamente criado/localizado; teste cobre banco preenchido e repetição do seed.
+- **Cadastro:** endereço e celular têm validação de tipo e tamanho, e somente os valores validados são gravados. Login também exige senha do tipo string.
+- **Status público:** as duas APIs usam o mesmo critério: um apadrinhamento ativo prevalece sobre o status armazenado da criança; sem ativo, usam o status cadastrado.
+- **Formatação:** os nove arquivos anteriormente apontados foram padronizados junto dos arquivos novos.
+
+### Limites e pendências desta entrega
+
+- A revogação foi implementada para **sessões em banco (`SESSION_DRIVER=database`)**, com conexão e tabela configuradas. Trocar para Redis, arquivos ou cookies exige adaptar e testar a revogação antes de usar o novo driver.
+- O banco real não foi alterado. Doações antigas já marcadas `concluido` não foram reclassificadas: precisam de conciliação antes de apresentar os totais como arrecadação real. O schema legado ainda tem default `concluido`; qualquer novo fluxo de criação deve informar explicitamente seu status até essa migração ser planejada.
+- Nenhuma senha real foi rotacionada ou entregue nesta revisão. A revogação corrigida vale nas próximas execuções; a correção do código não encerra retroativamente as sessões já abertas.
+- Recompensas que já tenham sido associadas incorretamente precisam de revisão no banco existente. Corrigir o seed não reatribui registros antigos automaticamente.
+- Os testes usam SQLite. A validação em MySQL e o fluxo completo do navegador continuam pendentes.
+- A integração React–Laravel, uploads, recuperação de senha pelo próprio apoiador e pagamentos continuam pendentes.
+- O Laravel Boost foi instalado como dependência de desenvolvimento conforme o `AGENTS.md` original; suas configurações e orientações de desenvolvimento foram geradas.
+
+### Contrato atual para integração com o site
+
+O contrato consumível pela SPA está em `/api/v1` e o cliente inicial está em `inter-ong/src/api/backend.js`. Ele usa a sessão web do Laravel, `credentials: include` e o token obtido em `GET /api/v1/csrf` no header `X-CSRF-TOKEN`. O frontend deve usar uma origem por proxy no desenvolvimento ou configurar `VITE_BACKEND_URL`.
+
+| Caminho | Acesso | Comportamento |
+|---|---|---|
+| `GET/POST /cadastro`, `GET/POST /entrar` | Público, grupo web | Formulários com sessão e CSRF; validação normalmente redireciona, ou devolve 422 quando a requisição espera JSON. |
+| `POST /sair` | Grupo web | Encerra a sessão; nome interno da rota: `logout`. |
+| `GET /minha-conta`, `GET/POST /apoio-unico` | Apoiador autenticado e sem troca obrigatória pendente | Área da conta e registro de intenção de doação. |
+| `GET/POST /minha-conta/senha` | Apoiador autenticado | Permite criar senha própria mesmo quando a troca é obrigatória. |
+| `GET /`, `POST /seed-dados`, `POST /criancas/salvar` | Gestão e sem troca obrigatória pendente | Painel provisório e ações administrativas. |
+| Sete GETs de conteúdo/estatísticas em `/api/*` | Público | Crianças, apoiadores, programas, apadrinhamentos, notícias, materiais e transparência. |
+| `POST /api/newsletter` | Público | Grava inscrição; 201 no sucesso; validação JSON. |
+
+O CORS cobre somente `api/*` e não habilita credenciais. A SPA ainda faz GET para arquivos PHP inexistentes, sem enviar os campos do formulário; também falta coletar `nome_completo`, obrigatório no backend. É necessário definir o fluxo de autenticação e CSRF antes de apenas substituir URLs. `setIsLogin` existe; o defeito é mudar a tela antes de confirmar o cadastro.
+
+Contagens reproduzíveis em banco vazio: `OngDadosSeeder` cria 3 apoiadores de demonstração (2 comuns e 1 gestor), 3 crianças e 1 apadrinhamento. O seed padrão chama esse seeder e adiciona 2 apoiadores, 3 crianças e 1 apadrinhamento. Contagens históricas do banco real não são o inventário atual do seed. `firstOrCreate()` não anonimiza registros existentes.
+
+Outras pendências identificadas: imagens referenciadas mas ausentes (`perfil_padrao.jpg` e arquivos de demonstração), política para programas inativos na API, definição de campos/permissões dos futuros endpoints de voluntários e revisão do uso de `/seed-dados` antes da publicação.
+
+As seções abaixo preservam o histórico de desenvolvimento; as garantias atuais são as descritas neste quadro.
+
+---
+
 ## 1. Resumo do Progresso Nesta Sessão
 
 ### Sessão de 26/09/2026 — Senha forte, bloqueio de conta, data da rotação, troca obrigatória, CORS e limpeza de dados reais
-Fechamos o ciclo de segurança do painel e limpamos o que tinha entrado da base real. Agora **toda senha de apoio é forte por definição** (8+ caracteres, com maiúscula, minúscula e número — regra `App\Rules\SenhaForte`, aplicada no cadastro público e no `gestor:senha`); **5 tentativas erradas travam a conta por 5 minutos**, com resposta igual para e-mail existente e inexistente, para o formulário não servir de lista de quem tem cadastro; e o `POST /apoio-unico`, que grava uma linha no banco a cada clique, ganhou **limite de 10 por minuto por IP** (o `/sair` ficou de fora de propósito, porque limiter em logout só produziria 419 na cara do usuário). A suíte está em **207 testes / 3.067 assertions** e, no caminho, foi corrigido um bug no gerador de senhas: ele nem sempre sorteava dígito, o que fazia `gestor:senha` falhar ao acaso.
+Fechamos o ciclo de segurança do painel e limpamos o que tinha entrado da base real. Agora **toda senha de apoio é forte por definição** (8+ caracteres, com maiúscula, minúscula e número — regra `App\Rules\SenhaForte`, aplicada no cadastro público e no `gestor:senha`); **5 tentativas erradas bloqueiam o par e-mail/IP por 5 minutos**, com resposta igual para e-mail existente e inexistente, para o formulário não servir de lista de quem tem cadastro; e o `POST /apoio-unico`, que grava uma linha no banco a cada clique, ganhou **limite de 10 por minuto por IP** (o `/sair` ficou de fora de propósito, porque limiter em logout só produziria 419 na cara do usuário). A suíte está em **207 testes / 3.067 assertions** e, no caminho, foi corrigido um bug no gerador de senhas: ele nem sempre sorteava dígito, o que fazia `gestor:senha` falhar ao acaso.
 
 A rotação deixou de ser cega em três pontos. Primeiro, `php artisan apoiadores:listar` tira a digitação de e-mail do caminho e marca quem ainda responde à senha pública do seed. Segundo — e esse só apareceu porque a tabela `apoiadores` nunca teve `created_at`/`updated_at` — não existia **nenhuma** forma de responder "essa conta já foi rotacionada?". A migration `2026_09_26_000001` cria `senha_alterada_em`, gravada por `gestor:senha`, `apoiador:senha` e pelo cadastro público; a lista mostra a coluna `senha em` e o `--rotacionar` trata conta sem data como pendência; e `apoiadores:marcar-senha` carimba a data de quem já rotacionou sem trocar senha, para não obrigar a reentregar senha nova a quem já recebeu a sua. O terceiro ponto é o que faltava e só apareceu na hora de entregar: **a rotação sozinha não fecha nada, porque a senha entregue é a senha que a pessoa vai ter até trocar** — e ela vai por WhatsApp. A migration `2026_09_26_000002` e o comando `apoiadores:exigir-troca` prendem a conta numa tela de troca obrigatória até a pessoa criar senha própria, que é a única janela em que dá para forçar isso (item 25).
 
 Como o projeto **não está em produção**, a parte que depende de domínio não foi feita e sim **preparada**: a lista de origens do CORS saiu do `config/cors.php` fixo para `CORS_ALLOWED_ORIGINS` no `.env` (publicar é mexer em `.env`, não em PHP versionado), o `.env.example` passou a `APP_DEBUG=false` com `SESSION_SECURE_COOKIE` documentado, e o README ganhou a seção "Publicando" com os valores, os comandos na ordem e os dois erros que não dão mensagem nenhuma. A auditoria de dados reais em cima disso achou nomes próprios usados como fixture de teste e na tabela de inventário deste relatório: foram removidos da árvore atual, e o que sobrou no histórico antigo foi convertido em **risco residual aceito e documentado** na seção 6. A checagem de fotos do acervo continua com dois arquivos para olhar com olho humano.
 
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de testes** que roda em SQLite (152 testes ao fim desta sessão; 171 hoje — ver 4.8), cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de testes** que roda em SQLite (152 testes ao fim desta sessão; 207 antes desta revisão; resultado atual no quadro inicial), cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -43,14 +92,14 @@ O banco de dados continua rodando em ambiente isolado via Docker:
 * **Tabelas administrativas (migration `2026_09_15_000002`):** `administradores`, `noticias`, `materiais_didaticos`, `documentos_transparencia`, `newsletter`.
 * A tabela `apadrinhamentos` antiga (schema inicial, vazia e sem AUTO_INCREMENT) e a `criancas` parcialmente criada por uma migration antiga foram **dropadas** e recriadas pelas novas migrations.
 
-### 2.3 Dados Importados (seeder `OngDadosSeeder`)
-Dados reais extraídos do `ong.sql` e inseridos com sucesso (contagens verificadas no banco):
+### 2.3 Dados de demonstração atuais (seeder `OngDadosSeeder`)
+Inventário do seeder atual em banco vazio. A importação histórica de dados reais foi substituída por demonstrações no código; o conteúdo de bancos existentes não foi consultado nesta revisão:
 
 | Tabela | Total | Observações |
 |---|---|---|
-| `criancas` | 3 | Nomes das três crianças do acervo (com `imagem_perfil`) |
-| `apoiadores` | 4 | Quatro contas reais: três com papel `apoiador` e a conta de administração (`admin`) |
-| `apadrinhamentos` | 1 | Um benfeitor → um apoiador (R$100/mês, ativo) |
+| `criancas` | 3 | Três personagens de demonstração (com `imagem_perfil`) |
+| `apoiadores` | 3 | Duas contas de demonstração com papel `apoiador` e uma de gestão (`admin`) |
+| `apadrinhamentos` | 1 | Um apoiador → uma criança (R$100/mês, ativo) |
 | `recompensas_apadrinhamento` | 1 | Vídeo/mensagem do Ben 10 (PNG) |
 | `doacoes_unicas` | 3 | Valores em Pix, concluídas |
 | `doacoes_mensais` | 3 | Pix Automático e Cartão de Crédito recorrente |
@@ -70,8 +119,8 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 * **Configuração de Autenticação (`config/auth.php`):** Criado o guard personalizado `apoiador` e o provedor de usuários correspondente, separando o acesso dos doadores/voluntários dos usuários administrativos padrão.
 
 ### 3.2 Controllers e Fluxo de Sessão
-* **`CadastroApoiadorController.php`:** Responsável por validar campos obrigatórios (CPF, e-mail, senha), criptografar a senha com `Hash::make()` e salvar o novo apoiador na tabela.
-* **`LoginApoiadorController.php`:** Gerencia a autenticação com a chamada `Auth::guard('apoiador')->attempt(...)` e destruição de sessão no logout.
+* **`ApoiadorAuthController::register()`:** Responsável por validar campos obrigatórios (CPF, e-mail, senha), criptografar a senha com `Hash::make()` e salvar o novo apoiador na tabela.
+* **`ApoiadorAuthController::login()` / `logout()`:** Gerencia a autenticação com a chamada `Auth::guard('apoiador')->attempt(...)` e destruição de sessão no logout.
 * **`MinhaContaController.php`:** Gerencia o painel interno do apoiador (`/minha-conta`). Recupera o usuário autenticado e prepara as relações de doações, apadrinhamentos e voluntariado.
 
 ### 3.3 Views e Rotas (Blade & Tailwind CSS)
@@ -80,7 +129,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
   * `GET /cadastro` e `POST /cadastro`
   * `GET /entrar` e `POST /entrar`
   * `GET /minha-conta` (Área Restrita do Apoiador)
-  * `POST /logout`
+  * `POST /sair` (nome interno: `logout`)
 
 ### 3.4 Segurança do Painel de Gestão (25/09)
 * **Middleware `EhGestor`:** registrado como `gestor` em `bootstrap/app.php`; aplicado em `GET /`, `POST /seed-dados` e `POST /criancas/salvar`. Qualquer apoiador sem `tipo_usuario = admin` é redirecionado para `/entrar`.
@@ -88,7 +137,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 * **APIs públicas sem dados pessoais:** `Apoiador::$hidden` passou a esconder `senha`, `cpf`, `celular` e `email` — inclusive em relações aninhadas (`/api/apoiadores`, `/api/criancas`, `/api/apadrinhamentos`).
 * **Comando `gestor:senha`:** `php artisan gestor:senha <email> [senha]` promove um apoiador existente a `admin`, aceita o e-mail com qualquer caixa e pode gerar uma senha forte. É a forma documentada de recuperar o acesso da gestão (conta do seed: `gestor@exemplo.org`).
 * **`$fillable` completados** em `Apoiador`, `DoacaoUnica`, `DoacaoMensal` e `Noticia`; o cadastro público passa a gravar `tipo_usuario = apoiador` de forma explícita, ignorando qualquer valor enviado no formulário.
-* **`DatabaseSeeder` chama `OngDadosSeeder`:** o seed padrão já entrega o banco com os dados reais da ONG.
+* **`DatabaseSeeder` chama `OngDadosSeeder`:** o seed padrão entrega dados de demonstração e acrescenta registros aos do `OngDadosSeeder`.
 
 ### 3.5 Validação de CPF no Cadastro (25/09)
 * **Regra `App\Rules\Cpf`:** confere comprimento (11 dígitos), dígitos verificadores e rejeita CPFs de dígitos repetidos (`111.111.111-11`). Traz `apenasDigitos()` e `formatar()` para reuso.
@@ -130,13 +179,13 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 | `tests/Feature/ApiParaOSiteTest.php` | 8 | O contrato CORS por HTTP: em desenvolvimento o header é `*`; com a lista real preenchida o header deixa de ser coringa, cada origem da lista recebe a própria permissão e origem de fora não recebe header nenhum. |
 | `tests/Feature/MarcaSenhaApoiadoresTest.php` | 7 | O carimbo grava a data sem mexer no hash; `--todos` só marca quem não tem data; `--reforcar` sobrescreve; e-mail inexistente falha sem alterar nada; a rotação real (`apoiador:senha`) também grava data. |
 | `tests/Feature/ListaDeApoiadoresTest.php` | 9 | A lista que o gestor usa para rotacionar: mostra e-mail, papel e `senha em` de cada conta, imprime o comando de rotação de cada uma (`gestor:senha` na gestão, `apoiador:senha` nas demais), marca quem ainda responde a senha pública do seed, escreve `nunca` quando falta a data, e o `--rotacionar` esconde só quem tem senha nova **e** data. |
-| `tests/Feature/BloqueioDeLoginTest.php` | 7 | 5 erros travam a conta por 5 minutos (mesmo quando a senha está certa), login certo zera o contador, o bloqueio é por conta e não derruba o login dos outros, e-mail inexistente trava igual a existente (a resposta não vaza quem tem conta), a tela diz quando volta e o e-mail digitado volta no formulário. |
+| `tests/Feature/BloqueioDeLoginTest.php` | 7 | 5 erros bloqueiam o par e-mail/IP por 5 minutos (mesmo quando a senha está certa), login certo zera o contador, o bloqueio é por e-mail/IP e não derruba o login dos outros, e-mail inexistente trava igual a existente (a resposta não vaza quem tem conta), a tela diz quando volta e o e-mail digitado volta no formulário. |
 | `tests/Feature/RotacaoDeSenhaTest.php` | 9 | As duas ferramentas de rotação (as duas gravam a data), a senha gerada entra no painel, a antiga morre, sessão antiga é derrubada, seed sem hash previsível — e a regressão do gerador: 2.200 senhas seguidas sempre passam na regra de força, e o tamanho é 16 sem prefixo fixo. |
 | `tests/Feature/CadastroApoiadorTest.php` | 17 | Cadastro, senha criptografada, CPF de ponta a ponta, a senha forte (recusa `12345678`, que tem tamanho mas não variedade) e a data da senha — sem ela, toda conta nova nasceria na lista de pendências sem ter senha para trocar. |
 | `tests/Feature/GestorDeAcessoTest.php` | 8 | `gestor:senha` promove e libera o painel, recusa senha curta e senha de 8 caracteres sem variedade, aceita e-mail com caixa alta, avisa quando a conta não existe e grava a data da rotação. |
 | `tests/Feature/LimiteDeRequisicoesTest.php` | 4 | Os cinco limites nomeados. O teste do limite de IP do login passou a usar e-mail malformado: com senha errada, a partir da 5ª vez quem responde é o bloqueio por conta e o teste mediria duas coisas ao mesmo tempo. |
 
-**Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — posta para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`. Esse é o molde que o `d665b30` deixou de propósito, e a pendência 10 da seção 5 já pedia a ligação; o que a auditoria acrescenta é o resto do diagnóstico: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** — ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário — diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora — e sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin(true)` após o cadastro é estado que não existe no componente. Enquanto a ligação não for feita, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
+**Achado de passagem (26/09):** `LoginECadastro.jsx` (SPA) ainda não chama o backend — faz GET, sem corpo, para `NomeDoArquivoLogin.php` / `NomeDoArquivoParaCadastro.php`. Esse é o molde que o `d665b30` deixou de propósito, e a pendência 10 da seção 5 já pedia a ligação; o que a auditoria acrescenta é o resto do diagnóstico: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** — ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário — diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora — e sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin` está declarado, mas `setIsLogin(true)` é executado antes de confirmar que o cadastro funcionou. Enquanto a ligação não for feita, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
 
 **Comando novo (26/09):** `php artisan apoiadores:listar` — a rotação era manual, conta por conta, e o e-mail digitado errado deixava a conta com a senha antiga. A lista sai do banco, marca quem ainda responde à senha pública do seed e imprime o comando pronto de cada conta (`--rotacionar` mostra só as pendentes).
 
@@ -195,11 +244,11 @@ Os testes agora travam esse acordo nos dois sentidos, com o middleware efetivo d
 * `test_os_formularios_do_backend_continuam_com_protecao_de_csrf` — `POST /cadastro`, `/entrar`, `/apoio-unico` e `/criancas/salvar` **precisam** continuar protegidos;
 * `test_leitura_da_api_vem_com_permissao_para_o_site_leer` e `test_o_site_pode_enviar_a_newsletter_de_outra_origem` — resposta com `Access-Control-Allow-Origin`.
 
-> ⚠️ **Antes de publicar:** trocar `allowed_origins: ['*']` em `config/cors.php` pela origem real do site (ex.: `['https://ongsos.org.br']`). Sem isso, qualquer página da internet poderia ler as respostas da API.
+> ⚠️ **Antes de publicar:** definir a origem real do site em `CORS_ALLOWED_ORIGINS` no ambiente e atualizar o cache de configuração. O CORS restringe leitura entre origens no navegador; não substitui autenticação de endpoints.
 
-**Ainda pendente:** antes de publicar, trocar `allowed_origins: ['*']` pela origem real do site (ver 5).
+**Ainda pendente:** preencher `CORS_ALLOWED_ORIGINS` no ambiente de publicação (ver 5).
 
-### 4.3 Rate limiting — nenhuma rota escrevia sem limite
+### 4.3 Rate limiting — limites aplicados e exceções
 
 A instalação não tinha limite de requisições em lugar nenhum: a `POST /api/newsletter` (pública, grava no banco) aceitava chamadas infinitas e o `POST /entrar` permitia testar senha em massa. Agora os limites ficam nomeados em `backend/app/Providers/AppServiceProvider.php`:
 
@@ -209,6 +258,10 @@ A instalação não tinha limite de requisições em lugar nenhum: a `POST /api/
 | `newsletter` | `POST /api/newsletter` | 5/min por IP | é pública e grava no banco |
 | `cadastro` | `POST /cadastro` | 5/min por IP | evita cadastro em massa |
 | `login` | `POST /entrar` | 10/min por IP | evita tentativa de senha em massa |
+| `doacao-unica` | `POST /apoio-unico` | 10/min por IP | limita intenções de doação |
+| `troca-senha-post` | `POST /minha-conta/senha` | 10/min por e-mail/IP | limita trocas de senha |
+
+`POST /sair` é exceção deliberada. As ações administrativas `/seed-dados` e `/criancas/salvar` têm controle de acesso, mas não têm limitador específico aplicado.
 
 Os limites são **nomeados** de propósito: dois `throttle:5,1` inline na mesma rota usam a mesma chave de cache, o contador é somado duas vezes por requisição e o limite efetivo cai pela metade. Isso aconteceu na primeira versão desta implementação (o 3o envio da newsletter já levava 429 em vez do 6o) e o teste da newsletter pega a regressão.
 
@@ -250,7 +303,7 @@ O que mudou:
 
 O dump também era uma **fonte de bug**: ele dizia `cep` NOT NULL sem default, enquanto a migration diz `cep` nullable. Quem instalou pelo Docker e rodou o seed em 11/09 tomou erro 1364 no cadastro público (`/cadastro`), e o Laravel logou o SQL com os valores — CPF e hash bcrypt de uma pessoa real foram parar no `storage/logs/laravel.log`. Ter duas definições de schema foi o que causou o erro; agora há uma só.
 
-A queda da sessão é feita decodificando o payload em base64 de `sessions` e procurando a chave `login_apoiador_<id>` — o `LIKE` no payload não funciona porque o `DatabaseSessionHandler` do Laravel grava base64 (achado no teste, que usa o mesmo formato do framework).
+Correção de 26/09: a implementação anterior procurava uma chave incorreta e o teste repetia o erro. Agora a revogação usa `Auth::guard('apoiador')->getName()` e compara o ID guardado no valor, lendo o armazenamento pelo próprio Laravel. A cobertura com sessões reais confirma a exclusão da conta e a preservação das demais.
 
 `tests/Feature/RotacaoDeSenhaTest.php` (7 testes) cobre a senha gerada (16 caracteres, sem caractere ambíguo, e que entra no painel), a troca da senha antiga, o `apoiador:senha` sem promoção de papel, o encerramento da sessão alheia que **não** pode ser derrubada, a recusa de senha fraca, a garantia de que **nenhuma** conta criada pelo seed aceita senha previsível, e uma guarda que reprova qualquer `$2y$` ou e-mail de domínio real escrito em um seeder.
 
@@ -282,7 +335,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ---
 
-## 5. O Que Foi Feito vs. O Que Falta Feazer
+## 5. O Que Foi Feito vs. O Que Falta Fazer
 
 ### 🟢 Concluído
 1. Infraestrutura Docker com MySQL.
@@ -294,17 +347,17 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
-10. **Suíte automatizada de 207 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 239 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
 14. **Telas Blade sem CDN**, com Tailwind 4 compilado pelo Vite e fontes do sistema (25/09).
 15. **`$fillable` completos**, seed padrão ligado ao `OngDadosSeeder` e views mortas removidas (25/09).
 16. **APIs movidas para `routes/api.php`** (sem CSRF) e **`config/cors.php` criado** liberando origem em desenvolvimento (25/09).
-17. **Rate limiting por IP** em todas as rotas: 120/min na API, 5/min na newsletter, 5/min no cadastro, 10/min no login e 10/min na doação única (25/09, doacao-unica em 26/09).
+17. **Rate limiting** nas rotas listadas na seção 4.3: 120/min na API, 5/min na newsletter, 5/min no cadastro, 10/min no login e 10/min na doação única (25/09, doacao-unica em 26/09).
 18. **Auditoria de segurança das 19 frentes** (SQLi, IDOR, XSS, SSRF, upload, cookies, CSRF, CORS, LGPD, força bruta, rate limit, arquivos expostos): sem SQL injection, IDOR, XSS, SSRF nem upload; 3 problemas críticos corrigidos (itens 12, 19 e 20) (25/09).
 19. **Credenciais de pessoas reais fora do repositório:** `database/init.sql` removido (do repositório e do histórico), seeds com e-mail de exemplo e senha inutilizável, `SenhaForte` (16 caracteres, sem caractere ambíguo) e novo comando `apoiador:senha` para redefinir senha sem promover a gestor e derrubar a sessão antiga (25/09).
-20. **Senha forte e bloqueio de conta (26/09):** `min:6` no cadastro público aceitava `123456`; agora cadastro e os dois comandos de rotação exigem 8 caracteres com maiúscula, minúscula e número (`app/Rules/SenhaForte.php`). O login trava a conta por 5 minutos depois de 5 erros, com mensagem dizendo quando volta, e o login certo zera o contador (`tests/Feature/BloqueioDeLoginTest.php`, 7 testes). Um e-mail inexistente trava igual a um existente, para a resposta não revelar quais contas existem. `POST /apoio-unico` ganhou limite de 10/min; `POST /sair` ficou sem limite de propósito (não consome recurso e um 429 ali deixaria o apoiador preso logado, com tela de erro no lugar do logout). Corrigido de passagem um **bug do gerador**: uma em cada dez senhas geradas saída sem nenhum dígito (só 8 dos 61 caracteres do alfabeto são número) e era reprovada pela própria regra de força, então `gestor:senha` sem argumento falhava ao acaso; o gerador agora garante um caractere de cada classe e embaralha, com teste de 2.200 amostras.
+20. **Senha forte e bloqueio de conta (26/09):** `min:6` no cadastro público aceitava `123456`; agora cadastro e os dois comandos de rotação exigem 8 caracteres com maiúscula, minúscula e número (`app/Rules/SenhaForte.php`). O login bloqueia o par e-mail/IP por 5 minutos depois de 5 erros, com mensagem dizendo quando volta, e o login certo zera o contador (`tests/Feature/BloqueioDeLoginTest.php`, 7 testes). Um e-mail inexistente trava igual a um existente, para a resposta não revelar quais contas existem. `POST /apoio-unico` ganhou limite de 10/min; `POST /sair` ficou sem limite de propósito (não consome recurso e um 429 ali deixaria o apoiador preso logado, com tela de erro no lugar do logout). Corrigido de passagem um **bug do gerador**: uma em cada dez senhas geradas saída sem nenhum dígito (só 8 dos 61 caracteres do alfabeto são número) e era reprovada pela própria regra de força, então `gestor:senha` sem argumento falhava ao acaso; o gerador agora garante um caractere de cada classe e embaralha, com teste de 2.200 amostras.
 21. **Data da rotação de senha (26/09):** a tabela `apoiadores` nunca teve `created_at`/`updated_at` (o model desliga timestamp desde a criação), então não existia forma de responder "essa conta já foi rotacionada?". A migration `2026_09_26_000001` cria `senha_alterada_em`, gravada por `gestor:senha`, `apoiador:senha` e pelo cadastro público; `apoiadores:listar` mostra a coluna `senha em` e o `--rotacionar` trata conta sem data como pendência; `apoiadores:marcar-senha` carimba a data de quem já rotacionou sem mexer na senha (`tests/Feature/MarcaSenhaApoiadoresTest.php`, 7 testes).
 22. **Origem do CORS no .env e checklist de publicação (26/09):** com o projeto fora de produção, a lista de origens saiu de `config/cors.php` (fixo) para `CORS_ALLOWED_ORIGINS`, e o `.env.example` passou a `APP_DEBUG=false` com `SESSION_SECURE_COOKIE` documentado. O README ganhou a seção "Publicando" com os valores, os comandos na ordem e os dois erros silenciosos (cookie `Secure` em HTTP desloga todo mundo; a origem do CORS é a do site, não a do backend). A leitura da lista tem teste próprio (`tests/Unit/OrigensCorsTest.php`, 6 testes) e o contrato HTTP foi travado no comportamento real do php-cors: quem barra origem não permitida é o navegador, não o servidor.
 23. **Nomes próprios fora do código (26/09):** a auditoria achou nomes reais da ONG usados como fixture de teste e na tabela de inventário deste relatório; saíram da árvore atual em `12e5502`. O que sobrou em dois commits antigos está registrado na seção 6 como risco residual aceito.
@@ -324,12 +377,12 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
    * Rota `POST /api/voluntarios` para envio de currículo (PDF) + validação de maioridade (+18 anos).
    * Rota de upload para `materiais_didaticos` e `documentos_transparencia`. Nome de arquivo gerado pelo servidor (nunca do usuário), `mimes` + `max` e fora do `public/` quando não for para ser servido.
 9. **Rota `GET /api/voluntarios`** (e demais endpoints REST de leitura que faltam) para expor as tabelas recém-importadas.
-10. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto). **Pior do que aparente (achado em 26/09):** essa tela ainda não chama o backend - o `handleSubmit` faz `fetch('NomeDoArquivoLogin.php')` e `fetch('NomeDoArquivoParaCadastro.php')`, dois nomes de arquivo que não existem, e a validação de CPF vai para `https://api.invertexto.com/api-validador-cpf-cnpj/`. Ou seja: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** - ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário - diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora, e também sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin(true)` após o cadastro é estado que não existe no componente. Enquanto isso não for ligado, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
+10. **Adaptar a tela de cadastro do frontend** ao novo CPF: o backend responde 422 e a SPA deve mostrar a mensagem do campo `cpf` (hoje a validação acontece no frontend, via API externa do inverterto). **Pior do que aparente (achado em 26/09):** essa tela ainda não chama o backend - o `handleSubmit` faz `fetch('NomeDoArquivoLogin.php')` e `fetch('NomeDoArquivoParaCadastro.php')`, dois nomes de arquivo que não existem, e a validação de CPF vai para `https://api.invertexto.com/api-validador-cpf-cnpj/`. Ou seja: (a) o cadastro público com senha forte, CPF e bloqueio de conta **não existe para quem usa o site** - ele existe no Blade `/cadastro`; (b) o CPF digitado no formulário é enviado a uma empresa de terceiro sem qualquer aviso ao usuário - diferente dos links de Instagram, do mapa do Google e do PDF do gov.br, que só levam o visitante embora, e também sem necessidade, porque o backend já valida CPF por dígito verificador (`App\Rules\Cpf`); (c) o `setIsLogin` está declarado, mas `setIsLogin(true)` é executado antes de confirmar que o cadastro funcionou. Enquanto isso não for ligado, as proteções do item 20 protegem o caminho Blade, não o caminho do site.
 
 ---
 
 ### 🟡 Pendente — Média Prioridade
-1. **`pint --test` reprova 9 arquivos do projeto (achado em 26/09):** rodando no projeto inteiro — e não só nos arquivos tocados, que é como vinha sendo conferido — o Pint reprova `conexao.php`, `config/auth.php`, as quatro migrations de 15/09, `DoacaoUnicaController.php`, `MinhaContaController.php` e o trait `CriaCenarioOng.php`. **Nenhum deles é desta sessão** (o `MinhaContaController` foi conferido contra o `HEAD` antes de mexer e já reprovava com os mesmos dois fixers). São espaços em operador, ordem de import e fim-de-arquivo, nada que mude comportamento. Deixou de ser feito de propósito: `conexao.php` é o arquivo de conexão com o banco, e o ganho não paga o risco de mexer em arquivo legado no meio de uma entrega. Fecha numa sessão só de `pint` no projeto inteiro, conferindo o diff antes de commitar.
+1. **Formatação corrigida nesta revisão:** os nove arquivos apontados anteriormente foram padronizados pelo Pint. A alteração do arquivo legado de conexão foi somente de formatação; sua substituição por configuração centralizada permanece fora desta entrega.
 2. **Refatoração de Controllers:** Dividir o `DashboardTesteController.php` em controllers específicos por domínio (`NoticiaController`, `CriancaController`, `ApadrinhamentoController`).
 3. **Integração de Meios de Pagamento:** Preparar a estrutura/webhooks de PIX e Cartão para doações.
 4. **Autenticação Admin para a SPA (JWT / Sanctum):** o painel Blade já é protegido por sessão + `tipo_usuario = admin`; falta o equivalente para o frontend React (hoje não há endpoints administrativos de escrita expostos).
@@ -344,7 +397,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 90 commits, `main` e `origin/main` no mesmo commit.
+* **Base desta revisão:** 91 commits; `HEAD` e a referência local `origin/main` em `00804dc`. As correções desta revisão estão na árvore de trabalho, ainda sem commit ou publicação. O remoto não foi consultado.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
 * **Risco residual aceito (decisão do responsável em 26/09):** sobraram **três nomes próprios** em dois commits antigos — `ee1dfcc` (importação dos dados da ONG, no `OngDadosSeeder.php`) e `bb8fa53` (suíte de testes, que copiou nome e e-mail da base real para uma fixture). O repositório é público, e a auditoria de 26/09 confirmou o que **não** está exposto: nenhum e-mail real, nenhum CPF válido (os `12378945610/11` do seeder antigo são placeholders e reprovam no dígito verificador) e nenhum endereço residencial — o `CEP 54220-140` é um logradouro público do Recife. Ficam só nomes, sem contato junto, e um deles é o próprio coautor do projeto, já creditado no `README`. **Reescrever o histórico de novo foi descartado**: trocaria todos os SHAs uma segunda vez, exigiria reclonar em todas as máquinas e o GitHub pode manter os commits antigos em cache. A árvore atual (`main`) está limpa disso desde `12e5502`. A proteção que de fato importa para as contas é a **rotação de senha** (item 1 da seção 5).
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
@@ -381,4 +434,4 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
   * `database/seeders/OngDadosSeeder.php`
   * `public/img/` (acervo de imagens da ONG)
 * **Commits do frontend (`inter-ong/`, mantidos intactos nesta sessão):** `fefe70b` (centraliza itens do login), `5eff3c1` (endereço no login/Contato/Sobre), `0a08226` (useState por componente de endereço), `d665b30` (molde do `fetch` para o backend).
-* **Observação:** a suíte roda em SQLite e o build de assets é local; nenhum commit do backend depende de banco ou internet para ser validado.
+* **Observação:** a suíte roda em SQLite e o build de assets é local; a suíte depende de SQLite em memória e de dependências já instaladas, sem precisar do MySQL externo. Isso não substitui validação em MySQL.

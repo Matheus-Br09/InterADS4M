@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Rules\SenhaForte;
+use App\Support\EncerraSessoesDoApoiador;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,10 +16,10 @@ class MinhaContaController extends Controller
         $apoiador = Auth::guard('apoiador')->user();
 
         // Carrega as relações apenas se as tabelas existirem no banco
-        $doacoesUnicas   = Schema::hasTable('doacoes_unicas') ? $apoiador->doacoesUnicas : collect();
-        $doacoesMensais  = Schema::hasTable('doacoes_mensais') ? $apoiador->doacoesMensais : collect();
+        $doacoesUnicas = Schema::hasTable('doacoes_unicas') ? $apoiador->doacoesUnicas : collect();
+        $doacoesMensais = Schema::hasTable('doacoes_mensais') ? $apoiador->doacoesMensais : collect();
         $apadrinhamentos = Schema::hasTable('apadrinhamentos') ? $apoiador->apadrinhamentos : collect();
-        $voluntario      = Schema::hasTable('voluntarios') ? $apoiador->voluntario : null;
+        $voluntario = Schema::hasTable('voluntarios') ? $apoiador->voluntario : null;
 
         return view('apoiador.minha-conta', compact(
             'apoiador',
@@ -34,12 +35,13 @@ class MinhaContaController extends Controller
         return view('apoiador.senha', ['apoiador' => Auth::guard('apoiador')->user()]);
     }
 
-    public function updateSenha(Request $request)
+    public function updateSenha(Request $request, EncerraSessoesDoApoiador $sessoes)
     {
         $apoiador = Auth::guard('apoiador')->user();
 
         $credentials = $request->validate([
             'senha' => ['required', 'string', 'confirmed', new SenhaForte],
+            'senha_atual' => $request->is('api/v1/*') && ! $apoiador->trocar_senha_obrigatorio ? ['required', 'string', 'current_password:apoiador'] : ['nullable', 'string'],
         ]);
 
         /*
@@ -49,8 +51,10 @@ class MinhaContaController extends Controller
         * no cadastro e a senha entregue continua valendo.
         */
         if (Hash::check($credentials['senha'], $apoiador->senha)) {
+            if ($request->is('api/v1/*')) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['senha' => 'A nova senha precisa ser diferente da senha atual.']);
+            }
             return back()
-                ->withInput()
                 ->withErrors(['senha' => 'A nova senha precisa ser diferente da senha que você está usando.']);
         }
 
@@ -60,9 +64,13 @@ class MinhaContaController extends Controller
             'trocar_senha_obrigatorio' => false,
         ])->save();
 
-        // A senha mudou dentro da sessão autenticada: trocar o ID de sessão faz
-        // o cookie antigo não valer mais.
-        $request->session()->regenerate();
+        $sessoes->encerrar($apoiador);
+        $request->session()->forget('_old_input');
+        $request->session()->regenerate(true);
+
+        if ($request->is('api/v1/*')) {
+            return response()->json(['message' => 'Senha alterada com sucesso.']);
+        }
 
         return redirect()
             ->route('minha-conta')

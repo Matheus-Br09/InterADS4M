@@ -41,7 +41,7 @@
             @forelse($doacoesUnicas as $doacao)
                 <div class="text-sm border-b py-2 flex justify-between">
                     <span>R$ {{ number_format($doacao->valor, 2, ',', '.') }} ({{ strtoupper($doacao->metodo_pagamento) }})</span>
-                    <span class="text-green-600 font-semibold">{{ ucfirst($doacao->status) }}</span>
+                    <span class="text-gray-700 font-semibold">{{ $doacao->status === 'pendente' ? 'Aguardando pagamento' : ucfirst($doacao->status) }}</span>
                 </div>
             @empty
                 <p class="text-gray-500 text-sm py-2">Nenhuma doação pontual registrada.</p>

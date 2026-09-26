@@ -15,6 +15,8 @@ class Apoiador extends Authenticatable
 
     protected $table = 'apoiadores';
 
+    protected $authPasswordName = 'senha';
+
     public $timestamps = false;
 
     /**

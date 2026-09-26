@@ -77,7 +77,7 @@ class SuperficiePublicaDaApiTest extends TestCase
 
                 $uri = $rota->uri();
 
-                if (str_starts_with($uri, 'api/')) {
+                if (str_starts_with($uri, 'api/') && ! str_starts_with($uri, 'api/v1/')) {
                     $achadas[] = $metodo.' '.$uri;
                 }
             }

@@ -1,7 +1,7 @@
 # 🌱 InterADS4M
 
 ![Laravel](https://img.shields.io/badge/Laravel-13-FF2D20?style=flat-square)
-![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?style=flat-square)
+![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?style=flat-square)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square)
 ![Vite](https://img.shields.io/badge/Vite-646CFF?style=flat-square)
 ![Tailwind](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?style=flat-square)
@@ -36,7 +36,7 @@ Plataforma web para a **ONG SOS** — divulgação de ações, angariação de d
 
 | Camada | Tecnologia |
 | --- | --- |
-| **Backend** | Laravel 13 (PHP 8.3) |
+| **Backend** | Laravel 13 (PHP 8.4.1+) |
 | Banco | MySQL 8.0 (via Docker) + Eloquent |
 | **Frontend SPA** | React 19 + Vite + React Router |
 | Estilo | Tailwind CSS |
@@ -199,15 +199,15 @@ e a senha entregue continua valendo — o pedido de "senha nova" vira enfeite.
   minúscula, um número e um símbolo por construção, e embaralha. Antes, uma em
   cada dez senhas geradas não tinha nenhum dígito e era reprovada pela própria
   regra - o comando falhava ao acaso.
-- **Bloqueio por conta, não só por IP**: 5 erros travam aquele e-mail por 5
+- **Bloqueio por e-mail e IP**: 5 erros bloqueiam aquele par por 5
   minutos, com mensagem dizendo quando volta. O limite por IP (10/min)
-  continua valendo: ele protege o servidor, o bloqueio protege a conta. Login
+  continua valendo; o bloqueio por e-mail/IP não impede tentativas distribuídas entre IPs. Login
   certo zera o contador, e um e-mail inexistente trava igual a um existente
   (senão a resposta revelaria quais e-mails têm conta). Chave em
   `ApoiadorAuthController`, testes em `tests/Feature/BloqueioDeLoginTest.php`.
 
 Limites de requisição: `api` 120/min, `newsletter` 5/min, `cadastro` 5/min,
-`login` 10/min, `doacao-unica` 10/min (todos por IP, em `AppServiceProvider`).
+`login` 10/min, `doacao-unica` 10/min (por IP) e `troca-senha-post` 10/min por e-mail/IP, em `AppServiceProvider`.
 
 As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
 `/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
@@ -285,7 +285,7 @@ cadastro da SPA deve mostrar a mensagem que o backend devolver.
 
 ```bash
 cd backend
-php artisan test    # 191 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
+php artisan test    # 239 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
 ```
 
 ### Frontend SPA
@@ -296,6 +296,12 @@ npm install
 npm run dev
 ```
 
+### Integração do frontend com a API
+
+O cliente React pode importar `inter-ong/src/api/backend.js`. A API usa a sessão do Laravel e fica em `/api/v1`; no desenvolvimento, o frontend deve usar a mesma origem por proxy ou definir `VITE_BACKEND_URL`. Antes do primeiro POST, chame `prepararCsrf()` e envie o token retornado no header `X-CSRF-TOKEN`. As requisições usam `credentials: include`.
+
+Os recursos públicos ficam em `GET /api/v1/conteudos/noticias`, `materiais`, `transparencia` e `programas`, além de `GET /api/v1/estatisticas`. Cadastro e login usam `POST /api/v1/auth/cadastro` e `POST /api/v1/auth/entrar`. A resposta 403 com `codigo=troca_senha_obrigatoria` indica que o usuário precisa chamar `PUT /api/v1/auth/senha`; 401 indica sessão ausente ou credencial inválida; 422 traz erros por campo.
+
 ---
 
 ## 🔄 Status atual
@@ -304,9 +310,9 @@ npm run dev
 - ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
 - ✅ Cadastro público com validação de CPF no servidor
 - ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 191 testes automatizados no backend
+- ✅ 239 testes automatizados no backend
 - ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela posta para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
+- ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela faz GET, sem enviar os campos, para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
 
 ---
 
@@ -320,3 +326,13 @@ npm run dev
 ## 📝 Licença
 
 A combinar.
+
+### Correções da auditoria de 26/09/2026
+
+A suíte atual passou com **239 testes e 3.211 assertions**. Foram corrigidos o encerramento de sessões na rotação/troca de senha, a persistência indevida de senhas em dados de formulário na sessão, o rehash no login e a associação de recompensas no seed. Os testes de sessão usam o armazenamento real do Laravel, inclusive criptografia e isolamento entre usuários/guards.
+
+A revogação implementada pressupõe `SESSION_DRIVER=database`. Não trocar o driver sem adaptar e validar essa operação. As correções não executam rotação nem encerram retroativamente sessões do banco real.
+
+O formulário de doação registra **intenção pendente**, sem cobrança. As estatísticas de doação única incluem apenas registros `concluido`; valores antigos e dados de demonstração ainda precisam de conciliação antes de divulgar arrecadação real. O provedor e os webhooks de pagamento continuam pendentes.
+
+O `relatorio_backend.md` contém o estado atual, o contrato de integração com a SPA e os limites da validação em SQLite. Laravel Boost foi instalado somente para desenvolvimento, conforme as instruções locais do projeto.

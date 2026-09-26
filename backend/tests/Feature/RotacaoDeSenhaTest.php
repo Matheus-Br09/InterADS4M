@@ -5,7 +5,10 @@ namespace Tests\Feature;
 use App\Models\Apoiador;
 use App\Support\SenhaForte;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Session\DatabaseSessionHandler;
+use Illuminate\Session\Store;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
@@ -115,30 +118,22 @@ class RotacaoDeSenhaTest extends TestCase
     {
         $apoiador = $this->criarApoiador();
 
-        // SESSION_DRIVER=array no phpunit.xml não grava linha em `sessions`, então
-        // a sessão é criada aqui no mesmo formato do DatabaseSessionHandler do
-        // Laravel (payload em base64) - em produção o SESSION_DRIVER é database.
-        $chave = 'login_apoiador_'.$apoiador->id;
-        $payload = base64_encode((string) json_encode([
-            '_token' => 'token-de-teste',
-            $chave => $apoiador->id,
-        ]));
-        $outro = base64_encode((string) json_encode([
-            '_token' => 'token-de-teste',
-            'login_apoiador_999' => 999,
-        ]));
-
-        DB::table('sessions')->insert([
-            ['id' => 'sessao-do-apoiador', 'user_id' => null, 'ip_address' => '127.0.0.1', 'user_agent' => 'teste', 'payload' => $payload, 'last_activity' => time()],
-            ['id' => 'sessao-de-outro', 'user_id' => null, 'ip_address' => '127.0.0.1', 'user_agent' => 'teste', 'payload' => $outro, 'last_activity' => time()],
-        ]);
+        $handler = new DatabaseSessionHandler(DB::connection(), 'sessions', 120);
+        $sessao = new Store('teste', $handler, null, 'json');
+        $sessao->start();
+        $sessao->put(Auth::guard('apoiador')->getName(), $apoiador->id);
+        $sessao->save();
+        $outro = new Store('teste', new DatabaseSessionHandler(DB::connection(), 'sessions', 120), null, 'json');
+        $outro->start();
+        $outro->put(Auth::guard('apoiador')->getName(), 999);
+        $outro->save();
 
         $codigo = Artisan::call('apoiador:senha', ['email' => $apoiador->email]);
 
         $this->assertSame(0, $codigo);
         $this->assertStringContainsString('sessão(ões) aberta(s) com a senha antiga foram encerradas', Artisan::output());
-        $this->assertDatabaseMissing('sessions', ['id' => 'sessao-do-apoiador']);
-        $this->assertDatabaseHas('sessions', ['id' => 'sessao-de-outro']);
+        $this->assertDatabaseMissing('sessions', ['id' => $sessao->getId()]);
+        $this->assertDatabaseHas('sessions', ['id' => $outro->getId()]);
     }
 
     public function test_apoiador_senha_recusa_senha_fraca_e_email_desconhecido(): void

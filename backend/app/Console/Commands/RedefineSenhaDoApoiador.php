@@ -3,9 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Models\Apoiador;
+use App\Support\EncerraSessoesDoApoiador;
 use App\Support\SenhaForte;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -24,7 +24,7 @@ class RedefineSenhaDoApoiador extends Command
 
     protected $description = 'Redefine a senha de um apoiador, mantendo o papel dele (não promove a gestor)';
 
-    public function handle(): int
+    public function handle(EncerraSessoesDoApoiador $sessoes): int
     {
         $email = mb_strtolower(trim((string) $this->argument('email')));
         $gerada = ! $this->argument('senha');
@@ -52,22 +52,7 @@ class RedefineSenhaDoApoiador extends Command
             'senha_alterada_em' => now(),
         ])->save();
 
-        // A sessão guardada em `sessions` continua valendo com a senha antiga;
-        // derrubar as sessões do próprio apoiador fecha a janela de quem já
-        // estiver autenticado. O guard 'apoiador' grava a chave
-        // `login_apoiador_<id>` no payload, que o driver de banco grava em
-        // base64 - por isso é preciso decodificar para procurar a chave.
-        $chave = 'login_apoiador_'.$apoiador->id;
-        $derrubadas = 0;
-
-        foreach (DB::table('sessions')->get(['id', 'payload']) as $sessao) {
-            $dados = json_decode((string) base64_decode($sessao->payload, true), true);
-
-            if (is_array($dados) && array_key_exists($chave, $dados)) {
-                DB::table('sessions')->where('id', $sessao->id)->delete();
-                $derrubadas++;
-            }
-        }
+        $derrubadas = $sessoes->encerrar($apoiador);
 
         $this->info("Senha de {$apoiador->nome_completo} redefinida em ".now()->format('d/m/Y H:i')." (papel mantido: {$papel}).");
         $this->line($derrubadas > 0

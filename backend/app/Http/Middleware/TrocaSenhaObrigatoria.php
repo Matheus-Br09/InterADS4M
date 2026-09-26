@@ -43,6 +43,10 @@ class TrocaSenhaObrigatoria
             return $next($request);
         }
 
+        if ($request->is('api/*')) {
+            return response()->json(['message' => 'Troque sua senha para continuar.', 'codigo' => 'troca_senha_obrigatoria'], 403);
+        }
+
         return redirect()
             ->route('senha.edit')
             ->with('aviso', 'Crie uma senha nova para continuar usando o sistema.');

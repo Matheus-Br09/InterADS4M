@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\Apoiador;
+use App\Support\EncerraSessoesDoApoiador;
 use App\Support\SenhaForte;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,7 @@ class DefineSenhaDoGestor extends Command
 
     protected $description = 'Define a senha de um apoiador e garante acesso de gestor da ONG';
 
-    public function handle(): int
+    public function handle(EncerraSessoesDoApoiador $sessoes): int
     {
         $email = mb_strtolower(trim((string) $this->argument('email')));
         $gerada = ! $this->argument('senha');
@@ -48,6 +49,8 @@ class DefineSenhaDoGestor extends Command
             'senha_alterada_em' => now(),
             'tipo_usuario' => 'admin',
         ])->save();
+
+        $sessoes->encerrar($apoiador);
 
         $this->info("Senha de {$apoiador->nome_completo} atualizada em ".now()->format('d/m/Y H:i').'.');
         $this->line($jaEraGestor

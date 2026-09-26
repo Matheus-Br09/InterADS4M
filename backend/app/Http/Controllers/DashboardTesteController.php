@@ -115,9 +115,9 @@ class DashboardTesteController extends Controller
             'status' => 'success',
             'total' => Apoiador::count(),
             'doadores_mensais' => DoacaoMensal::where('status', 'ativo')->distinct('apoiador_id')->count('apoiador_id'),
-            'doadores_unicos' => DoacaoUnica::distinct('apoiador_id')->count('apoiador_id'),
+            'doadores_unicos' => DoacaoUnica::where('status', 'concluido')->distinct('apoiador_id')->count('apoiador_id'),
             'total_mensal' => (float) DoacaoMensal::where('status', 'ativo')->sum('valor_mensal'),
-            'total_unico' => (float) DoacaoUnica::sum('valor'),
+            'total_unico' => (float) DoacaoUnica::where('status', 'concluido')->sum('valor'),
         ]);
     }
 
@@ -126,7 +126,7 @@ class DashboardTesteController extends Controller
         return response()->json([
             'status' => 'success',
             'total' => ProgramaAcao::count(),
-            'dados' => ProgramaAcao::all(),
+            'dados' => ProgramaAcao::where('status', 'ativo')->latest('id')->get(),
         ]);
     }
 
@@ -134,12 +134,12 @@ class DashboardTesteController extends Controller
     {
         // Quem apadrinha e quanto paga não é público. Fica a criança
         // apadrinhada, o status do apadrinhamento e as recompensas enviadas.
-        $dados = Apadrinhamento::with('crianca', 'recompensas')->get()->map(fn (Apadrinhamento $apadrinhamento) => [
+        $dados = Apadrinhamento::with('crianca.apadrinhamentos', 'recompensas')->get()->map(fn (Apadrinhamento $apadrinhamento) => [
             'status' => $apadrinhamento->status,
             'data_inicio' => $apadrinhamento->data_inicio,
             'crianca' => [
                 'nome' => $apadrinhamento->crianca->nome,
-                'status' => $apadrinhamento->crianca->status,
+                'status' => $apadrinhamento->crianca->apadrinhamentos->contains('status', 'ativo') ? 'apadrinhada' : $apadrinhamento->crianca->status,
                 'imagem_perfil' => $apadrinhamento->crianca->imagem_perfil,
             ],
             'recompensas' => $apadrinhamento->recompensas->map(fn (RecompensaApadrinhamento $recompensa) => [

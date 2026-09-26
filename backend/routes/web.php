@@ -6,6 +6,8 @@ use App\Http\Controllers\DoacaoUnicaController;
 use App\Http\Controllers\MinhaContaController;
 use Illuminate\Support\Facades\Route;
 
+Route::prefix('api/v1')->middleware([\App\Http\Middleware\RespostaJson::class, 'throttle:api'])->group(__DIR__.'/integracao.php');
+
 // ==========================================
 // PAINEL PROVISÓRIO DE TESTES
 // ==========================================

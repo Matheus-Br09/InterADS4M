@@ -16,20 +16,24 @@ class DoacaoUnicaController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'valor'            => 'required|numeric|min:5',
+            'valor' => 'required|numeric|decimal:0,2|min:5|max:99999999.99',
             'metodo_pagamento' => 'required|in:pix,cartao_credito,boleto',
         ]);
 
         $apoiador = Auth::guard('apoiador')->user();
 
-        DoacaoUnica::create([
-            'apoiador_id'      => $apoiador->id,
-            'valor'            => $validated['valor'],
+        $doacao = DoacaoUnica::create([
+            'apoiador_id' => $apoiador->id,
+            'valor' => $validated['valor'],
             'metodo_pagamento' => $validated['metodo_pagamento'],
-            'status'           => 'concluido',
-            'data_doacao'      => now(),
+            'status' => 'pendente',
+            'data_doacao' => now(),
         ]);
 
-        return redirect()->route('minha-conta')->with('success', 'Doação realizada com sucesso!');
+        if ($request->is('api/v1/*')) {
+            return response()->json(['dados' => $doacao, 'message' => 'Intenção registrada; nenhum pagamento foi realizado.'], 201);
+        }
+
+        return redirect()->route('minha-conta')->with('success', 'Intenção de doação registrada. Nenhum pagamento foi realizado.');
     }
 }

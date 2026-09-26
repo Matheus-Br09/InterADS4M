@@ -127,7 +127,7 @@ class OngDadosSeeder extends Seeder
             ]
         );
 
-        Apadrinhamento::firstOrCreate(
+        $apadrinhamento = Apadrinhamento::firstOrCreate(
             ['apoiador_id' => $apoiador1->id, 'crianca_id' => $ben10->id],
             [
                 'valor_mensal' => 100.00,
@@ -137,7 +137,7 @@ class OngDadosSeeder extends Seeder
         );
 
         RecompensaApadrinhamento::firstOrCreate(
-            ['apadrinhamento_id' => 1, 'titulo' => 'tá na hora de virar herói'],
+            ['apadrinhamento_id' => $apadrinhamento->id, 'titulo' => 'tá na hora de virar herói'],
             [
                 'mensagem' => 'E aí, beleza? Aqui é o Ben Tennyson. Fiquei sabendo que você é um grande fã das minhas aventuras... Continue sendo esse fã incrível, respeitando seus pais, estudando bastante e ajudando quem precisa. Um grande abraço do seu amigo, Ben 10',
                 'arquivo_midia' => 'recompensa_1789499207.png',

@@ -44,5 +44,9 @@ class AppServiceProvider extends ServiceProvider
         // troca dos outros que entram pelo mesmo endereço.
         RateLimiter::for('troca-senha-post', fn (Request $request) => Limit::perMinute(10)
             ->by(mb_strtolower((string) $request->user('apoiador')?->email).'|'.$request->ip()));
+
+        RateLimiter::for('recuperacao', fn (Request $request) => Limit::perMinute(3)->by((string) $request->ip()));
+        RateLimiter::for('uploads', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
+        RateLimiter::for('gestao', fn (Request $request) => Limit::perMinute(60)->by((string) $request->ip()));
     }
 }

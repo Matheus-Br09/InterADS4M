@@ -23,12 +23,13 @@ class ApoioUnicoTest extends TestCase
             ]);
 
         $response->assertRedirect(route('minha-conta'))
-            ->assertSessionHas('success', 'Doação realizada com sucesso!');
+            ->assertSessionHas('success', 'Intenção de doação registrada. Nenhum pagamento foi realizado.');
 
         $this->assertDatabaseHas('doacoes_unicas', [
             'apoiador_id' => $apoiador->id,
             'valor' => 50.00,
             'metodo_pagamento' => 'pix',
+            'status' => 'pendente',
         ]);
     }
 
