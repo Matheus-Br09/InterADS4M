@@ -9,7 +9,7 @@
 
 ## Estado atual após a correção da auditoria — 26/09/2026
 
-**Validação:** 239 testes aprovados e 3.211 assertions, em SQLite em memória. Os 207 testes/3.067 assertions das seções históricas eram o resultado anterior, não a cobertura dos novos casos.
+**Validação:** 243 testes aprovados e 3.228 assertions, em SQLite em memória. Os 207 testes/3.067 assertions das seções históricas eram o resultado anterior, não a cobertura dos novos casos.
 
 ### Corrigido nesta revisão
 
@@ -29,7 +29,7 @@
 - Nenhuma senha real foi rotacionada ou entregue nesta revisão. A revogação corrigida vale nas próximas execuções; a correção do código não encerra retroativamente as sessões já abertas.
 - Recompensas que já tenham sido associadas incorretamente precisam de revisão no banco existente. Corrigir o seed não reatribui registros antigos automaticamente.
 - Os testes usam SQLite. A validação em MySQL e o fluxo completo do navegador continuam pendentes.
-- A integração React–Laravel, uploads, recuperação de senha pelo próprio apoiador e pagamentos continuam pendentes.
+- A integração React–Laravel está disponível pelo contrato `/api/v1`. Permanecem como etapas futuras a recuperação de senha por e-mail e a confirmação automática de pagamentos.
 - O Laravel Boost foi instalado como dependência de desenvolvimento conforme o `AGENTS.md` original; suas configurações e orientações de desenvolvimento foram geradas.
 
 ### Contrato atual para integração com o site
@@ -46,7 +46,13 @@ O contrato consumível pela SPA está em `/api/v1` e o cliente inicial está em 
 | Sete GETs de conteúdo/estatísticas em `/api/*` | Público | Crianças, apoiadores, programas, apadrinhamentos, notícias, materiais e transparência. |
 | `POST /api/newsletter` | Público | Grava inscrição; 201 no sucesso; validação JSON. |
 
-O CORS cobre somente `api/*` e não habilita credenciais. A SPA ainda faz GET para arquivos PHP inexistentes, sem enviar os campos do formulário; também falta coletar `nome_completo`, obrigatório no backend. É necessário definir o fluxo de autenticação e CSRF antes de apenas substituir URLs. `setIsLogin` existe; o defeito é mudar a tela antes de confirmar o cadastro.
+O CORS cobre somente `api/*` e não habilita credenciais. O cliente inicial da SPA já usa `/api/v1`, sessão web, `credentials: include` e CSRF; a ligação dos componentes visuais aos métodos desse cliente fica para a etapa do frontend.
+
+### Adições futuras planejadas
+
+- **E-mails transacionais com Resend:** recuperação de senha, confirmação de cadastro, confirmação de doação e avisos de mudança de status. A chave deve permanecer no servidor, com domínio de envio verificado e webhooks de entrega acompanhados.
+- **Pagamentos com SyncPay:** criação de cobranças Pix e cartão, assinaturas recorrentes, consulta e reembolso. O backend deverá guardar o identificador da transação e atualizar a doação somente por webhook autenticado da SyncPay; o frontend nunca deve marcar um pagamento como concluído diretamente.
+- Antes dessas integrações, devem ser definidos as credenciais de produção, os estados locais de pagamento, idempotência, retentativas, conciliação e o tratamento de falhas do provedor.
 
 Contagens reproduzíveis em banco vazio: `OngDadosSeeder` cria 3 apoiadores de demonstração (2 comuns e 1 gestor), 3 crianças e 1 apadrinhamento. O seed padrão chama esse seeder e adiciona 2 apoiadores, 3 crianças e 1 apadrinhamento. Contagens históricas do banco real não são o inventário atual do seed. `firstOrCreate()` não anonimiza registros existentes.
 
