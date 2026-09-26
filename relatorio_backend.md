@@ -2,15 +2,18 @@
 
 **Projeto:** InterADS4M — Site da ONG SOS  
 **Responsável pelo Backend:** Carlos  
-**Data:** 11/09/2026; última atualização em **25/09/2026**  
+**Data:** 11/09/2026; última atualização em **26/09/2026**  
 **Tecnologias:** Laravel 13 (PHP 8.4), MySQL 8.0, Docker, Vite, Tailwind CSS 4, Blade  
 
 ---
 
 ## 1. Resumo do Progresso Nesta Sessão
 
+### Sessão de 26/09/2026 — Senha forte, bloqueio de conta, limite na doação e limpeza de dados reais
+Fechamos o ciclo de segurança do painel e limpamos o que tinha entrado da base real. Agora **toda senha de apoio é forte por definição** (8+ caracteres, com maiúscula, minúscula e número — regra `App\Rules\SenhaForte`, aplicada no cadastro público e no `gestor:senha`); **5 tentativas erradas travam a conta por 5 minutos**, com resposta igual para e-mail existente e inexistente, para o formulário não servir de lista de quem tem cadastro; e o `POST /apoio-unico`, que grava uma linha no banco a cada clique, ganhou **limite de 10 por minuto por IP** (o `/sair` ficou de fora de propósito, porque limiter em logout só produziria 419 na cara do usuário). A suíte está em **171 testes / 2.970 assertions** e, no caminho, foi corrigido um bug no gerador de senhas: ele nem sempre sorteava dígito, o que fazia `gestor:senha` falhar ao acaso. Como a rotação de senha era manual e dependia de digitar o e-mail certo, criamos **`php artisan apoiadores:listar`**, que lista as contas, marca quem ainda responde à senha pública do seed e imprime o comando de rotação de cada uma. A auditoria de dados reais em cima disso achou nomes próprios usados como fixture de teste e na tabela de inventário deste relatório: foram removidos da árvore atual, e o que sobrou no histórico antigo foi convertido em **risco residual aceito e documentado** na seção 6. A checagem de fotos do acervo continua com dois arquivos para olhar com olho humano.
+
 ### Sessão de 25/09/2026 — Suíte de testes, segurança do painel, Vite local e CPF
-Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de 165 testes (651 assertions)** que roda em SQLite, cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
+Fechamos o ciclo de qualidade e segurança do backend. Foi criada uma **suíte automatizada de testes** que roda em SQLite (152 testes ao fim desta sessão; 171 hoje — ver 4.8), cobrindo autenticação, painel, APIs, seeders, CPF, inventário de rotas e assets offline. Em paralelo, o painel em `/` deixou de ser público: ganhou o middleware `EhGestor`, que exige `tipo_usuario = admin`, e o comando `gestor:senha` resolve o acesso da gestão. As APIs públicas passaram a esconder `senha`, `cpf`, `celular` e `email` de qualquer apoiador. O cadastro público agora **valida o CPF no servidor** (dígitos verificadores, sem dígitos repetidos) e grava o campo só com números. Por fim, as telas Blade trocaram o `cdn.tailwindcss.com` por **build local do Vite**, para o sistema funcionar sem internet no pen drive. A cobertura extra revelou e resolveu dois bugs de integração com o site: **`POST /api/newsletter` exigia token de CSRF (419 em produção)** e não havia configuração de CORS (ver 4.2).
 
 ### Sessão de 15/09/2026 — Importação do acervo da ONG (`ong.sql` + `ONG.zip`)
 Foi realizada a **integração completa dos dados e arquivos da ONG** no backend do InterADS4M. O schema do banco foi **mesclado** (tabelas antigas do `init.sql` + tabelas/colunas do novo `ong.sql`) e **povoado com dados reais** através de migrations e seeder. As imagens do acervo foram extraídas para `public/img`, o `conexão.php` foi corrigido e o `init.sql` foi atualizado para que um container Docker novo suba com o banco já completo. Todos os endpoints REST existentes foram testados e aprovados.
@@ -119,7 +122,7 @@ Corrigido o nome do banco de `'meu_banco'` → `'ong'` em `backend\conexão.php`
 
 ### 4.1 Sessão de 25/09 — Suíte Automatizada
 
-**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; a suite está em 165 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
+**Comando:** `cd backend && php artisan test` → **152 testes, 152 aprovados, 651 assertions** (número da sessão de 25/09; ã suite está em 171 desde 26/09, ver 4.8) (banco SQLite em memória, sem depender do MySQL do Docker). Nenhum teste fica marcado como *incompleto*: o contrato de CORS passou a existir e é verificado de verdade.
 
 | Arquivo de teste | Testes | O que trava |
 |---|---|---|
@@ -268,7 +271,7 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 7. **Extração e cópia do acervo de imagens para `public/img`** (15/09).
 8. **Correção do `conexão.php`** (`meu_banco` → `ong`) (15/09).
 9. **Geração do dump `database/init.sql`** com schema + dados para subir o MySQL pelo Docker. Em 25/09 esse arquivo saiu do repositório: carregava dado de pessoa real e divergia das migrations (ver 4.5) (15/09).
-10. **Suíte automatizada de 165 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
+10. **Suíte automatizada de 171 testes** cobrindo autenticação, painel, APIs, seeders, domínio, CPF, inventário de rotas e assets (25/09).
 11. **Painel de gestão protegido** por `EhGestor` (`tipo_usuario = admin`) + comando `gestor:senha` (25/09).
 12. **APIs públicas sem dados pessoais** de apoiador (`senha`, `cpf`, `celular`, `email`, endereço e `tipo_usuario`) e sem dado sensível de criança (`historico`, `data_nascimento`), com lista montada campo a campo e teste que varre a resposta inteira (25/09).
 13. **Validação de CPF no cadastro público**, com gravação só em dígitos e resposta 422 (25/09).
@@ -313,12 +316,17 @@ A queda da sessão é feita decodificando o payload em base64 de `sessions` e pr
 
 ## 6. Histórico de Commits e Sincronização Git
 
-* **Estado:** repositório com 82 commits, `main` e `origin/main` no mesmo commit.
+* **Estado:** repositório com 84 commits, `main` e `origin/main` no mesmo commit.
 * **Atenção (25/09):** o histórico foi **reescrito** para apagar o dump com PII e as credenciais de seed, o que trocou o SHA de todos os commits. Os SHAs abaixo são os **novos**; qualquer referência a SHA antigo (em issue, PR ou anotação) não vale mais. Quem já tinha clonado precisa atualizar com `git fetch && git reset --hard origin/main`.
+* **Risco residual aceito (decisão do responsável em 26/09):** sobraram **três nomes próprios** em dois commits antigos — `ee1dfcc` (importação dos dados da ONG, no `OngDadosSeeder.php`) e `bb8fa53` (suíte de testes, que copiou nome e e-mail da base real para uma fixture). O repositório é público, e a auditoria de 26/09 confirmou o que **não** está exposto: nenhum e-mail real, nenhum CPF válido (os `12378945610/11` do seeder antigo são placeholders e reprovam no dígito verificador) e nenhum endereço residencial — o `CEP 54220-140` é um logradouro público do Recife. Ficam só nomes, sem contato junto, e um deles é o próprio coautor do projeto, já creditado no `README`. **Reescrever o histórico de novo foi descartado**: trocaria todos os SHAs uma segunda vez, exigiria reclonar em todas as máquinas e o GitHub pode manter os commits antigos em cache. A árvore atual (`main`) está limpa disso desde `12e5502`. A proteção que de fato importa para as contas é a **rotação de senha** (item 1 da seção 5).
 * **Sessão de 26/09/2026 (backend), do mais recente para o mais antigo:**
+  * `12e5502` fix(backend): tira nome de pessoa real do codigo e do relatorio
+  * `4b2d919` feat(backend): comando apoiadores:listar para a rotacao de senha
+  * `371db8b` docs: corrige referencia de item no relatorio
+  * `27fe744` docs: corrige o enquadramento da pendencia do CPF da SPA
   * `a36b44d` docs: detalha a checagem das fotos do acervo
   * `39f2804` docs: registro da auditoria, pendências e rotação de senha
-  * *(este commit)* feat(backend): senha forte, bloqueio de conta e limite na doação
+  * `867d601` feat(backend): senha forte, bloqueio de conta e limite na doação
 * **Sessão de 25/09/2026 (backend), do mais recente para o mais antigo:**
   * `46724b5` fix(backend): tira credencial de pessoa real do repositorio
   * `9c125af` fix(backend): tira dado pessoal das APIs publicas
