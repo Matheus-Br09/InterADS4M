@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Support\OrigensCors;
 use Illuminate\Contracts\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -50,6 +51,53 @@ class ApiParaOSiteTest extends TestCase
         $this->getJson('/api/criancas', ['Origin' => self::ORIGEM_LOCAL])
             ->assertOk()
             ->assertHeader('Access-Control-Allow-Origin', '*');
+    }
+
+    /*
+     * O 'allowed_origins' virou configuração de .env (CORS_ALLOWED_ORIGINS) para
+     * o ajuste de produção não ser commit de código. Aqui vai o outro lado
+     * disso, que é o comportamento do php-cors e vale registrar:
+     *
+     * - Com '*', a resposta volta com '*' (desenvolvimento).
+     * - Com uma origem só, a resposta volta com essa origem, venha o pedido de
+     *   onde vier. Quem barra é o navegador, ao comparar com a própria origem.
+     * - Com duas ou mais, a resposta volta com a origem do pedido **só se** ela
+     *   estiver na lista; origem que não está sai sem o header nenhum.
+     *
+     * Ou seja: o header 'sumir' é o sinal de bloqueio, e nunca pode ser '*'
+     * depois de publicada a lista de verdade.
+     */
+    public function test_com_a_lista_de_origens_preenchida_o_header_para_de_ser_coringa(): void
+    {
+        config(['cors.allowed_origins' => OrigensCors::aPartirDe('https://ongsos.org.br,https://www.ongsos.org.br')]);
+
+        $this->getJson('/api/criancas', ['Origin' => 'https://ongsos.org.br'])
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://ongsos.org.br');
+
+        $this->getJson('/api/criancas', ['Origin' => 'https://www.ongsos.org.br'])
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://www.ongsos.org.br');
+    }
+
+    public function test_origem_que_nao_esta_na_lista_nao_recebe_permissao(): void
+    {
+        config(['cors.allowed_origins' => OrigensCors::aPartirDe('https://ongsos.org.br,https://www.ongsos.org.br')]);
+
+        $this->getJson('/api/criancas', ['Origin' => 'https://site-que-nao-e-a-ong.example'])
+            ->assertOk()
+            ->assertHeaderMissing('Access-Control-Allow-Origin');
+    }
+
+    public function test_origem_que_esta_na_lista_com_espaco_ainda_passa(): void
+    {
+        // Regressão do erro clássico de .env: "https://a.com, https://b.com".
+        // Sem o trim, a segunda origem não bate e o navegador acusa CORS.
+        config(['cors.allowed_origins' => OrigensCors::aPartirDe(' https://ongsos.org.br , https://www.ongsos.org.br ')]);
+
+        $this->getJson('/api/criancas', ['Origin' => 'https://www.ongsos.org.br'])
+            ->assertOk()
+            ->assertHeader('Access-Control-Allow-Origin', 'https://www.ongsos.org.br');
     }
 
     public function test_o_site_pode_enviar_a_newsletter_de_outra_origem(): void

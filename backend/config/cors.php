@@ -1,5 +1,7 @@
 <?php
 
+use App\Support\OrigensCors;
+
 /*
 |--------------------------------------------------------------------------
 | CORS
@@ -9,9 +11,10 @@
 | precisa de permissão para ler as respostas. Em desenvolvimento qualquer
 | origem pode falar com a API.
 |
-| ANTES DE PUBLICAR: troque 'allowed_origins' pela origem real do site
-| (ex.: ['https://ongsos.org.br']) e volte 'supports_credentials' para
-| false se continuar sem cookie de sessão.
+| ANTES DE PUBLICAR: não edite este arquivo. A lista de origens vem do .env,
+| na linha CORS_ALLOWED_ORIGINS (ex.: https://ongsos.org.br). O motivo é que
+| o ajuste de produção é uma configuração de máquina, não um commit de código:
+| editar o config faria o '*' de desenvolvimento acabar em produção junto.
 |
 */
 
@@ -21,7 +24,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => OrigensCors::aPartirDe(env('CORS_ALLOWED_ORIGINS', '*')),
 
     'allowed_origins_patterns' => [],
 

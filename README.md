@@ -198,6 +198,45 @@ alimentam o site, mas devolvem só o que o site precisa mostrar:
 
 Nada de `senha`, `cpf`, `email`, `celular`, endereço, valor pago ou papel na gestão sai dessas rotas. As listas são montadas campo a campo e `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` varre a resposta inteira de todas elas para travar isso.
 
+### Publicando (quando sair de desenvolvimento)
+
+Hoje o projeto **não está em produção**, e o `.env.example` está com os valores
+de desenvolvimento. Nada aqui trava o trabalho local; esta é a lista do que
+precisa estar diferente no dia da publicação, e é toda em `.env` — sem editar
+código:
+
+```dotenv
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://seudominio.com.br
+CORS_ALLOWED_ORIGINS=https://seudominio.com.br
+SESSION_SECURE_COOKIE=true      # só se o acesso for por HTTPS
+```
+
+E os comandos, na ordem:
+
+```bash
+cd backend
+composer install --no-dev --optimize-autoloader
+php artisan migrate --force
+npm ci && npm run build
+php artisan config:cache && php artisan route:cache && php artisan view:cache
+php artisan storage:link
+```
+
+Duas coisas que só valem a pena conferir porque não aparecem em erro nenhum:
+
+- **`SESSION_SECURE_COOKIE` só com HTTPS.** Ligado em `http://localhost` ou em
+  IP de rede local, o navegador simplesmente não devolve o cookie e **todo
+  mundo fica deslogado**, sem mensagem.
+- **`CORS_ALLOWED_ORIGINS` com a origem do site, não do backend.** O valor é a
+  origem de onde o `fetch` sai, ou seja, o endereço do site público. Asterisco
+  em produção deixa qualquer página da internet ler as respostas da API. Várias
+  origens separe por vírgula, sem espaços sobrando.
+
+Depois de publicar, `php artisan apoiadores:listar` continua sendo o jeito de
+conferir se nenhuma conta ficou com a senha antiga.
+
 ### Assets do backend (Vite + Tailwind, sem internet)
 
 As telas Blade são compiladas por `npm run build` e servidas de `public/build`.
