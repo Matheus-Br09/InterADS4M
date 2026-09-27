@@ -1,5 +1,6 @@
 import { useState } from "react"
 import './css/auth.css'
+import { backend, prepararCsrf } from '../api/backend'
 
 export default function LoginECadastro(){
     const [isLogin, setIsLogin] = useState('')
@@ -42,7 +43,7 @@ export default function LoginECadastro(){
         }
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setError('')
         setMessage('')
@@ -62,13 +63,17 @@ export default function LoginECadastro(){
         // aqui que vai acontecer a parada toda pro back pegar os dados
 
         if (isLogin){
-            fetch('NomeDoArquivoLogin.php')
-            .then((resposta) => resposta.json())
-            .then((dados) => {
-                setMessage(dados)
-            })
-            .catch((error) => console.log('O erro foi: ', error))
-            console.log('funcionando o login')
+            try{
+                await prepararCsrf();
+                const resposta = await backend.entrar({email, 
+                    senha: password,
+                })
+                console.log('Login realizado com sucesso: ', resposta)
+            } catch (err) {
+                console.log('Erro ao fazer login: ', err)
+                setError('Credenciais inválidas ou erro no servidor')
+            }         
+
         } else {
             fetch('NomeDoArquivoParaCadastro.php')
             .then((resposta) => resposta.json())
