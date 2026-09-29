@@ -1,32 +1,55 @@
-const API_BASE = import.meta.env.VITE_BACKEND_URL || ''
-let csrfToken = ''
+const API_BASE = (import.meta.env?.VITE_BACKEND_URL || '').replace(/\/+$/, '')
 
-async function request(path, { headers: customHeaders = {}, ...options } = {}) {
-  const response = await fetch(`${API_BASE}/api/v1${path}`, {
-    credentials: 'include',
-    headers: {
-      Accept: 'application/json',
-      ...(csrfToken ? { 'X-CSRF-TOKEN': csrfToken } : {}),
-      ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
-      ...customHeaders,
-    },
-    ...options,
-  })
+async function request(path, { headers: customHeaders = {}, ...options } = {}, retry = true) {
+  const mutacao = !['GET', 'HEAD'].includes(options.method || 'GET')
+  // Login, logout e troca de senha renovam o token da sessão no servidor.
+  const csrf = mutacao ? await prepararCsrf() : null
+  let response
+  try {
+    response = await fetch(`${API_BASE}/api/v1${path}`, {
+      credentials: 'include',
+      headers: {
+        Accept: 'application/json',
+        ...(csrf ? { 'X-CSRF-TOKEN': csrf.token } : {}),
+        ...(options.body && !(options.body instanceof FormData) ? { 'Content-Type': 'application/json' } : {}),
+        ...customHeaders,
+      },
+      ...options,
+    })
+  } catch (error) {
+    if (error.name === 'AbortError') throw error
+    throw new Error('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.', { cause: error })
+  }
+
+  if (response.status === 419 && mutacao && retry) {
+    return request(path, { ...options, headers: customHeaders }, false)
+  }
 
   if (!response.ok) {
     const error = await response.json().catch(() => ({}))
-    const failure = new Error(error.message || 'Não foi possível concluir a operação.')
+    const message = response.status === 419
+      ? 'Sua sessão expirou. Atualize a página e entre novamente.'
+      : response.status >= 500
+        ? 'O servidor está indisponível. Tente novamente em instantes.'
+        : error.message || 'Não foi possível concluir a operação.'
+    const failure = new Error(message)
     failure.status = response.status
     failure.errors = error.errors || {}
+    failure.codigo = error.codigo
+    failure.tentarEm = error.tentar_em
     throw failure
   }
 
-  return response.status === 204 ? null : response.json()
+  if (response.status === 204) return null
+  if (!response.headers.get('content-type')?.includes('application/json')) {
+    throw new Error('O servidor retornou uma resposta inesperada. Verifique a configuração da API.')
+  }
+  return response.json()
 }
 
 export async function prepararCsrf() {
   const resposta = await request('/csrf')
-  csrfToken = resposta.token
+  if (!resposta.token) throw new Error('Não foi possível preparar uma sessão segura. Atualize a página.')
   return resposta
 }
 
@@ -34,7 +57,7 @@ export const backend = {
   cadastrar: (dados) => request('/auth/cadastro', { method: 'POST', body: JSON.stringify(dados) }),
   entrar: (dados) => request('/auth/entrar', { method: 'POST', body: JSON.stringify(dados) }),
   sair: () => request('/auth/sair', { method: 'POST' }),
-  conta: () => request('/auth/eu'),
+  conta: (options) => request('/auth/eu', options),
   atualizarConta: (dados) => request('/conta', { method: 'PATCH', body: JSON.stringify(dados) }),
   trocarSenha: (dados) => request('/auth/senha', { method: 'PUT', body: JSON.stringify(dados) }),
   doacao: (dados) => request('/doacoes', { method: 'POST', body: JSON.stringify(dados) }),

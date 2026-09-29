@@ -76,7 +76,7 @@ export default function NavBar() {
               </NavLink>
 
               <NavLink to="/login" className={desktopNavLinkClass}>
-                Login / Cadastro
+                Minha conta / Entrar
               </NavLink>
 
             </nav>
@@ -171,6 +171,11 @@ export default function NavBar() {
 
               <NavLink to="/educacional" onClick={closeMobileMenu} className={mobileNavLinkClass}>
                 <span>Área Educacional</span>
+                <span className="text-xs opacity-60">→</span>
+              </NavLink>
+
+              <NavLink to="/login" onClick={closeMobileMenu} className={mobileNavLinkClass}>
+                <span>Minha conta / Entrar</span>
                 <span className="text-xs opacity-60">→</span>
               </NavLink>
 

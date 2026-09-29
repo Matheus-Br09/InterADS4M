@@ -1,274 +1,208 @@
-import { use, useState } from "react"
+import { useEffect, useRef, useState } from 'react'
+import { backend } from '../api/backend'
 import './css/auth.css'
-import { backend, prepararCsrf } from '../api/backend'
 
-export default function LoginECadastro(){
-    const [isLogin, setIsLogin] = useState('')
+const cadastroVazio = {
+  nome_completo: '', cpf: '', celular: '', cep: '', logradouro: '',
+  numero: '', complemento: '', bairro: '', cidade: '', estado: '',
+}
+const camposCadastro = [
+  ['nome_completo', 'Nome completo', 'text', 'name', true],
+  ['cpf', 'CPF', 'text', 'off', true],
+  ['celular', 'Telefone', 'tel', 'tel'],
+  ['cep', 'CEP', 'text', 'postal-code'],
+  ['logradouro', 'Rua', 'text', 'address-line1'],
+  ['numero', 'Número', 'text', 'off'],
+  ['complemento', 'Complemento', 'text', 'address-line2'],
+  ['bairro', 'Bairro', 'text', 'off'],
+  ['cidade', 'Cidade', 'text', 'address-level2'],
+  ['estado', 'Estado', 'text', 'address-level1'],
+]
 
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [confirmPassword, setConfirmPassword] = useState('')
+export default function LoginECadastro() {
+  const [isLogin, setIsLogin] = useState(true)
+  const [conta, setConta] = useState(null)
+  const [trocaObrigatoria, setTrocaObrigatoria] = useState(false)
+  const [carregando, setCarregando] = useState(true)
+  const [enviando, setEnviando] = useState(false)
+  const emAndamento = useRef(false)
+  const [email, setEmail] = useState('')
+  const [senha, setSenha] = useState('')
+  const [confirmacao, setConfirmacao] = useState('')
+  const [cadastro, setCadastro] = useState(cadastroVazio)
+  const [erro, setErro] = useState('')
+  const [errosCampos, setErrosCampos] = useState({})
+  const [mensagem, setMensagem] = useState('')
 
-    const [nome_completo, setNomeCompleto] = useState('')
-    const [cpf, setCpf] = useState('');
+  useEffect(() => {
+    const controller = new AbortController()
+    backend.conta({ signal: controller.signal }).then(({ dados }) => {
+      setConta(dados)
+      setTrocaObrigatoria(dados.trocar_senha_obrigatorio)
+    }).catch((error) => {
+      if (controller.signal.aborted) return
+      if (error.codigo === 'troca_senha_obrigatoria') setTrocaObrigatoria(true)
+      else if (error.status !== 401) setErro(error.message)
+    }).finally(() => {
+      if (!controller.signal.aborted) setCarregando(false)
+    })
+    return () => controller.abort()
+  }, [])
 
-    const [telefone, setTelefone] = useState('')
-    const [cep, setCep] = useState('')
-    const [rua, setRua] = useState('')
-    const [numero, setNumero] = useState('')
-    const [complemento, setComplemento] = useState('')
-    const [bairro, setBairro] = useState('')
-    const [cidade, setCidade] = useState('')
-    const [estado, setEstado] = useState('')
+  function limparAvisos() {
+    setErro('')
+    setErrosCampos({})
+    setMensagem('')
+  }
 
-    const [resultado, setResultado] = useState('');
-
-    const [message, setMessage] = useState('')
-    const [error, setError] = useState('')
-
-    const validarCPF = async () => {
-        try {
-            const resposta = await fetch(
-                `https://api.invertexto.com/api-validador-cpf-cnpj/${cpf}`
-            );
-
-            const dados = await resposta.json();
-
-            if (dados.valido) {
-                setResultado("CPF válido!");
-            } else {
-                setResultado("CPF inválido!");
-            }
-
-        } catch (erro) {
-            console.log("Erro:", erro);
-            setResultado("Erro ao validar CPF.");
-        }
+  function mostrarErro(error) {
+    setErro(error.message)
+    setErrosCampos(error.errors || {})
+    if (error.status === 401) {
+      setConta(null)
+      setTrocaObrigatoria(false)
+      setIsLogin(true)
     }
+    if (error.codigo === 'troca_senha_obrigatoria') setTrocaObrigatoria(true)
+  }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault()
-        setError('')
-        setMessage('')
-
-        // Para você ai plebeu do back-end esses dois if's são tratamento de erro
-
-        if (!email || !password){
-            setError('Por favor, preencha os campos corretamente.')
-            return;
-        }
-
-        if (!isLogin && password !== confirmPassword){
-            setError('As senhas não coincidem')
-            return;
-        }
-
-        // aqui que vai acontecer a parada toda pro back pegar os dados
-
-        if (isLogin){
-            try{
-                await prepararCsrf();
-                const resposta = await backend.entrar({email: email, 
-                    senha: password,
-                })
-                console.log('Login realizado com sucesso: ', resposta)
-            } catch (err) {
-                console.log('Erro ao fazer login: ', err)
-                setError('Credenciais inválidas')
-            }         
-
-        } else {
-            try{
-                await prepararCsrf()
-                const resposta = await backend.cadastrar({
-                    nome_completo: nome_completo,
-                    email: email,
-                    cpf: cpf,
-                    celular: telefone,
-                    cep: cep,
-                    logradouro: rua,
-                    numero: numero,
-                    complemento: complemento,
-                    bairro: bairro,
-                    cidade: cidade,
-                    estado: estado,
-                    senha: password,
-                    senha_confirmation: confirmPassword
-                })
-            } catch (err) {
-                console.log('Erro: ', err)
-                return;
-            }
-
-            setIsLogin(true)
-
-            
-            
-        }
+  async function enviar(event) {
+    event.preventDefault()
+    if (emAndamento.current) return
+    limparAvisos()
+    if ((!isLogin || trocaObrigatoria) && senha !== confirmacao) {
+      setErro('As senhas não coincidem.')
+      return
     }
+    emAndamento.current = true
+    setEnviando(true)
+    try {
+      if (trocaObrigatoria) {
+        await backend.trocarSenha({ senha, senha_confirmation: confirmacao })
+        const { dados } = await backend.conta()
+        setConta(dados)
+        setTrocaObrigatoria(false)
+        setMensagem('Senha alterada com sucesso.')
+      } else {
+        const { dados } = isLogin
+          ? await backend.entrar({ email, senha })
+          : await backend.cadastrar({ ...cadastro, email, senha, senha_confirmation: confirmacao })
+        setConta(dados)
+        setTrocaObrigatoria(dados.trocar_senha_obrigatorio)
+        setCadastro(cadastroVazio)
+        setMensagem(isLogin ? 'Login realizado com sucesso.' : 'Conta criada com sucesso.')
+      }
+      setSenha('')
+      setConfirmacao('')
+    } catch (error) {
+      mostrarErro(error)
+    } finally {
+      emAndamento.current = false
+      setEnviando(false)
+    }
+  }
 
-    
+  async function sair() {
+    if (emAndamento.current) return
+    limparAvisos()
+    emAndamento.current = true
+    setEnviando(true)
+    try {
+      await backend.sair()
+      setConta(null)
+      setTrocaObrigatoria(false)
+      setIsLogin(true)
+      setEmail('')
+      setSenha('')
+      setConfirmacao('')
+      setMensagem('Você saiu da sua conta.')
+    } catch (error) {
+      mostrarErro(error)
+    } finally {
+      emAndamento.current = false
+      setEnviando(false)
+    }
+  }
 
-    return(
-        <div className="auth-container">
-            <div className="auth-card">
-                <div className="auth-tabs">
-                    <button
-                    className="auth-button"
-                    onClick={() => { setIsLogin(true); setError(''); setMessage('')}}>
-                        Fazer Login
-                    </button>
+  function alternar(login) {
+    setIsLogin(login)
+    setSenha('')
+    setConfirmacao('')
+    limparAvisos()
+  }
 
-                    <button
-                    className="auth-button"
-                    onClick={() => {
-                        setIsLogin(false); 
-                        setError(''); 
-                        setMessage('')}}>
-                        Cadastrar Conta
-                    </button>
+  const erroCampo = (campo) => errosCampos[campo] && (
+    <span id={`${campo}-erro`} className="error-msg">{errosCampos[campo].join(' ')}</span>
+  )
+  const acessibilidade = (campo) => ({
+    'aria-invalid': Boolean(errosCampos[campo]),
+    'aria-describedby': errosCampos[campo] ? `${campo}-erro` : undefined,
+  })
+
+  return (
+    <div className="auth-container">
+      <section className="auth-card" aria-label="Acesso à conta" aria-busy={carregando || enviando}>
+        {erro && <p className="error-msg" role="alert">{erro}</p>}
+        {mensagem && <p className="success-msg" role="status">{mensagem}</p>}
+        {carregando ? <p role="status">Verificando sua sessão…</p> : conta && !trocaObrigatoria ? (
+          <>
+            <h2>Minha conta</h2>
+            <p>Bem-vindo(a), {conta.nome_completo}!</p>
+            <p>{conta.email}</p>
+            <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>
+          </>
+        ) : (
+          <>
+            {!trocaObrigatoria && (
+              <div className="auth-tabs">
+                <button className="auth-button" disabled={enviando} aria-pressed={isLogin} onClick={() => alternar(true)}>Fazer Login</button>
+                <button className="auth-button" disabled={enviando} aria-pressed={!isLogin} onClick={() => alternar(false)}>Cadastrar Conta</button>
+              </div>
+            )}
+            <h2>{trocaObrigatoria ? 'Crie uma nova senha' : isLogin ? 'Bem-vindo de volta!' : 'Crie sua conta'}</h2>
+            {trocaObrigatoria && <p>Para continuar, substitua a senha temporária por uma senha sua.</p>}
+            <form onSubmit={enviar}>
+              <fieldset disabled={enviando} className="auth-fields">
+                {!trocaObrigatoria && (
+                  <div className="input-group">
+                    <label htmlFor="email">E-mail</label>
+                    <input id="email" type="email" autoComplete="username" required maxLength={255} value={email} onChange={(e) => setEmail(e.target.value)} {...acessibilidade('email')} />
+                    {erroCampo('email')}
+                  </div>
+                )}
+                {!isLogin && !trocaObrigatoria && (
+                  <div className="auth-registration">
+                    {camposCadastro.map(([campo, label, type, autoComplete, required]) => (
+                      <div className="input-group" key={campo}>
+                        <label htmlFor={campo}>{label}{required ? ' *' : ''}</label>
+                        <input id={campo} type={type} autoComplete={autoComplete} required={required} maxLength={campo === 'cpf' ? 14 : 255} value={cadastro[campo]} onChange={(e) => setCadastro({ ...cadastro, [campo]: e.target.value })} {...acessibilidade(campo)} />
+                        {erroCampo(campo)}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div className="input-group">
+                  <label htmlFor="senha">{trocaObrigatoria ? 'Nova senha' : 'Senha'}</label>
+                  <input id="senha" type="password" autoComplete={isLogin && !trocaObrigatoria ? 'current-password' : 'new-password'} required minLength={!isLogin || trocaObrigatoria ? 8 : undefined} value={senha} onChange={(e) => setSenha(e.target.value)} {...acessibilidade('senha')} />
+                  {erroCampo('senha')}
                 </div>
-                <form action="auth-form" onSubmit={handleSubmit} className="flex flex-col justify-center items-center mb-38.5">
-
-                    <h2>
-                        {isLogin ? 'Bem-vindo de volta!' 
-                        : 'Crie sua conta'}
-                    </h2>
-
-                    {error && <p className="error-msg">{error}</p>}
-                    {message && <p className="succes-msg">{message}</p>}
-
+                {(!isLogin || trocaObrigatoria) && (
+                  <>
+                    <p>Use pelo menos 8 caracteres, com letra maiúscula, minúscula e número.</p>
                     <div className="input-group">
-                        <label htmlFor="email">E-mail</label>
-                        <input 
-                        type="email" 
-                        id="email"
-                        placeholder="seu@email.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}/>
+                      <label htmlFor="senha_confirmation">Confirmar senha</label>
+                      <input id="senha_confirmation" type="password" autoComplete="new-password" required value={confirmacao} onChange={(e) => setConfirmacao(e.target.value)} {...acessibilidade('senha_confirmation')} />
+                      {erroCampo('senha_confirmation')}
                     </div>
-
-                    <div className="input-group">
-                        <label htmlFor="password">Senha</label>
-                        <input 
-                        type="password" 
-                        id="password"
-                        placeholder="Sua Senha"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}/>
-                    </div>
-
-                    
-                    {!isLogin && (
-                        <div>
-                           <div className="input-group">
-                                <label htmlFor="confirmPassword">Confirmar Senha</label>
-                                <input 
-                                type="password"
-                                id="confirmPassword" 
-                                placeholder="Repita Sua Senha"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                />
-                            </div> 
-                            <div className="input-group">
-                                <label htmlFor="nome_completo">Nome Completo </label>
-                                <input type="text" 
-                                id="nome_completo"
-                                placeholder="Seu nome aqui"
-                                value={nome_completo}
-                                onChange={(e) => setNomeCompleto(e.target.value)}/>
-                            </div>
-                            <div className="grid grid-cols-3 gap-4">
-
-                                <div className="input-group items-center">
-                                    <label htmlFor="cpf">CPF:</label>
-                                    <input  
-                                    type="text"
-                                    maxLength={14}
-                                    placeholder=" 111.222.333-00 "
-                                    value={cpf}
-                                    onChange={(e)=> setCpf(e.target.value)}
-                                    />
-                                    <button type='button' onClick={validarCPF} className="auth-button">
-                                        validar CPF
-                                    </button>
-                                    <p>{resultado}</p>
-                                </div>
-
-                                <div className="input-group">
-                                    <label htmlFor="telefone">Telefone: </label>
-                                    <input type="tel" 
-                                    name="telefone" id="tel" 
-                                    placeholder="(81) 99999-9999"  
-                                    value={telefone}
-                                    onChange={(e) => {setTelefone(e.target.value)}}/>
-                                </div>
-                                
-                                <div className="input-group">
-                                    <label htmlFor="CEP: ">
-                                        CEP: 
-                                    </label>
-                                    <input type="text" 
-                                        name="cep" id="cep" 
-                                        placeholder="55555-000"
-                                        value={cep}
-                                        onChange={(e) => {setCep(e.target.value)}}/>
-                                </div>
-
-                                <div className="input-group">
-                                    <label htmlFor="rua">Rua: </label>
-                                    <input type="text" 
-                                    name="rua" id="rua"
-                                    placeholder="Avenida Paulista"
-                                    value={rua}
-                                    onChange={(e) => setRua(e.target.value)} />
-                                </div>
-
-                                <div className="input-group">
-                                    <label htmlFor="numero">N°: </label>
-                                    <input type="number" 
-                                    placeholder="56" 
-                                    value={numero}
-                                    onChange={(e) => setNumero(e.target.value)}/>
-                                </div>
-
-                                <div className="input-group">
-                                    <label htmlFor="Complemento">Complemento: </label>
-                                    <input type="text" name="complement" 
-                                    id="complement" 
-                                    placeholder="Bloco A"
-                                    value={complemento}
-                                    onChange={(e) => {setComplemento(e.target.value)}}/>
-                                </div>
-
-                                <div className="input-group col-span-3 justify-self-center w-full max-w-xs">
-                                    <label htmlFor="bairro">Bairro: </label>
-                                    <input type="text" name="bairro" 
-                                    id="bairro" 
-                                    placeholder="Paulista"
-                                    value={bairro}
-                                    onChange={(e) => {setBairro(e.target.value)}}/>
-                                </div>
-                             
-
-                            </div>
-                            
-                        </div>
- 
-                    )}
-
-                    <button type="submit" className="auth-button">
-                        {isLogin ? 'Entrar' : 'Cadastrar'}
-                    </button>
-
-                </form>
-
-                
-
-            </div>
-
-            
-        </div>
-    )
+                  </>
+                )}
+                <button type="submit" className="auth-button">{enviando ? 'Aguarde…' : trocaObrigatoria ? 'Salvar nova senha' : isLogin ? 'Entrar' : 'Cadastrar'}</button>
+              </fieldset>
+            </form>
+            {trocaObrigatoria && <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>}
+          </>
+        )}
+      </section>
+    </div>
+  )
 }
