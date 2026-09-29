@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { use, useState } from "react"
 import './css/auth.css'
 import { backend, prepararCsrf } from '../api/backend'
 
@@ -9,6 +9,7 @@ export default function LoginECadastro(){
     const [password, setPassword] = useState('')
     const [confirmPassword, setConfirmPassword] = useState('')
 
+    const [nome_completo, setNomeCompleto] = useState('')
     const [cpf, setCpf] = useState('');
 
     const [telefone, setTelefone] = useState('')
@@ -17,6 +18,8 @@ export default function LoginECadastro(){
     const [numero, setNumero] = useState('')
     const [complemento, setComplemento] = useState('')
     const [bairro, setBairro] = useState('')
+    const [cidade, setCidade] = useState('')
+    const [estado, setEstado] = useState('')
 
     const [resultado, setResultado] = useState('');
 
@@ -65,26 +68,42 @@ export default function LoginECadastro(){
         if (isLogin){
             try{
                 await prepararCsrf();
-                const resposta = await backend.entrar({email, 
+                const resposta = await backend.entrar({email: email, 
                     senha: password,
                 })
                 console.log('Login realizado com sucesso: ', resposta)
             } catch (err) {
                 console.log('Erro ao fazer login: ', err)
-                setError('Credenciais inválidas ou erro no servidor')
+                setError('Credenciais inválidas')
             }         
 
         } else {
-            fetch('NomeDoArquivoParaCadastro.php')
-            .then((resposta) => resposta.json())
-            .then((dados) => {
-                setMessage(dados)
-            })
-            .catch((error) => console.log('Erro foi: ', error))
+            try{
+                await prepararCsrf()
+                const resposta = await backend.cadastrar({
+                    nome_completo: nome_completo,
+                    email: email,
+                    cpf: cpf,
+                    celular: telefone,
+                    cep: cep,
+                    logradouro: rua,
+                    numero: numero,
+                    complemento: complemento,
+                    bairro: bairro,
+                    cidade: cidade,
+                    estado: estado,
+                    senha: password,
+                    senha_confirmation: confirmPassword
+                })
+            } catch (err) {
+                console.log('Erro: ', err)
+                return;
+            }
 
             setIsLogin(true)
-            setPassword('');
-            setConfirmPassword('');
+
+            
+            
         }
     }
 
@@ -152,13 +171,21 @@ export default function LoginECadastro(){
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 />
                             </div> 
+                            <div className="input-group">
+                                <label htmlFor="nome_completo">Nome Completo </label>
+                                <input type="text" 
+                                id="nome_completo"
+                                placeholder="Seu nome aqui"
+                                value={nome_completo}
+                                onChange={(e) => setNomeCompleto(e.target.value)}/>
+                            </div>
                             <div className="grid grid-cols-3 gap-4">
 
                                 <div className="input-group items-center">
                                     <label htmlFor="cpf">CPF:</label>
                                     <input  
-                                    type="int"
-                                    maxLength={11}
+                                    type="text"
+                                    maxLength={14}
                                     placeholder=" 111.222.333-00 "
                                     value={cpf}
                                     onChange={(e)=> setCpf(e.target.value)}
