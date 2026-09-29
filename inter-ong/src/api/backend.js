@@ -26,12 +26,26 @@ async function request(path, { headers: customHeaders = {}, ...options } = {}, r
   }
 
   if (!response.ok) {
-    const error = await response.json().catch(() => ({}))
+    const textoErro = await response.text()
+    let error = {}
+    try {
+      error = JSON.parse(textoErro)
+    } catch {
+      const jsonNoAviso = textoErro.match(/\{\s*"(?:message|mensagem)"[\s\S]*\}\s*$/)
+      if (jsonNoAviso) {
+        error = JSON.parse(jsonNoAviso[0])
+      }
+    }
+    const falhaUploadTemporario = /File upload error|unable to create a temporary file/i.test(textoErro)
     const message = response.status === 419
       ? 'Sua sessão expirou. Atualize a página e entre novamente.'
       : response.status >= 500
         ? 'O servidor está indisponível. Tente novamente em instantes.'
-        : error.message || 'Não foi possível concluir a operação.'
+        : falhaUploadTemporario
+          ? 'O PHP não conseguiu criar o arquivo temporário do upload. Reinicie o servidor Laravel e verifique a pasta temporária do PHP.'
+        : response.status === 413
+          ? 'O arquivo excede o limite de envio do servidor. Escolha um PDF menor.'
+          : error.message || error.mensagem || 'Não foi possível concluir a operação.'
     const failure = new Error(message)
     failure.status = response.status
     failure.errors = error.errors || {}
@@ -65,7 +79,9 @@ export const backend = {
   apadrinhamento: (dados) => request('/apadrinhamentos', { method: 'POST', body: JSON.stringify(dados) }),
   voluntariado: () => request('/voluntariado'),
   inscreverVoluntario: (formulario) => request('/voluntariado', { method: 'POST', body: formulario }),
-  conteudos: (tipo, pagina = 1) => request(`/conteudos/${tipo}?page=${pagina}`),
+  conteudos: (tipo, pagina = 1, options) => request(`/conteudos/${encodeURIComponent(tipo)}?page=${pagina}`, options),
+  arquivoConteudo: (tipo, id, campo = 'arquivo_pdf') => `${API_BASE}/api/v1/conteudos/${encodeURIComponent(tipo)}/${encodeURIComponent(id)}/arquivos/${encodeURIComponent(campo)}`,
+  publicarMaterial: (dados) => request('/gestao/conteudos/materiais', { method: 'POST', body: JSON.stringify(dados) }),
   estatisticas: () => request('/estatisticas'),
   newsletter: (dados) => request('/newsletter', { method: 'POST', body: JSON.stringify(dados) }),
 }

@@ -96,3 +96,42 @@ test('cancelamento da leitura não vira erro de conexão', async () => {
   mock.method(globalThis, 'fetch', async () => { throw new DOMException('Cancelado', 'AbortError') })
   await assert.rejects(backend.conta(), { name: 'AbortError' })
 })
+
+test('materiais respeitam a página e permitem cancelar uma consulta antiga', async () => {
+  const resposta = { dados: [{ id: 21, titulo: 'Guia', arquivo_pdf: 'materiais/guia.pdf' }], paginacao: { pagina: 2, por_pagina: 20, total: 21 } }
+  const fetch = responder([json(resposta)])
+  const controller = new AbortController()
+  assert.deepEqual(await backend.conteudos('materiais', 2, { signal: controller.signal }), resposta)
+  const [url, options] = fetch.mock.calls[0].arguments
+  assert.equal(url, '/api/v1/conteudos/materiais?page=2')
+  assert.equal(options.signal, controller.signal)
+  assert.equal(fetch.mock.callCount(), 1)
+})
+
+test('download de material usa a rota pública, sem expor caminho de armazenamento', () => {
+  assert.equal(backend.arquivoConteudo('materiais', 21), '/api/v1/conteudos/materiais/21/arquivos/arquivo_pdf')
+})
+
+test('gestão publica PDF como JSON na rota protegida com CSRF', async () => {
+  const fetch = responder([json({ token: 'seguro' }), json({ dados: { id: 30, titulo: 'Guia' } })])
+  const dados = { titulo: 'Guia', categoria: 'Educação', descricao: null, arquivo_pdf_base64: 'data:application/pdf;base64,JVBERi0xLjQ=', arquivo_pdf_nome: 'guia.pdf' }
+  assert.equal((await backend.publicarMaterial(dados)).dados.id, 30)
+  const [url, options] = fetch.mock.calls[1].arguments
+  assert.equal(url, '/api/v1/gestao/conteudos/materiais')
+  assert.equal(options.method, 'POST')
+  assert.equal(options.headers['X-CSRF-TOKEN'], 'seguro')
+  assert.equal(options.headers['Content-Type'], 'application/json')
+  assert.deepEqual(JSON.parse(options.body), dados)
+})
+
+test('gestão preserva a mensagem de acesso negado e trata limite de upload', async () => {
+  responder([json({ token: 'a' }), json({ mensagem: 'Acesso restrito a gestores da ONG.' }, 403), json({ token: 'b' }), new Response('Too large', { status: 413 })])
+  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 403, message: 'Acesso restrito a gestores da ONG.' })
+  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 413, message: 'O arquivo excede o limite de envio do servidor. Escolha um PDF menor.' })
+})
+
+test('upload informa quando o PHP não consegue criar arquivo temporário', async () => {
+  const aviso = '<b>Warning</b>: PHP Request Startup: File upload error - unable to create a temporary file on line 0 {"message":"Unauthenticated."}'
+  responder([json({ token: 'a' }), new Response(aviso, { status: 401 })])
+  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 401, message: /arquivo temporário/ })
+})

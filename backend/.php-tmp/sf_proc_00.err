@@ -1,0 +1,11 @@
+[Tue Sep 29 20:29:44 2026] PHP 8.4.24 Development Server (http://127.0.0.1:8000) started
+[Tue Sep 29 20:30:18 2026] 127.0.0.1:58675 Accepted
+[Tue Sep 29 20:30:18 2026] 127.0.0.1:58675 Closing
+[Tue Sep 29 20:30:19 2026] 127.0.0.1:58678 Accepted
+[Tue Sep 29 20:30:19 2026] 127.0.0.1:58678 Closing
+[Tue Sep 29 20:30:37 2026] 127.0.0.1:61898 Accepted
+[Tue Sep 29 20:30:37 2026] 127.0.0.1:61898 Closing
+[Tue Sep 29 20:30:37 2026] 127.0.0.1:63928 Accepted
+[Tue Sep 29 20:30:37 2026] PHP Warning:  PHP Request Startup: File upload error - unable to create a temporary file in Unknown on line 0
+[Tue Sep 29 20:30:37 2026] 127.0.0.1:63928 Closing
+^C

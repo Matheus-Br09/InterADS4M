@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { backend } from '../api/backend'
 import './css/auth.css'
 
@@ -149,6 +150,7 @@ export default function LoginECadastro() {
             <h2>Minha conta</h2>
             <p>Bem-vindo(a), {conta.nome_completo}!</p>
             <p>{conta.email}</p>
+            {conta.tipo_usuario === 'admin' && <p className="my-4"><Link to="/gestao/materiais" className="auth-button">Gerenciar materiais educativos</Link></p>}
             <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>
           </>
         ) : (
