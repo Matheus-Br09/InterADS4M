@@ -185,8 +185,8 @@ export default function LoginECadastro(){
                                     <label htmlFor="cpf">CPF:</label>
                                     <input  
                                     type="text"
-                                    maxLength={14}
-                                    placeholder=" 111.222.333-00 "
+                                    maxLength={11}
+                                    placeholder="111.222.333-00"
                                     value={cpf}
                                     onChange={(e)=> setCpf(e.target.value)}
                                     />
