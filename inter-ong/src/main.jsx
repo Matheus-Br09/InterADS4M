@@ -14,8 +14,11 @@ import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import LoginECadastro from './pages/LoginECadastro.jsx'
+<<<<<<< HEAD
 import GestaoMateriais from './pages/GestaoMateriais.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
+=======
+>>>>>>> b5d7ea3b97f3ed878bff652c758026115e2f07b8
 
 
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui 
@@ -49,6 +52,7 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginECadastro />
+<<<<<<< HEAD
       },
       {
         path: "gestao/materiais",
@@ -57,6 +61,8 @@ const router = createBrowserRouter([
       {
         path: "voluntariado",
         element: <Voluntariado />
+=======
+>>>>>>> b5d7ea3b97f3ed878bff652c758026115e2f07b8
       }
     ]
   }

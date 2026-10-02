@@ -1,0 +1,76 @@
+/* Estilos complementares da página de Doação */
+
+@keyframes pulseSubtle {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.92) translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes floatGentle {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes celebrationHeart {
+  0% {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modal-pop-in {
+  animation: popIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pulse-hover:hover {
+  animation: pulseSubtle 1.2s ease-in-out infinite;
+}
+
+.float-badge {
+  animation: floatGentle 3s ease-in-out infinite;
+}
+
+.heart-celebrate {
+  animation: celebrationHeart 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Custom scrollbar para modal em telas pequenas */
+.custom-modal-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-modal-scroll::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 9999px;
+}
+.custom-modal-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.custom-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}

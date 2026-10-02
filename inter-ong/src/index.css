@@ -1,7 +1,6 @@
+@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
 @import "tailwindcss";
 
-@import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
-
-div{
+body, div {
     font-family: 'Readex Pro', sans-serif;
 }
