@@ -56,7 +56,7 @@ const router = createBrowserRouter([
         element: <Educacional />
       },
       {
-        path: "gestao/materiais",
+        path: "gestao",
         element: <GestaoMateriais />
       },
       {

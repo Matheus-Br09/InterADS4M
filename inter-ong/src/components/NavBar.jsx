@@ -56,7 +56,7 @@ export default function NavBar() {
            </Link>
 
 
-            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
+            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
               <NavLink to="/" className={desktopNavLinkClass} end>
                 Início
               </NavLink>
