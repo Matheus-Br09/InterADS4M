@@ -73,6 +73,10 @@ export default function NavBar() {
                 Área Educacional
               </NavLink>
 
+              <NavLink to="/voluntariado" className={desktopNavLinkClass}>
+                Voluntariado
+              </NavLink>
+
               <NavLink to="/login" className={desktopNavLinkClass}>
                 Login / Cadastro
               </NavLink>
