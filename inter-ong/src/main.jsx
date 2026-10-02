@@ -14,6 +14,7 @@ import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import LoginECadastro from './pages/LoginECadastro.jsx'
+import Voluntariado from './pages/voluntariado.jsx'
 
 
 
@@ -49,14 +50,14 @@ const router = createBrowserRouter([
         path: "login",
         element: <LoginECadastro />
       },
-      {
-        path: "gestao/materiais",
-        element: <GestaoMateriais />
-      },
-      {
-        path: "voluntariado",
-        element: <Voluntariado />
-      }
+      // {
+      //   path: "gestao/materiais",
+      //   element: <GestaoMateriais />
+      // },
+       {
+         path: "voluntariado",
+         element: <Voluntariado />
+       }
     ]
   }
 ])
