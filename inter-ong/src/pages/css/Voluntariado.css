@@ -1,0 +1,454 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --pink: #f72574;
+  --pink-dark: #e71968;
+  --pink-light: #fff1f7;
+  --pink-border: #ffd0e2;
+  --blue: #a7e4fa;
+  --dark: #15213d;
+  --text: #526780;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.volunteer-page {
+  font-family: "Nunito Sans", sans-serif;
+  color: var(--dark);
+  background: #fff;
+  overflow: hidden;
+}
+
+.volunteer-hero {
+  max-width: 1120px;
+  margin: auto;
+  padding: 65px 20px 55px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 50px;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border: 1px solid var(--pink-border);
+  background: #fff6fa;
+  border-radius: 30px;
+  color: var(--pink);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.eyebrow span {
+  color: var(--pink);
+}
+
+.hero-content h1 {
+  margin: 22px 0;
+  font-size: clamp(48px, 5.5vw, 68px);
+  font-weight: 900;
+  line-height: 0.98;
+  letter-spacing: -3px;
+}
+
+.hero-content h1 span,
+.form-heading h2 span,
+.volunteer-cta h2 span {
+  color: var(--pink);
+}
+
+.hero-content > p {
+  max-width: 480px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.hero-note {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding: 13px 17px;
+  width: fit-content;
+  border: 1px solid var(--pink-border);
+  border-radius: 18px;
+  box-shadow: 0 10px 25px rgba(247, 37, 116, 0.08);
+}
+
+.hero-note > span {
+  color: var(--pink);
+  font-size: 23px;
+}
+
+.hero-note strong,
+.hero-note small {
+  display: block;
+}
+
+.hero-note strong {
+  font-size: 13px;
+}
+
+.hero-note small {
+  margin-top: 2px;
+  color: var(--text);
+  font-size: 11px;
+}
+
+.hero-visual {
+  height: 410px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-circle {
+  position: absolute;
+  width: 370px;
+  height: 370px;
+  background: var(--blue);
+  border-radius: 50%;
+}
+
+.hero-visual img {
+  position: relative;
+  z-index: 1;
+  width: 315px;
+  height: 355px;
+  object-fit: cover;
+  border: 6px solid #fff;
+  border-radius: 30px;
+  box-shadow: 0 20px 50px rgba(21, 33, 61, 0.12);
+}
+
+.floating-heart {
+  position: absolute;
+  z-index: 2;
+  top: 10px;
+  left: 20px;
+  color: var(--pink);
+  font-size: 45px;
+}
+
+/* FORMULÁRIO */
+
+.form-section {
+  max-width: 1120px;
+  padding: 0 20px 70px;
+  margin: auto;
+}
+
+.form-card {
+  padding: 40px 45px;
+  border: 1px solid var(--pink-border);
+  border-radius: 30px;
+  background: #fff;
+  box-shadow: 0 20px 55px rgba(247, 37, 116, 0.07);
+}
+
+.form-heading {
+  margin-bottom: 28px;
+}
+
+.form-heading h2 {
+  margin: 20px 0 7px;
+  font-size: 36px;
+  line-height: 1.15;
+  font-weight: 900;
+  letter-spacing: -1px;
+}
+
+.form-heading p {
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px 25px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field.full-width {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  font-size: 13px;
+  font-weight: 800;
+  color: #234969;
+}
+
+.field label b,
+.form-footer small b {
+  color: var(--pink);
+}
+
+.field input,
+.field select,
+.field textarea {
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--pink-border);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--dark);
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input,
+.field select {
+  min-height: 53px;
+}
+
+.field textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.field input::placeholder,
+.field textarea::placeholder {
+  color: #9aabc0;
+}
+
+.field input:focus,
+.field select:focus,
+.field textarea:focus {
+  border-color: var(--pink);
+  box-shadow: 0 0 0 3px rgba(247, 37, 116, 0.08);
+}
+
+.form-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  margin-top: 25px;
+}
+
+.form-footer small {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.submit-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 28px;
+  border: 0;
+  border-radius: 30px;
+  background: var(--pink);
+  color: #fff;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(247, 37, 116, 0.2);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.submit-button:hover {
+  background: var(--pink-dark);
+  transform: translateY(-2px);
+}
+
+.submit-button span {
+  font-size: 18px;
+}
+
+/* CONFIRMAÇÃO */
+
+.success-message {
+  text-align: center;
+  padding: 35px 10px;
+}
+
+.success-heart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  height: 65px;
+  border-radius: 50%;
+  background: var(--pink-light);
+  color: var(--pink);
+  font-size: 30px;
+}
+
+.success-message h3 {
+  margin: 20px 0 10px;
+  font-size: 24px;
+}
+
+.success-message p {
+  max-width: 470px;
+  margin: 0 auto 25px;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+/* CTA */
+
+.volunteer-cta {
+  position: relative;
+  padding: 45px 20px 80px;
+  text-align: center;
+  background: linear-gradient(180deg, #fff 0%, #fff8fb 100%);
+}
+
+.cta-heart {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--pink);
+  font-size: 45px;
+}
+
+.volunteer-cta h2 {
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.cta-line {
+  width: 100px;
+  height: 3px;
+  margin: 22px auto 0;
+  border-radius: 10px;
+  background: #ffb6d1;
+}
+
+/* RESPONSIVIDADE */
+
+@media (max-width: 850px) {
+  .volunteer-hero {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding-top: 45px;
+  }
+
+  .hero-content {
+    text-align: center;
+  }
+
+  .hero-content > p {
+    margin: auto;
+  }
+
+  .hero-note {
+    margin: 25px auto 0;
+    text-align: left;
+  }
+
+  .hero-visual {
+    height: 370px;
+  }
+
+  .hero-circle {
+    width: 320px;
+    height: 320px;
+  }
+
+  .hero-visual img {
+    width: 275px;
+    height: 325px;
+  }
+}
+
+@media (max-width: 600px) {
+  .volunteer-hero {
+    padding: 40px 18px 35px;
+  }
+
+  .hero-content h1 {
+    font-size: 48px;
+    letter-spacing: -2px;
+  }
+
+  .hero-content > p {
+    font-size: 14px;
+  }
+
+  .hero-visual {
+    height: 320px;
+  }
+
+  .hero-circle {
+    width: 270px;
+    height: 270px;
+  }
+
+  .hero-visual img {
+    width: 235px;
+    height: 285px;
+    border-radius: 25px;
+  }
+
+  .floating-heart {
+    left: 5px;
+    top: 0;
+  }
+
+  .form-section {
+    padding: 0 15px 50px;
+  }
+
+  .form-card {
+    padding: 28px 20px;
+    border-radius: 23px;
+  }
+
+  .form-heading h2 {
+    font-size: 30px;
+  }
+
+  .form-heading p {
+    font-size: 13px;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .field.full-width {
+    grid-column: auto;
+  }
+
+  .form-footer {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .submit-button {
+    width: 100%;
+  }
+
+  .volunteer-cta h2 {
+    font-size: 25px;
+  }
+}

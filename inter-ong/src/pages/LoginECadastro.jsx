@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { backend } from '../api/backend'
 import './css/auth.css'
 
@@ -144,15 +144,23 @@ export default function LoginECadastro() {
     <div className="auth-container">
       <section className="auth-card" aria-label="Acesso à conta" aria-busy={carregando || enviando}>
         {erro && <p className="error-msg" role="alert">{erro}</p>}
-        {mensagem && <p className="success-msg" role="status">{mensagem}</p>}
+        {/* {mensagem && <p className="success-msg" role="status">{mensagem}</p>} */}
         {carregando ? <p role="status">Verificando sua sessão…</p> : conta && !trocaObrigatoria ? (
-          <>
+          <div className='flex flex-col items-center'>
             <h2>Minha conta</h2>
-            <p>Bem-vindo(a), {conta.nome_completo}!</p>
-            <p>{conta.email}</p>
+            <p className='m-3'>Bem-vindo(a), {conta.nome_completo}!</p>
+            <div className='flex gap-3 justify-center items-center m-2'>
+              <p>Quer ser um voluntário?</p>
+              <NavLink to="/voluntariado"><button className='auth-click rounded-2xl'>Clique Aqui</button></NavLink> 
+            </div>
+            <div className='flex gap-3 justify-center items-center m-2'>
+              <p>Gostaria de doar?</p>
+              <NavLink to="/doar"><button className='auth-click-2 rounded-2xl'>Clique Aqui</button></NavLink>
+            </div>
+            
             {conta.tipo_usuario === 'admin' && <p className="my-4"><Link to="/gestao/materiais" className="auth-button">Gerenciar materiais educativos</Link></p>}
             <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>
-          </>
+          </div>
         ) : (
           <>
             {!trocaObrigatoria && (

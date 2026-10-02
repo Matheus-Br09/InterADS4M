@@ -15,6 +15,7 @@ import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import LoginECadastro from './pages/LoginECadastro.jsx'
 import GestaoMateriais from './pages/GestaoMateriais.jsx'
+import Voluntariado from './pages/Voluntariado.jsx'
 
 
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui 
@@ -52,6 +53,10 @@ const router = createBrowserRouter([
       {
         path: "gestao/materiais",
         element: <GestaoMateriais />
+      },
+      {
+        path: "voluntariado",
+        element: <Voluntariado />
       }
     ]
   }
