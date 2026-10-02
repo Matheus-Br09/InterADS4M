@@ -1,9 +1,11 @@
 import { useState } from "react"
 import { NavLink, Link } from "react-router-dom"
 import logoImg from "../assets/logo.png"
+import { useTheme } from "../context/ThemeContext.jsx"
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { isDarkMode, toggleDarkMode } = useTheme()
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev)
@@ -17,27 +19,23 @@ export default function NavBar() {
   const desktopNavLinkClass = ({ isActive }) =>
     `px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
       isActive
-        ? "bg-white text-[#fb2782] shadow-sm border-pink-200"
-        : "text-gray-700 border-transparent hover:text-[#fb2782] hover:bg-white/60"
+        ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border-pink-200 dark:border-pink-900/50"
+        : "text-gray-700 dark:text-slate-200 border-transparent hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
     }`
 
 
   const mobileNavLinkClass = ({ isActive }) =>
     `flex items-center justify-between px-4 py-3 rounded-2xl text-base font-semibold transition-all duration-200 ${
       isActive
-        ? "bg-white text-[#fb2782] shadow-sm border border-pink-200"
-        : "text-gray-700 hover:text-[#fb2782] hover:bg-white/60"
+        ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border border-pink-200 dark:border-pink-900/50"
+        : "text-gray-700 dark:text-slate-200 hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
     }`
 
   return (
     <header className="sticky top-0 z-50 w-full">
 
       <div
-        className="w-full shadow-lg shadow-pink-500/10 rounded-b-[2rem] sm:rounded-b-[2.5rem] border-b border-pink-100/60 backdrop-blur-md"
-        style={{
-          background:
-            "linear-gradient(180deg, #ff7096 0%, #ff98b7 32%, #ffd5e4 70%, #fff2f6 92%, #ffffff 100%)",
-        }}
+        className="navbar-bg-gradient w-full shadow-lg shadow-pink-500/10 rounded-b-[2rem] sm:rounded-b-[2.5rem] border-b border-pink-100/60 dark:border-slate-800/60 backdrop-blur-md"
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 sm:h-24">
@@ -48,17 +46,17 @@ export default function NavBar() {
               className="flex items-center group transition-transform duration-200 hover:scale-105 active:scale-95"
               aria-label="SOS Tudo pelo Social - Página Inicial"
             >
-              <div className="px-4 py-2  bg-white/60 background-blur border-gradiente border-white/60 rounded-full ">
+              <div className="px-4 py-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur border border-white/60 dark:border-slate-700/60 rounded-full">
               <img
                 src={logoImg}
                 alt="SOS Tudo pelo social"
-                className="h-9 sm:h-11 md:h-12 w-auto object-contain drop-shadow-sm "
+                className="h-9 sm:h-11 md:h-12 w-auto object-contain drop-shadow-sm"
               />
            </div>
            </Link>
 
 
-            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 shadow-inner">
+            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-3 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
               <NavLink to="/" className={desktopNavLinkClass} end>
                 Início
               </NavLink>
@@ -86,6 +84,31 @@ export default function NavBar() {
             </nav>
 
             <div className="hidden md:flex items-center gap-3">
+              {/* Botão de Alternância de Tema (Claro / Escuro) */}
+              <button
+                type="button"
+                onClick={toggleDarkMode}
+                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all duration-200 border cursor-pointer shadow-xs bg-white/80 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-pink-200/70 dark:border-slate-700 hover:scale-105 active:scale-95"
+                title={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
+                aria-label={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
+              >
+                {isDarkMode ? (
+                  <>
+                    <svg className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24">
+                      <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
+                    </svg>
+                    <span>Tema Claro</span>
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4 fill-slate-700 text-slate-700" viewBox="0 0 24 24">
+                      <path d="M12.3 2a10 10 0 0 0 9.7 11.5 10 10 0 1 1-11.5-9.7c.6 0 1.2.1 1.8.2z" />
+                    </svg>
+                    <span>Tema Escuro</span>
+                  </>
+                )}
+              </button>
+
               <NavLink
                 to="/doar"
                 className="group relative inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-white font-bold text-sm tracking-wide bg-gradient-to-r from-[#fb2782] via-[#ff3b8d] to-[#ff6398] shadow-md shadow-pink-500/30 hover:shadow-lg hover:shadow-pink-500/45 hover:scale-105 active:scale-95 transition-all duration-200 overflow-hidden"
@@ -104,6 +127,16 @@ export default function NavBar() {
             </div>
 
             <div className="flex md:hidden items-center gap-2">
+              {/* Botão de Tema Mobile */}
+              <button
+                type="button"
+                onClick={toggleDarkMode}
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-pink-200/50 dark:border-slate-700 shadow-xs"
+                aria-label={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
+              >
+                {isDarkMode ? "☀️ Claro" : "🌙 Escuro"}
+              </button>
+
               <NavLink
                 to="/doar"
                 onClick={closeMobileMenu}
@@ -119,7 +152,7 @@ export default function NavBar() {
               <button
                 type="button"
                 onClick={toggleMobileMenu}
-                className="p-2.5 rounded-2xl bg-white/70 text-gray-700 hover:text-[#fb2782] hover:bg-white border border-pink-200/50 shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#fb2782]/40"
+                className="p-2.5 rounded-2xl bg-white/70 dark:bg-slate-800/80 text-gray-700 dark:text-slate-200 hover:text-[#fb2782] hover:bg-white border border-pink-200/50 dark:border-slate-700 shadow-sm transition-all duration-200 focus:outline-none"
                 aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu de navegação"}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-nav-menu"
@@ -157,7 +190,7 @@ export default function NavBar() {
           }`}
         >
           <div className="px-4 sm:px-6 pt-2 space-y-1.5">
-            <div className="p-3 bg-white/60 backdrop-blur-md rounded-2xl border border-white/80 shadow-sm space-y-1">
+            <div className="p-3 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-white/80 dark:border-slate-800 shadow-lg space-y-1">
               <NavLink to="/" onClick={closeMobileMenu} className={mobileNavLinkClass} end>
                 <span>Início</span>
                 <span className="text-xs opacity-60">→</span>
