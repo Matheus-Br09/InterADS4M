@@ -1,4 +1,4 @@
-/* Estilos complementares da página de Doação */
+/* Estilos complementares da página de Doação e Apadrinhamento */
 
 @keyframes pulseSubtle {
   0%, 100% {
@@ -67,10 +67,21 @@
   background: #f8fafc;
   border-radius: 9999px;
 }
+.dark .custom-modal-scroll::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
 .custom-modal-scroll::-webkit-scrollbar-thumb {
   background: #cbd5e1;
   border-radius: 9999px;
 }
+.dark .custom-modal-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 .custom-modal-scroll::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
+}
+.dark .custom-modal-scroll::-webkit-scrollbar-thumb:hover {
+  background: #475569;
 }
