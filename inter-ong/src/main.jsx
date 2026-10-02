@@ -50,14 +50,10 @@ const router = createBrowserRouter([
         path: "login",
         element: <LoginECadastro />
       },
-      // {
-      //   path: "gestao/materiais",
-      //   element: <GestaoMateriais />
-      // },
-       {
-         path: "voluntariado",
-         element: <Voluntariado />
-       }
+      {
+        path: "voluntariado",
+        element: <Voluntariado />
+      }
     ]
   }
 ])
