@@ -319,7 +319,7 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="project-card-bottom">
-                  <Link to="/sobre" className="btn-circle-arrow" aria-label="Acessar projeto">
+                  <Link to="/contato" className="btn-circle-arrow" aria-label="Acessar projeto">
                     →
                   </Link>
                 </div>
@@ -537,7 +537,7 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-              <Link to="/contato" className="btn-circle-arrow btn-circle-arrow-sky" aria-label="Ser voluntário">
+              <Link to="/voluntariado" className="btn-circle-arrow btn-circle-arrow-sky" aria-label="Ser voluntário">
                 →
               </Link>
             </div>
@@ -557,7 +557,7 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
-              <Link to="/contato" className="btn-circle-arrow" aria-label="Ser parceiro">
+              <Link to="/voluntariado" className="btn-circle-arrow" aria-label="Ser parceiro">
                 →
               </Link>
             </div>

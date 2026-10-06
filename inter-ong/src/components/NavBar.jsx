@@ -17,7 +17,7 @@ export default function NavBar() {
 
 
   const desktopNavLinkClass = ({ isActive }) =>
-    `px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+    `px-2 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
       isActive
         ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border-pink-200 dark:border-pink-900/50"
         : "text-gray-700 dark:text-slate-200 border-transparent hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
@@ -59,6 +59,10 @@ export default function NavBar() {
             <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
               <NavLink to="/" className={desktopNavLinkClass} end>
                 Início
+              </NavLink>
+
+              <NavLink to={"/noticias"}>
+                Notícias
               </NavLink>
 
               <NavLink to="/sobre" className={desktopNavLinkClass}>

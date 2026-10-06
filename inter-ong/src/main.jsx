@@ -16,6 +16,7 @@ import Educacional from './pages/Educacional.jsx'
 import LoginECadastro from './pages/LoginECadastro.jsx'
 import GestaoMateriais from './pages/GestaoMateriais.jsx'
 import Voluntariado from './pages/voluntariado.jsx'
+import Noticias from './pages/Noticias.jsx'
 
 
 
@@ -62,6 +63,10 @@ const router = createBrowserRouter([
       {
         path: "voluntariado",
         element: <Voluntariado />
+      },
+      {
+        path: "noticias",
+        element: <Noticias />
       }
     ]
   }
