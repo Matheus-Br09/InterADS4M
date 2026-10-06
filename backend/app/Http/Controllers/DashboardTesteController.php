@@ -89,6 +89,7 @@ class DashboardTesteController extends Controller
     public function apiCriancas()
     {
         $dados = Crianca::with('apadrinhamentos')->get()->map(fn (Crianca $crianca) => [
+            'id' => $crianca->id,
             'nome' => $crianca->nome,
             // O status guardado no banco só muda quando alguém mexe no painel,
             // então o site recebe o estado real (apadrinhamento ativo) para não

@@ -18,6 +18,7 @@ class MaterialDidatico extends Model
         'descricao',
         'arquivo_pdf',
         'imagem_capa',
+        'categoria',
         'data_upload',
     ];
 }

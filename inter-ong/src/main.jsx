@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 
 
 // Importa as páginas
@@ -15,12 +15,12 @@ import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import LoginECadastro from './pages/LoginECadastro.jsx'
 import GestaoMateriais from './pages/GestaoMateriais.jsx'
-import Voluntariado from './pages/voluntariado.jsx'
+import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
 
 
 
-// Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui 
+// Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui
 
 const router = createBrowserRouter([
   {
@@ -28,6 +28,9 @@ const router = createBrowserRouter([
     errorElement: <ErrorPage />,
     element: <App />,
     children: [
+      { path: "programas", element: <Noticias key="programas" recurso="programas" titulo="Programas e ações" /> },
+      { path: "transparencia", element: <Noticias key="transparencia" recurso="transparencia" titulo="Transparência" /> },
+      { path: 'gestao', element: <Navigate to='/gestao/materiais' replace /> },
       {
         index: true,
         element: <LandingPage />
@@ -52,12 +55,9 @@ const router = createBrowserRouter([
         path: "login",
         element: <LoginECadastro />
       },
+
       {
-        path: "educacional",
-        element: <Educacional />
-      },
-      {
-        path: "gestao",
+        path: "gestao/materiais",
         element: <GestaoMateriais />
       },
       {

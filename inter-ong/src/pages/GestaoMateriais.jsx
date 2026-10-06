@@ -37,19 +37,8 @@ export default function GestaoMateriais() {
     emAndamento.current = true
     setEnviando(true)
     try {
-      const arquivoBase64 = await new Promise((resolve, reject) => {
-        const leitor = new FileReader()
-        leitor.onload = () => resolve(leitor.result)
-        leitor.onerror = () => reject(new Error('Não foi possível ler o PDF selecionado.'))
-        leitor.readAsDataURL(pdf)
-      })
-      const { dados: material } = await backend.publicarMaterial({
-        titulo: dados.get('titulo'),
-        categoria: dados.get('categoria'),
-        descricao: dados.get('descricao') || null,
-        arquivo_pdf_base64: arquivoBase64,
-        arquivo_pdf_nome: pdf.name,
-      })
+      dados.append('imagem_capa', '')
+      const { dados: material } = await backend.publicarMaterial(dados)
       setPublicado(material)
       form.reset()
     } catch (error) {

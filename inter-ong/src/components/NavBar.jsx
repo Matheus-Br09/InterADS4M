@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { NavLink, Link } from "react-router-dom"
 import logoImg from "../assets/logo.png"
-import { useTheme } from "../context/ThemeContext.jsx"
+import { useTheme } from "../context/theme.js"
 
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -39,7 +39,7 @@ export default function NavBar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 sm:h-24">
-            
+
             <Link
               to="/"
               onClick={closeMobileMenu}
@@ -189,8 +189,9 @@ export default function NavBar() {
           id="mobile-nav-menu"
           role="navigation"
           aria-label="Menu de navegação mobile"
+          inert={!isMobileMenuOpen}
           className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-            isMobileMenuOpen ? "max-h-96 opacity-100 pb-5" : "max-h-0 opacity-0 pb-0"
+            isMobileMenuOpen ? "max-h-[calc(100dvh-6rem)] overflow-y-auto opacity-100 pb-5" : "max-h-0 opacity-0 pb-0"
           }`}
         >
           <div className="px-4 sm:px-6 pt-2 space-y-1.5">
@@ -215,6 +216,9 @@ export default function NavBar() {
                 <span className="text-xs opacity-60">→</span>
               </NavLink>
 
+              <NavLink to="/noticias" onClick={closeMobileMenu} className={mobileNavLinkClass}>Notícias →</NavLink>
+              <NavLink to="/voluntariado" onClick={closeMobileMenu} className={mobileNavLinkClass}>Voluntariado →</NavLink>
+              <NavLink to="/login" onClick={closeMobileMenu} className={mobileNavLinkClass}>Minha conta / Entrar →</NavLink>
               <div className="pt-2">
                 <NavLink
                   to="/doar"

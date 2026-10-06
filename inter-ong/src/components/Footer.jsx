@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 
 export default function Footer(){
     return(
-        <footer className="flex bg-blue-950 p-8 text-white justify-between" aria-label="Rodapé do site">
-            <div className='w-98'>
+        <footer className="flex flex-col gap-8 bg-blue-950 p-8 text-white lg:flex-row lg:justify-between" aria-label="Rodapé do site">
+            <div className='w-full max-w-sm'>
                 <img src={logoImg} alt="Logo SOS Tudo pelo Social" className='w-50 mb-4'/>
                 <p>Trabalhando incansavelmente por uma sociedade mais inclusiva, justa e acolhedora para todas as famílias.</p>
 
@@ -27,9 +27,9 @@ export default function Footer(){
                    </a>
                 </nav>
 
-                
+
             </div>
-            <div className='flex gap-26'>
+            <div className='flex flex-col gap-8 sm:flex-row sm:gap-12'>
                 <nav aria-label="Links rápidos de navegação" className='p-2'>
                     <p className='font-bold mb-3.5' id="quick-links-heading">Links Rápidos</p>
 
@@ -37,11 +37,13 @@ export default function Footer(){
                         <li className='link-rapido'><Link to={"/"}>Home</Link></li>
                         <li className='link-rapido'><Link to={"sobre"}>Sobre</Link></li>
                         <li className='link-rapido'><Link to={"educacional"}>Área Educacional</Link></li>
-                        <li className='link-rapido'><Link to={"contato"}>Contato</Link></li>
+                        <li className='link-rapido'><Link to="/contato">Contato</Link></li>
+                        <li className='link-rapido'><Link to="/programas">Programas</Link></li>
+                        <li className='link-rapido'><Link to="/transparencia">Transparência</Link></li>
                     </ul>
                 </nav>
 
-                <address style={{ fontStyle: "normal" }} className='w-70 p-2'>
+                <address style={{ fontStyle: "normal" }} className='w-full sm:w-70 p-2'>
                     <p className='font-bold mb-3.5' id="contact-footer-heading">Contato</p>
 
                     <p className='contato-rapido'>
@@ -67,8 +69,8 @@ export default function Footer(){
                     <p className='contato-rapido'>Rua Hosana Alves do Nascimento n°493, Casa 01 Janga, Paulista/PE</p>
                 </address>
             </div>
-            
+
         </footer>
     )
 }
-
+

@@ -1,4 +1,5 @@
-import React from 'react'
+import { useEffect, useState } from 'react'
+import { backend } from '../api/backend'
 import { Link } from 'react-router-dom'
 import './css/LandingPage.css'
 
@@ -15,6 +16,15 @@ import avatarVoluntarioImg from '../assets/avatar-voluntario.jpg'
 import avatarParceiroImg from '../assets/avatar-parceiro.jpg'
 
 export default function LandingPage() {
+  const [estatisticas, setEstatisticas] = useState(null)
+  const [erroEstatisticas, setErroEstatisticas] = useState(false)
+  useEffect(() => {
+    const controller = new AbortController()
+    backend.estatisticas({ signal: controller.signal }).then(dados => {
+      if (!controller.signal.aborted) setEstatisticas(dados)
+    }).catch(() => { if (!controller.signal.aborted) setErroEstatisticas(true) })
+    return () => controller.abort()
+  }, [])
   return (
     <main className="landing-page-main" id="conteudo-principal">
 
@@ -25,35 +35,35 @@ export default function LandingPage() {
         Pular para o conteúdo principal
       </a>
       <section className="hero-section">
-        
+
         <div className="hero-ambient-glow-sky" />
         <div className="hero-ambient-glow-pink" />
 
         <div className="landing-container">
           <div className="hero-grid">
-            
-          
+
+
             <div className="hero-content">
-              
-      
+
+
               <div className="badge-pill badge-pill-pink">
                 <span className="badge-icon-heart">♥</span>
                 <span>Juntos por um mundo mais inclusivo</span>
               </div>
 
-        
+
               <h1 className="hero-headline">
                 Acolher<br />
                 Inclui<br />
                 <span className="text-pink-highlight">Transforma</span>
               </h1>
 
-     
+
               <p className="hero-subtitle">
                 A SOS Tudo pelo Social desenvolve ações que acolhem, incluem e criam novas oportunidades para pessoas em situação de vulnerabilidade.
               </p>
 
-    
+
               <div className="hero-actions-row">
                 <a href="#projetos" className="btn-primary-pink">
                   <span>Conheça nossos projetos</span>
@@ -66,7 +76,7 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-      
+
               <div className="hero-metrics-pills-row">
 
                 <div className="hero-metric-pill-item">
@@ -76,12 +86,12 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div>
-                    <div className="hero-pill-number">+100</div>
-                    <div className="hero-pill-label">pessoas atendidas</div>
+                    <div className="hero-pill-number">{estatisticas?.total ?? (erroEstatisticas ? '—' : '…')}</div>
+                    <div className="hero-pill-label">apoiadores cadastrados</div>
                   </div>
                 </div>
 
- 
+
                 <div className="hero-metric-pill-item">
                   <div className="hero-pill-icon-box">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
@@ -89,8 +99,8 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div>
-                    <div className="hero-pill-number">+20</div>
-                    <div className="hero-pill-label">projetos realizados</div>
+                    <div className="hero-pill-number">{estatisticas?.doadores_mensais ?? (erroEstatisticas ? '—' : '…')}</div>
+                    <div className="hero-pill-label">doadores mensais ativos</div>
                   </div>
                 </div>
 
@@ -102,8 +112,8 @@ export default function LandingPage() {
                     </svg>
                   </div>
                   <div>
-                    <div className="hero-pill-number">+50</div>
-                    <div className="hero-pill-label">voluntários</div>
+                    <div className="hero-pill-number">{estatisticas?.doadores_unicos ?? (erroEstatisticas ? '—' : '…')}</div>
+                    <div className="hero-pill-label">doadores únicos confirmados</div>
                   </div>
                 </div>
               </div>
@@ -159,7 +169,7 @@ export default function LandingPage() {
       <section className="about-section" aria-label="Sobre nós">
         <div className="landing-container">
           <div className="about-grid">
-            
+
 
             <div className="about-photo-wrapper">
               <div className="about-photo-box">
@@ -196,7 +206,7 @@ export default function LandingPage() {
 
 
             <div className="about-pillars-grid">
-              
+
 
               <div className="pillar-card">
                 <div className="pillar-icon-box">
@@ -258,7 +268,7 @@ export default function LandingPage() {
 
       <section id="projetos" className="projects-section" aria-label="Nossos projetos">
         <div className="landing-container">
-          
+
 
           <div className="projects-header-row">
             <div className="projects-header-left">
@@ -275,7 +285,7 @@ export default function LandingPage() {
             </div>
 
             <div>
-              <Link to="/educacional" className="projects-link-all">
+              <Link to="/programas" className="projects-link-all">
                 <span>Ver todos os projetos</span>
                 <span>→</span>
               </Link>
@@ -284,7 +294,7 @@ export default function LandingPage() {
 
 
           <div className="projects-grid">
-            
+
 
             <div className="project-card">
               <div className="project-image-box">
@@ -374,9 +384,9 @@ export default function LandingPage() {
 
       <section className="impact-section" aria-label="Nosso impacto">
         <div className="landing-container">
-          
+
           <div className="impact-banner-wrapper">
-            
+
 
             <div className="impact-doodle-sparkle">
               <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -385,8 +395,8 @@ export default function LandingPage() {
             </div>
 
             <div className="impact-grid">
-              
-   
+
+
               <div className="impact-left-content">
                 <div className="badge-pill badge-pill-sky">
                   <span className="badge-icon-heart">♥</span>
@@ -397,13 +407,13 @@ export default function LandingPage() {
                   <span className="text-pink-highlight">grandes transformações.</span>
                 </h2>
                 <p className="impact-desc">
-                  Números que representam vidas, histórias e um futuro mais inclusivo.
+                  Contagens dos registros do sistema. Dados de demonstração e registros antigos dependem de revisão pela ONG.
                 </p>
               </div>
 
-         
+
               <div className="impact-metrics-row">
-                
+
 
                 <div className="impact-metric-card">
                   <div className="impact-metric-icon">
@@ -411,8 +421,8 @@ export default function LandingPage() {
                       <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
                     </svg>
                   </div>
-                  <div className="impact-metric-num">+100</div>
-                  <div className="impact-metric-lbl">pessoas atendidas</div>
+                  <div className="impact-metric-num">{estatisticas?.total ?? (erroEstatisticas ? '—' : '…')}</div>
+                  <div className="impact-metric-lbl">apoiadores cadastrados</div>
                 </div>
 
 
@@ -422,8 +432,8 @@ export default function LandingPage() {
                       <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
                     </svg>
                   </div>
-                  <div className="impact-metric-num">+20</div>
-                  <div className="impact-metric-lbl">projetos realizados</div>
+                  <div className="impact-metric-num">{estatisticas?.doadores_mensais ?? (erroEstatisticas ? '—' : '…')}</div>
+                  <div className="impact-metric-lbl">doadores mensais ativos</div>
                 </div>
 
 
@@ -433,8 +443,8 @@ export default function LandingPage() {
                       <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                     </svg>
                   </div>
-                  <div className="impact-metric-num">+50</div>
-                  <div className="impact-metric-lbl">voluntários</div>
+                  <div className="impact-metric-num">{estatisticas?.doadores_unicos ?? (erroEstatisticas ? '—' : '…')}</div>
+                  <div className="impact-metric-lbl">doadores únicos confirmados</div>
                 </div>
 
 
@@ -444,8 +454,8 @@ export default function LandingPage() {
                       <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z" />
                     </svg>
                   </div>
-                  <div className="impact-metric-num">+10</div>
-                  <div className="impact-metric-lbl">comunidades alcançadas</div>
+                  <div className="impact-metric-num">♥</div>
+                  <div className="impact-metric-lbl">apoio à comunidade</div>
                 </div>
 
               </div>
@@ -461,10 +471,10 @@ export default function LandingPage() {
 
       <section className="help-section" aria-label="Como ajudar">
         <div className="landing-container">
-          
- 
+
+
           <div className="help-top-row">
-            
+
             <div className="help-top-left">
               <div className="badge-pill badge-pill-pink">
                 <span className="badge-icon-heart">♥</span>
@@ -501,7 +511,7 @@ export default function LandingPage() {
 
 
           <div className="help-cards-grid">
-            
+
 
             <div className="help-action-card">
               <div className="help-card-left">
@@ -571,7 +581,7 @@ export default function LandingPage() {
 
       <section className="testimonials-section" aria-label="Depoimentos">
         <div className="landing-container">
-          
+
 
           <div className="projects-header-row">
             <div>
@@ -594,7 +604,7 @@ export default function LandingPage() {
 
 
           <div className="testimonials-grid">
-            
+
 
             <div className="testimonial-card">
               <div>
@@ -623,7 +633,7 @@ export default function LandingPage() {
               </div>
             </div>
 
- 
+
             <div className="testimonial-card">
               <div>
                 <span className="testimonial-quote-icon">“</span>
@@ -644,9 +654,9 @@ export default function LandingPage() {
 
       <section className="cta-section" aria-label="Chamada para ação">
         <div className="landing-container">
-          
+
           <div className="cta-banner-wrapper">
-            
+
             <div className="cta-content-left">
               <h2 className="cta-title">
                 Juntos podemos transformar mais histórias.
@@ -689,6 +699,3 @@ export default function LandingPage() {
     </main>
   )
 }
-
-
-

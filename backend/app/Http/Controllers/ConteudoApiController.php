@@ -73,10 +73,11 @@ class ConteudoApiController extends Controller
     private function regras(string $recurso, bool $parcial): array
     {
         $prefixo = $parcial ? 'sometimes|' : 'required|';
+        $opcional = 'sometimes|nullable|';
 
         return match ($recurso) {
-            'noticias' => ['titulo' => $prefixo.'string|max:150', 'resumo' => $prefixo.'string|max:255', 'texto_completo' => $prefixo.'string', 'imagem' => $prefixo.'nullable|file|mimes:jpg,jpeg,png,webp|max:5120', 'tipo' => $prefixo.'in:noticia,evento,campanha', 'data_evento' => $prefixo.'nullable|date'],
-            'materiais' => ['titulo' => $prefixo.'string|max:150', 'descricao' => $prefixo.'nullable|string', 'arquivo_pdf' => $prefixo.'file|mimes:pdf|max:10240', 'imagem_capa' => $prefixo.'nullable|image|mimes:jpg,jpeg,png,webp|max:5120', 'categoria' => $prefixo.'string|max:100'],
+            'noticias' => ['titulo' => $prefixo.'string|max:150', 'resumo' => $prefixo.'string|max:255', 'texto_completo' => $prefixo.'string', 'imagem' => $opcional.'file|mimes:jpg,jpeg,png,webp|max:5120', 'tipo' => $prefixo.'in:noticia,evento,campanha', 'data_evento' => $opcional.'date'],
+            'materiais' => ['titulo' => $prefixo.'string|max:150', 'descricao' => $opcional.'string', 'arquivo_pdf' => $prefixo.'file|mimes:pdf|max:10240', 'imagem_capa' => $opcional.'image|mimes:jpg,jpeg,png,webp|max:5120', 'categoria' => $prefixo.'string|max:100'],
             'transparencia' => ['titulo' => $prefixo.'string|max:150', 'ano_referencia' => $prefixo.'integer|min:1900|max:2200', 'tipo_documento' => $prefixo.'in:Relatório Anual,Balancete,Estatuto,Certidão,Outros', 'arquivo_pdf' => $prefixo.'file|mimes:pdf|max:10240'],
             'programas' => ['titulo' => $prefixo.'string|max:150', 'resumo' => $prefixo.'string|max:250', 'texto_completo' => $prefixo.'string', 'categoria' => $prefixo.'in:Neuropedagogia,Saúde e Bem-estar,Assistência Social,Educação,Outros', 'imagem_capa' => $prefixo.'nullable|image|mimes:jpg,jpeg,png,webp|max:5120', 'status' => $prefixo.'in:ativo,inativo'],
         };

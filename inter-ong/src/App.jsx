@@ -1,3 +1,4 @@
+import Newsletter from './components/Newsletter.jsx'
 import { Outlet } from 'react-router-dom'
 import NavBar from './components/NavBar.jsx'
 import './App.css'
@@ -13,6 +14,7 @@ function App() {
         <NavBar />
         <ScrollToTop />
         <Outlet />
+        <Newsletter />
         <Footer />
       </div>
     </ThemeProvider>
