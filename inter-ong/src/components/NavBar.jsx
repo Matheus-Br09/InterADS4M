@@ -17,7 +17,7 @@ export default function NavBar() {
 
 
   const desktopNavLinkClass = ({ isActive }) =>
-    `px-2 py-2 rounded-full text-sm font-semibold transition-all duration-200 border ${
+    `px-4 py-1 rounded-full text-sm font-semibold transition-all duration-200 border ${
       isActive
         ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border-pink-200 dark:border-pink-900/50"
         : "text-gray-700 dark:text-slate-200 border-transparent hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
@@ -61,7 +61,7 @@ export default function NavBar() {
                 Início
               </NavLink>
 
-              <NavLink to={"/noticias"}>
+              <NavLink to={"/noticias"} className={desktopNavLinkClass}>
                 Notícias
               </NavLink>
 
