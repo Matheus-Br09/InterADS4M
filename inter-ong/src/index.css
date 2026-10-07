@@ -1,20 +1,137 @@
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
 @import "tailwindcss";
 
-body, div {
+/* ═══════════════════════════════════════════════════════════
+   Habilita classes dark: do Tailwind com html.dark
+   ═══════════════════════════════════════════════════════════ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ═══════════════════════════════════════════════════════════
+   VARIÁVEIS DE TEMA — mudam automaticamente com html.dark
+   ═══════════════════════════════════════════════════════════ */
+:root {
+    /* Fundos */
+    --bg-page:      #ffffff;
+    --bg-card:      #ffffff;
+    --bg-card-alt:  #fdf4f8;
+    --bg-input:     #ffffff;
+    --bg-muted:     #f8fafc;
+    --bg-subtle:    #fff1f6;
+
+    /* Textos */
+    --text-primary:   #0f172a;
+    --text-secondary: #475569;
+    --text-muted:     #64748b;
+    --text-faint:     #94a3b8;
+
+    /* Bordas */
+    --border:       #e2e8f0;
+    --border-soft:  #fce7f3;
+
+    /* Marca */
+    --pink:         #fb2782;
+    --pink-light:   #fff1f6;
+
     font-family: 'Readex Pro', sans-serif;
+    color-scheme: light;
 }
 
+html.dark {
+    /* Fundos */
+    --bg-page:      #090d16;
+    --bg-card:      #121a2d;
+    --bg-card-alt:  #0e1526;
+    --bg-input:     #0d1829;
+    --bg-muted:     #0a1020;
+    --bg-subtle:    rgba(251, 39, 130, 0.12);
 
-html, body, header, main, section, footer, nav, div, p, h1, h2, h3, h4, h5, h6, span, button, a, input, textarea, select, svg, path {
-    transition: background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                border-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1),
-                fill 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    /* Textos */
+    --text-primary:   #f1f5f9;
+    --text-secondary: #cbd5e1;
+    --text-muted:     #94a3b8;
+    --text-faint:     #64748b;
+
+    /* Bordas */
+    --border:       #2d3f5e;
+    --border-soft:  #1e293b;
+
+    /* Marca (inalterada) */
+    --pink:         #fb2782;
+    --pink-light:   rgba(251, 39, 130, 0.15);
+
+    color-scheme: dark;
 }
 
+/* ═══════════════════════════════════════════════════════════
+   BASE GLOBAL — aplica variáveis em TUDO
+   ═══════════════════════════════════════════════════════════ */
+html {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+}
 
+body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Readex Pro', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Transições suaves em todos os elementos ao trocar tema */
+*,
+*::before,
+*::after {
+    transition:
+        background-color 0.3s ease,
+        color 0.3s ease,
+        border-color 0.3s ease,
+        box-shadow 0.3s ease;
+}
+
+/* ─── Headings ─────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--text-primary);
+}
+
+/* ─── Parágrafos ───────────────────────────────────────── */
+p {
+    color: var(--text-secondary);
+}
+
+/* ─── Links ────────────────────────────────────────────── */
+a {
+    color: inherit;
+}
+
+/* ─── Inputs, Textareas, Selects ───────────────────────── */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+textarea,
+select {
+    background-color: var(--bg-input);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+input::placeholder,
+textarea::placeholder {
+    color: var(--text-faint);
+}
+
+/* ─── Labels ───────────────────────────────────────────── */
+label {
+    color: var(--text-primary);
+}
+
+/* ─── Spans genéricos ──────────────────────────────────── */
+span {
+    color: inherit;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVBAR
+   ═══════════════════════════════════════════════════════════ */
 .navbar-bg-gradient {
     background: linear-gradient(180deg, #ff7096 0%, #ff98b7 32%, #ffd5e4 70%, #fff2f6 92%, #ffffff 100%);
     position: relative;
@@ -26,9 +143,9 @@ html, body, header, main, section, footer, nav, div, p, h1, h2, h3, h4, h5, h6, 
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    background: linear-gradient(180deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    background: linear-gradient(180deg, #080c14 0%, #0f172a 50%, #080c14 100%);
     opacity: 0;
-    transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    transition: opacity 0.3s ease !important;
     z-index: -1;
     pointer-events: none;
 }
@@ -37,86 +154,109 @@ html.dark .navbar-bg-gradient::before {
     opacity: 1;
 }
 
-
-
-html.dark, 
-html.dark body {
-    background-color: #090d16 !important;
-    color: #f1f5f9 !important;
-}
-
+/* ═══════════════════════════════════════════════════════════
+   LANDING PAGE
+   ═══════════════════════════════════════════════════════════ */
 html.dark .landing-page-main {
-    background-color: #090d16 !important;
-    color: #f1f5f9 !important;
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary) !important;
 }
 
-html.dark section,
+html.dark section {
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary) !important;
+}
+
+/* Seções específicas com fundo alternativo */
 html.dark .about-section,
 html.dark .projects-section,
 html.dark .impact-section,
+html.dark .help-section,
 html.dark .testimonials-section,
-html.dark .help-methods-section,
 html.dark .faq-section,
-html.dark .cta-banner-section,
-html.dark .volunteer-section {
-    background-color: #090d16 !important;
-    background: #090d16 !important;
-    color: #f1f5f9 !important;
+html.dark .cta-section {
+    background-color: var(--bg-page) !important;
 }
 
-
-html.dark h1,
-html.dark h2,
-html.dark h3,
-html.dark h4,
+/* ─── Títulos de seção ─────────────────────────────────── */
 html.dark .hero-headline,
+html.dark .section-headline,
 html.dark .section-title,
-html.dark .card-title-v2,
+html.dark .about-title,
+html.dark .impact-title,
+html.dark .cta-title,
+html.dark .pillar-card-title,
 html.dark .project-card-title,
-html.dark .impact-stat-number,
+html.dark .help-card-title,
+html.dark .impact-metric-num,
 html.dark .testimonial-author-name,
 html.dark .faq-question-text,
-html.dark .cta-banner-title,
 html.dark .hero-pill-number,
 html.dark .hero-doodle-line,
-html.dark .about-stat-num,
 html.dark .hero-float-badge-text,
-html.dark .font-bold,
-html.dark .font-extrabold,
-html.dark .font-black {
+html.dark .about-stat-num {
     color: #ffffff !important;
 }
 
-
-html.dark p,
-html.dark span:not(.btn-primary-pink *):not(.badge-pill *):not(.bg-\[\#fb2782\] *),
+/* ─── Parágrafos de seção ──────────────────────────────── */
 html.dark .hero-subtitle,
+html.dark .section-subtext,
 html.dark .section-subtitle,
-html.dark .hero-pill-label,
+html.dark .about-desc,
+html.dark .pillar-card-desc,
 html.dark .project-card-desc,
-html.dark .impact-stat-label,
+html.dark .help-card-desc,
+html.dark .impact-desc,
+html.dark .impact-metric-lbl,
 html.dark .testimonial-quote-text,
 html.dark .faq-answer-text,
-html.dark .cta-banner-subtitle,
+html.dark .cta-subtitle,
 html.dark .about-quote-text,
-html.dark .text-slate-600,
-html.dark .text-slate-700,
-html.dark .text-gray-600,
-html.dark .text-gray-700,
-html.dark .text-gray-800 {
-    color: #cbd5e1 !important;
+html.dark .hero-pill-label,
+html.dark .testimonial-author-role,
+html.dark .about-stat-lbl {
+    color: var(--text-secondary) !important;
 }
 
-
-html.dark .text-gray-400,
-html.dark .text-slate-400,
-html.dark .text-slate-500,
-html.dark .about-stat-lbl,
-html.dark .testimonial-author-role {
-    color: #94a3b8 !important;
+/* ─── Cards e elementos elevados ───────────────────────── */
+html.dark .hero-metric-pill-item,
+html.dark .pillar-card,
+html.dark .project-card,
+html.dark .impact-metric-card,
+html.dark .help-action-card,
+html.dark .testimonial-card,
+html.dark .hero-float-badge,
+html.dark .hero-shirt-tag,
+html.dark .about-quote-box,
+html.dark .about-stat-pill,
+html.dark .title-div,
+html.dark .missao-div,
+html.dark .info-contact {
+    background-color: var(--bg-card) !important;
+    background:       var(--bg-card) !important;
+    border-color:     var(--border-soft) !important;
+    color:            var(--text-primary) !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
 }
 
+html.dark .testimonial-author-box {
+    border-color: var(--border-soft) !important;
+}
 
+/* ─── Banners de destaque ──────────────────────────────── */
+html.dark .impact-banner-wrapper {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
+    border-color: var(--border-soft) !important;
+}
+
+html.dark .cta-banner-wrapper,
+html.dark .volunteer-banner,
+html.dark .cta-banner-v2 {
+    background: linear-gradient(135deg, #1e1b4b 0%, #2e1039 100%) !important;
+    border-color: #334155 !important;
+}
+
+/* ─── Tags e badges ────────────────────────────────────── */
 html.dark .badge-pill-pink {
     background-color: rgba(251, 39, 130, 0.18) !important;
     color: #ff66a3 !important;
@@ -129,50 +269,20 @@ html.dark .badge-pill-sky {
     border-color: rgba(56, 189, 248, 0.4) !important;
 }
 
+html.dark .tag-pink,
 html.dark .project-tag {
     background-color: rgba(251, 39, 130, 0.18) !important;
     color: #ff66a3 !important;
 }
 
-
-html.dark .hero-metric-pill-item,
-html.dark .project-card-v2,
-html.dark .impact-stat-card,
-html.dark .testimonial-card,
-html.dark .cta-card-box,
-html.dark .help-method-card,
-html.dark .faq-item-v2,
-html.dark .hero-float-badge,
-html.dark .hero-shirt-tag,
-html.dark .about-quote-box,
-html.dark .about-stat-pill,
-html.dark .volunteer-banner,
-html.dark .info-contact,
-html.dark .title-div,
-html.dark .missao-div,
-html.dark .input-group,
-html.dark .auth-container {
-    background-color: #121a2d !important;
-    background: #121a2d !important;
-    border-color: #1e293b !important;
-    color: #f1f5f9 !important;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4) !important;
+html.dark .tag-sky {
+    background-color: rgba(3, 105, 161, 0.25) !important;
+    color: #38bdf8 !important;
 }
 
-
-html.dark .bg-gray-50,
-html.dark .bg-slate-50,
-html.dark .bg-slate-100,
-html.dark .bg-pink-50,
-html.dark .bg-\[\#fff5f8\],
-html.dark .bg-\[\#fff7f9\] {
-    background-color: #0e1526 !important;
-    color: #e2e8f0 !important;
-    border-color: #1e293b !important;
-}
-
-
-html.dark .hero-pill-icon-box {
+/* ─── Ícones e botões circulares ───────────────────────── */
+html.dark .hero-pill-icon-box,
+html.dark .pillar-icon-box {
     background-color: rgba(251, 39, 130, 0.2) !important;
     color: #ff66a3 !important;
 }
@@ -197,72 +307,91 @@ html.dark .btn-circle-arrow-sky:hover {
     color: #ffffff !important;
 }
 
-
-html.dark input,
-html.dark textarea,
-html.dark select {
-    background-color: #0e1526 !important;
-    color: #ffffff !important;
-    border-color: #334155 !important;
+html.dark .btn-outline-small {
+    border-color: rgba(251, 39, 130, 0.4) !important;
+    color: #ff66a3 !important;
 }
 
-html.dark input::placeholder,
-html.dark textarea::placeholder {
-    color: #64748b !important;
+html.dark .btn-outline-small:hover {
+    background-color: rgba(251, 39, 130, 0.15) !important;
 }
 
 html.dark .btn-secondary-outline {
-    background-color: #121a2d !important;
+    background-color: var(--bg-card) !important;
     color: #ff4d8d !important;
     border-color: #ff4d8d !important;
 }
 
-html.dark .btn-secondary-outline:hover {
-    background-color: #ff4d8d !important;
+/* ─── Fundos claros neutralizados no dark ──────────────── */
+html.dark .bg-white,
+html.dark [class*="bg-white"] {
+    background-color: var(--bg-card) !important;
+}
+
+html.dark .bg-gray-50,
+html.dark .bg-slate-50,
+html.dark .bg-slate-100,
+html.dark .bg-pink-50,
+html.dark [class*="bg-pink-50"],
+html.dark [class*="bg-rose-50"] {
+    background-color: var(--bg-card-alt) !important;
+    border-color: var(--border-soft) !important;
+}
+
+/* ─── Texto Tailwind utilitário ────────────────────────── */
+html.dark .text-slate-900,
+html.dark .text-gray-900,
+html.dark .text-slate-800,
+html.dark .text-gray-800 {
     color: #ffffff !important;
 }
 
-
-html.dark .hero-ambient-glow-sky,
-html.dark .hero-ambient-glow-pink {
-    opacity: 0.15 !important;
+html.dark .text-slate-700,
+html.dark .text-gray-700,
+html.dark .text-slate-600,
+html.dark .text-gray-600 {
+    color: var(--text-secondary) !important;
 }
 
-/* Molduras de Fotos na Hero e Sobre */
-html.dark .hero-photo-card {
-    border-color: #1e293b !important;
+html.dark .text-slate-500,
+html.dark .text-gray-500,
+html.dark .text-slate-400,
+html.dark .text-gray-400 {
+    color: var(--text-muted) !important;
+}
+
+/* ─── Brilho ambiente ──────────────────────────────────── */
+html.dark .hero-ambient-glow-sky,
+html.dark .hero-ambient-glow-pink {
+    opacity: 0.12 !important;
+}
+
+/* ─── Fotos e molduras ─────────────────────────────────── */
+html.dark .hero-photo-card,
+html.dark .about-photo-box,
+html.dark .help-photo-box {
+    border-color: var(--border-soft) !important;
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6) !important;
 }
 
-/* Página "Sobre Nós" Gradientes e Cartões */
-html.dark .min-h-screen.bg-gradient-to-b.from-pink-100.via-white.to-pink-200 {
-    background: linear-gradient(180deg, #090d16 0%, #0f172a 50%, #090d16 100%) !important;
+/* ═══════════════════════════════════════════════════════════
+   RODAPÉ
+   ═══════════════════════════════════════════════════════════ */
+footer {
+    background-color: #0b1120;
+    color: #f1f5f9;
 }
 
-html.dark .bg-pink-400 {
-    background-color: #1e1b4b !important;
-    border: 1px solid #3b0764 !important;
-}
-
-/* Página "Contato" Gradientes */
-html.dark .min-h-screen.bg-gradient-to-b.from-pink-200.via-pink-100.to-white {
-    background: linear-gradient(180deg, #090d16 0%, #0f172a 100%) !important;
-}
-
-html.dark main.bg-gradient-to-r.from-pink-400.to-rose-400 {
-    background: linear-gradient(135deg, #1e1b4b 0%, #2e1039 100%) !important;
-    border: 1px solid #334155 !important;
-}
-
-/* Banners CTA e Voluntários */
-html.dark .volunteer-banner,
-html.dark .cta-banner-v2 {
-    background: linear-gradient(135deg, #1e1b4b 0%, #2e1039 100%) !important;
-    border-color: #334155 !important;
-}
-
-/* Rodapé */
 html.dark footer {
     background-color: #060911 !important;
-    border-top: 1px solid #1e293b !important;
+    border-top: 1px solid var(--border-soft) !important;
+    color: #f1f5f9 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PÁGINA DE ERRO
+   ═══════════════════════════════════════════════════════════ */
+html.dark .error-page {
+    background-color: var(--bg-page) !important;
+    color: var(--text-primary) !important;
 }

@@ -144,74 +144,185 @@ export default function LoginECadastro() {
   return (
     <div className="auth-container">
       <section className="auth-card" aria-label="Acesso à conta" aria-busy={carregando || enviando}>
+
         {erro && <p className="error-msg" role="alert">{erro}</p>}
         {mensagem && <p className="success-msg" role="status">{mensagem}</p>}
-        {carregando ? <p role="status">Verificando sua sessão…</p> : conta && !trocaObrigatoria ? (
-          <div className='flex flex-col items-center'>
+
+        {carregando ? (
+          <p role="status" className="text-center text-slate-500 dark:text-slate-400 py-4">
+            Verificando sua sessão…
+          </p>
+        ) : conta && !trocaObrigatoria ? (
+
+          /* ─── PAINEL DE CONTA LOGADA ─── */
+          <div className="flex flex-col items-center gap-4">
             <h2>Minha conta</h2>
-            <p className='m-3'>Bem-vindo(a), {conta.nome_completo}!</p>
-            <div className='flex gap-3 justify-center items-center m-2'>
-              <p>Quer ser um voluntário?</p>
-              <NavLink to="/voluntariado"><button className='auth-click rounded-2xl'>Clique Aqui</button></NavLink>
-            </div>
-            <div className='flex gap-3 justify-center items-center m-2'>
-              <p>Gostaria de doar?</p>
-              <NavLink to="/doar"><button className='auth-click-2 rounded-2xl'>Clique Aqui</button></NavLink>
+            <p className="text-slate-700 dark:text-slate-200 font-medium">
+              Bem-vindo(a), <strong className="text-[#fb2782] dark:text-pink-400">{conta.nome_completo}</strong>!
+            </p>
+
+            <div className="w-full flex flex-col sm:flex-row gap-3 justify-center items-center mt-1">
+              <NavLink to="/voluntariado" className="w-full sm:w-auto">
+                <button className="auth-click w-full sm:w-auto">
+                  💪 Ser Voluntário
+                </button>
+              </NavLink>
+              <NavLink to="/doar" className="w-full sm:w-auto">
+                <button className="auth-click-2 w-full sm:w-auto">
+                  ♥ Fazer Doação
+                </button>
+              </NavLink>
             </div>
 
-            {conta.tipo_usuario === 'admin' && <p className="my-4"><Link to="/gestao/materiais" className="auth-button">Gerenciar materiais educativos</Link></p>}
+            {conta.tipo_usuario === 'admin' && (
+              <p className="mt-2">
+                <Link to="/gestao/materiais" className="auth-button">
+                  🗂 Gerenciar materiais educativos
+                </Link>
+              </p>
+            )}
+
             <PainelConta conta={conta} onAtualizar={setConta} onErroSessao={mostrarErro} />
-            <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>
+
+            <button className="auth-button" disabled={enviando} onClick={sair}>
+              {enviando ? 'Aguarde…' : 'Sair da conta'}
+            </button>
           </div>
+
         ) : (
+
+          /* ─── FORMULÁRIO DE LOGIN / CADASTRO ─── */
           <>
             {!trocaObrigatoria && (
               <div className="auth-tabs">
-                <button className="auth-button" disabled={enviando} aria-pressed={isLogin} onClick={() => alternar(true)}>Fazer Login</button>
-                <button className="auth-button" disabled={enviando} aria-pressed={!isLogin} onClick={() => alternar(false)}>Cadastrar Conta</button>
+                <button
+                  className="auth-button"
+                  disabled={enviando}
+                  aria-pressed={isLogin}
+                  onClick={() => alternar(true)}
+                >
+                  Fazer Login
+                </button>
+                <button
+                  className="auth-button"
+                  disabled={enviando}
+                  aria-pressed={!isLogin}
+                  onClick={() => alternar(false)}
+                >
+                  Cadastrar Conta
+                </button>
               </div>
             )}
-            <h2>{trocaObrigatoria ? 'Crie uma nova senha' : isLogin ? 'Bem-vindo de volta!' : 'Crie sua conta'}</h2>
-            {trocaObrigatoria && <p>Para continuar, substitua a senha temporária por uma senha sua.</p>}
+
+            <h2>
+              {trocaObrigatoria ? 'Crie uma nova senha' : isLogin ? 'Bem-vindo de volta!' : 'Crie sua conta'}
+            </h2>
+
+            {trocaObrigatoria && (
+              <p>Para continuar, substitua a senha temporária por uma senha sua.</p>
+            )}
+
             <form onSubmit={enviar}>
               <fieldset disabled={enviando} className="auth-fields">
+
                 {!trocaObrigatoria && (
                   <div className="input-group">
                     <label htmlFor="email">E-mail</label>
-                    <input id="email" type="email" autoComplete="username" required maxLength={255} value={email} onChange={(e) => setEmail(e.target.value)} {...acessibilidade('email')} />
+                    <input
+                      id="email"
+                      type="email"
+                      autoComplete="username"
+                      required
+                      maxLength={255}
+                      placeholder="seu@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      {...acessibilidade('email')}
+                    />
                     {erroCampo('email')}
                   </div>
                 )}
+
                 {!isLogin && !trocaObrigatoria && (
                   <div className="auth-registration">
                     {camposCadastro.map(([campo, label, type, autoComplete, required]) => (
                       <div className="input-group" key={campo}>
                         <label htmlFor={campo}>{label}{required ? ' *' : ''}</label>
-                        <input id={campo} type={type} autoComplete={autoComplete} required={required} maxLength={campo === 'cpf' ? 14 : 255} value={cadastro[campo]} onChange={(e) => setCadastro({ ...cadastro, [campo]: e.target.value })} {...acessibilidade(campo)} />
+                        <input
+                          id={campo}
+                          type={type}
+                          autoComplete={autoComplete}
+                          required={required}
+                          maxLength={campo === 'cpf' ? 14 : 255}
+                          value={cadastro[campo]}
+                          onChange={(e) => setCadastro({ ...cadastro, [campo]: e.target.value })}
+                          {...acessibilidade(campo)}
+                        />
                         {erroCampo(campo)}
                       </div>
                     ))}
                   </div>
                 )}
+
                 <div className="input-group">
-                  <label htmlFor="senha">{trocaObrigatoria ? 'Nova senha' : 'Senha'}</label>
-                  <input id="senha" type="password" autoComplete={isLogin && !trocaObrigatoria ? 'current-password' : 'new-password'} required minLength={!isLogin || trocaObrigatoria ? 8 : undefined} value={senha} onChange={(e) => setSenha(e.target.value)} {...acessibilidade('senha')} />
+                  <label htmlFor="senha">
+                    {trocaObrigatoria ? 'Nova senha' : 'Senha'}
+                  </label>
+                  <input
+                    id="senha"
+                    type="password"
+                    autoComplete={isLogin && !trocaObrigatoria ? 'current-password' : 'new-password'}
+                    required
+                    minLength={!isLogin || trocaObrigatoria ? 8 : undefined}
+                    placeholder={!isLogin || trocaObrigatoria ? 'Mínimo 8 caracteres' : '••••••••'}
+                    value={senha}
+                    onChange={(e) => setSenha(e.target.value)}
+                    {...acessibilidade('senha')}
+                  />
                   {erroCampo('senha')}
                 </div>
+
                 {(!isLogin || trocaObrigatoria) && (
                   <>
-                    <p>Use pelo menos 8 caracteres, com letra maiúscula, minúscula e número.</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-3 -mt-1">
+                      Use pelo menos 8 caracteres, com letra maiúscula, minúscula e número.
+                    </p>
                     <div className="input-group">
                       <label htmlFor="senha_confirmation">Confirmar senha</label>
-                      <input id="senha_confirmation" type="password" autoComplete="new-password" required value={confirmacao} onChange={(e) => setConfirmacao(e.target.value)} {...acessibilidade('senha_confirmation')} />
+                      <input
+                        id="senha_confirmation"
+                        type="password"
+                        autoComplete="new-password"
+                        required
+                        placeholder="Repita a senha"
+                        value={confirmacao}
+                        onChange={(e) => setConfirmacao(e.target.value)}
+                        {...acessibilidade('senha_confirmation')}
+                      />
                       {erroCampo('senha_confirmation')}
                     </div>
                   </>
                 )}
-                <button type="submit" className="auth-button">{enviando ? 'Aguarde…' : trocaObrigatoria ? 'Salvar nova senha' : isLogin ? 'Entrar' : 'Cadastrar'}</button>
+
+                <button type="submit" className="auth-button">
+                  {enviando
+                    ? 'Aguarde…'
+                    : trocaObrigatoria
+                      ? 'Salvar nova senha'
+                      : isLogin
+                        ? 'Entrar'
+                        : 'Criar conta'}
+                </button>
+
               </fieldset>
             </form>
-            {trocaObrigatoria && <button className="auth-button" disabled={enviando} onClick={sair}>Sair da conta</button>}
+
+            {trocaObrigatoria && (
+              <button className="auth-button" disabled={enviando} onClick={sair}
+                style={{ marginTop: '0.75rem', background: 'transparent', color: '#64748b', boxShadow: 'none' }}>
+                Sair da conta
+              </button>
+            )}
           </>
         )}
       </section>

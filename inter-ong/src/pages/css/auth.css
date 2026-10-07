@@ -1,63 +1,389 @@
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
 
-.auth-container{
-    
+/* ================================================== */
+/* CONTAINER PRINCIPAL                                */
+/* ================================================== */
+
+.auth-container {
     display: flex;
     justify-content: center;
-    align-items: center;
-    text-align: center;
-    margin: 50px;
-    min-height: 60vh;
+    align-items: flex-start;
+    min-height: calc(100vh - 180px);
+    padding: 3rem 1rem 4rem;
+    background-color: transparent;
+    font-family: 'Readex Pro', sans-serif;
 }
 
-.input-group{
+/* ================================================== */
+/* CARD DO FORMULÁRIO                                 */
+/* ================================================== */
 
+.auth-card {
+    width: 100%;
+    max-width: 540px;
+    background-color: #ffffff;
+    border: 1.5px solid #fce7f3;
+    border-radius: 28px;
+    padding: 2.5rem 2.25rem;
+    box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.08);
+    text-align: left;
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html.dark .auth-card {
+    background-color: #121a2d !important;
+    border-color: #2d3f5e !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Todos os textos dentro do card no dark */
+html.dark .auth-card * {
+    color: inherit;
+}
+
+.auth-card h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 1rem 0;
+    text-align: center;
+    letter-spacing: -0.02em;
+}
+
+html.dark .auth-card h2 {
+    color: #ffffff !important;
+}
+
+.auth-card > p,
+.auth-card form p {
+    color: #475569;
+    font-size: 0.9375rem;
+    line-height: 1.6;
+    margin: 0 0 0.75rem 0;
+    text-align: center;
+}
+
+html.dark .auth-card > p,
+html.dark .auth-card form p {
+    color: #cbd5e1 !important;
+}
+
+/* Texto de sessão carregando */
+.auth-card [role="status"] {
+    color: #64748b;
+    text-align: center;
+    padding: 1rem 0;
+}
+
+html.dark .auth-card [role="status"] {
+    color: #94a3b8 !important;
+}
+
+/* ================================================== */
+/* ÁREA LOGADA (painel de conta)                      */
+/* ================================================== */
+
+.auth-card .flex.flex-col h2 {
+    color: #0f172a;
+    text-align: center;
+    font-size: 1.5rem;
+}
+
+html.dark .auth-card .flex.flex-col h2 {
+    color: #ffffff !important;
+}
+
+.auth-card .flex.flex-col > p {
+    color: #475569;
+    font-size: 1rem;
+}
+
+html.dark .auth-card .flex.flex-col > p {
+    color: #e2e8f0 !important;
+}
+
+/* ================================================== */
+/* TABS DE LOGIN / CADASTRO                           */
+/* ================================================== */
+
+.auth-tabs {
+    display: flex;
+    gap: 0.4rem;
+    background-color: #fdf2f8;
+    padding: 0.3rem;
+    border-radius: 9999px;
+    margin-bottom: 1.75rem;
+    border: 1px solid #fbcfe8;
+}
+
+html.dark .auth-tabs {
+    background-color: #0e1526 !important;
+    border-color: #2d3f5e !important;
+}
+
+.auth-tabs .auth-button {
+    flex: 1;
+    margin: 0;
+    padding: 0.6rem 1rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    background: transparent !important;
+    color: #64748b !important;
+    border: none;
+    box-shadow: none !important;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: auto;
+}
+
+html.dark .auth-tabs .auth-button {
+    color: #94a3b8 !important;
+}
+
+.auth-tabs .auth-button[aria-pressed="true"] {
+    background: #fb2782 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(251, 39, 130, 0.35) !important;
+}
+
+/* ================================================== */
+/* FIELDSET                                           */
+/* ================================================== */
+
+.auth-fields {
+    border: none;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+}
+
+html.dark .auth-fields {
+    background: transparent !important;
+}
+
+.auth-fields:disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* ================================================== */
+/* GRUPOS DE INPUT                                    */
+/* ================================================== */
+
+.input-group {
     display: flex;
     flex-direction: column;
+    gap: 0.45rem;
+    margin-bottom: 1rem;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
 
-    box-shadow: black 1px 1px 2px;
-    border-radius: 20px;
+html.dark .input-group {
+    background: transparent !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+}
 
+.input-group label {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #1e293b;
+    text-align: left;
+}
+
+html.dark .input-group label {
+    color: #e2e8f0 !important;
+}
+
+.input-group input {
     width: 100%;
-    padding: 15px;
-    margin: 10px;
-
-    
+    padding: 0.8rem 1rem;
+    border-radius: 14px;
+    border: 1.5px solid #e2e8f0;
+    background-color: #ffffff;
+    color: #0f172a;
+    font-size: 0.9375rem;
+    font-family: 'Readex Pro', sans-serif;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
 }
 
-.input-group input{
-    padding: 10px;
+html.dark .input-group input {
+    background-color: #0d1829 !important;
+    border-color: #2d3f5e !important;
+    color: #f8fafc !important;
+}
+
+.input-group input:focus {
+    border-color: #fb2782;
+    box-shadow: 0 0 0 3px rgba(251, 39, 130, 0.15);
+}
+
+html.dark .input-group input:focus {
+    border-color: #fb2782 !important;
+    box-shadow: 0 0 0 3px rgba(251, 39, 130, 0.25) !important;
+}
+
+.input-group input::placeholder {
+    color: #94a3b8;
+}
+
+html.dark .input-group input::placeholder {
+    color: #4a6080 !important;
+}
+
+/* ================================================== */
+/* BOTÃO PRINCIPAL                                    */
+/* ================================================== */
+
+.auth-button {
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
-}
-
-.auth-button{
-    box-shadow: rgb(115, 118, 119) 1px 1px 2px;
-    margin: 5px;
-    padding: 7px;
-    width: fit-content;
-
-    border-radius: 10px;
-
+    padding: 0.85rem 1.75rem;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #fb2782 0%, #ff4785 100%);
+    color: #ffffff !important;
+    font-weight: 800;
+    font-size: 0.9375rem;
+    font-family: 'Readex Pro', sans-serif;
+    border: none;
     cursor: pointer;
+    box-shadow: 0 8px 20px -4px rgba(251, 39, 130, 0.4);
+    transition: all 0.2s ease;
+    width: 100%;
+    margin-top: 0.5rem;
+    text-decoration: none;
+    text-align: center;
 }
 
-.auth-click{
-    border: 2px solid transparent; /* Espessura da borda */
-    border-radius: 16px; /* Arredondamento desejado */
-    background: linear-gradient(#ffffff, #ffffff) padding-box, 
-              linear-gradient(to right, #1e05fa, #eb03f3, #1e05fa) border-box;
-    padding: 5px;
+.auth-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 24px -4px rgba(251, 39, 130, 0.55);
+}
+
+.auth-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* ================================================== */
+/* BOTÕES RÁPIDOS (voluntariado / doação)             */
+/* ================================================== */
+
+.auth-click {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.35rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Readex Pro', sans-serif;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #fb2782 0%, #d946ef 100%);
+    border: none;
     cursor: pointer;
-    font-weight: bolder;
+    box-shadow: 0 6px 14px -3px rgba(251, 39, 130, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
 }
 
-.auth-click-2{
-    border: 2px solid transparent; /* Espessura da borda */
-    border-radius: 16px; /* Arredondamento desejado */
-    background: linear-gradient(#ffffff, #ffffff) padding-box, 
-              linear-gradient(to right, #910078, #eb03f3, #910078) border-box;
-    padding: 5px;
+.auth-click:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -4px rgba(251, 39, 130, 0.55);
+}
+
+.auth-click-2 {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.55rem 1.35rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    font-family: 'Readex Pro', sans-serif;
+    color: #ffffff !important;
+    background: linear-gradient(135deg, #0284c7 0%, #38bdf8 100%);
+    border: none;
     cursor: pointer;
-    font-weight: bolder;
+    box-shadow: 0 6px 14px -3px rgba(2, 132, 199, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
 }
 
+.auth-click-2:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px -4px rgba(2, 132, 199, 0.55);
+}
+
+/* ================================================== */
+/* MENSAGENS                                          */
+/* ================================================== */
+
+.error-msg {
+    color: #ef4444;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    margin-top: 0.25rem;
+    display: block;
+    text-align: left;
+}
+
+html.dark .error-msg {
+    color: #f87171 !important;
+}
+
+.success-msg {
+    display: block;
+    text-align: center;
+    color: #059669;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding: 0.65rem 1rem;
+    background-color: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+    border-radius: 12px;
+}
+
+html.dark .success-msg {
+    background-color: rgba(16, 185, 129, 0.12) !important;
+    border-color: rgba(16, 185, 129, 0.3) !important;
+    color: #34d399 !important;
+}
+
+/* ================================================== */
+/* GRID DE REGISTRO                                   */
+/* ================================================== */
+
+.auth-registration {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 0.75rem;
+}
+
+/* ================================================== */
+/* RESPONSIVO                                         */
+/* ================================================== */
+
+@media (max-width: 540px) {
+    .auth-registration {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-container {
+        padding: 1.5rem 0.75rem 3rem;
+    }
+
+    .auth-card {
+        padding: 1.75rem 1.25rem;
+        border-radius: 22px;
+    }
+}
