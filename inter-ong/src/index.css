@@ -1,14 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Readex+Pro:wght@160..700&display=swap');
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════════════
-   Habilita classes dark: do Tailwind com html.dark
-   ═══════════════════════════════════════════════════════════ */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ═══════════════════════════════════════════════════════════
-   VARIÁVEIS DE TEMA — mudam automaticamente com html.dark
-   ═══════════════════════════════════════════════════════════ */
+
 :root {
     /* Fundos */
     --bg-page:      #ffffff;
@@ -62,9 +57,7 @@ html.dark {
     color-scheme: dark;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   BASE GLOBAL — aplica variáveis em TUDO
-   ═══════════════════════════════════════════════════════════ */
+
 html {
     background-color: var(--bg-page);
     color: var(--text-primary);
@@ -76,36 +69,54 @@ body {
     font-family: 'Readex Pro', sans-serif;
     -webkit-font-smoothing: antialiased;
     min-height: 100vh;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 400ms cubic-bezier(0.4, 0, 0.2, 1), color 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Transições suaves em todos os elementos ao trocar tema */
-*,
-*::before,
-*::after {
+/* Transições suaves (400ms cubic-bezier) cobrindo background-color, color, border-color, box-shadow e fill */
+body,
+header,
+footer,
+nav,
+main,
+section,
+article,
+aside,
+.card,
+.pillar-card,
+.project-card,
+.impact-metric-card,
+.testimonial-card,
+.faq-card,
+.form-card,
+.auth-card,
+.sobre-card,
+.contato-card,
+.navbar-bg-gradient,
+.landing-page-main,
+.theme-toggle-btn {
     transition:
-        background-color 0.3s ease,
-        color 0.3s ease,
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
+        background-color 400ms cubic-bezier(0.4, 0, 0.2, 1),
+        color 400ms cubic-bezier(0.4, 0, 0.2, 1),
+        border-color 400ms cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 400ms cubic-bezier(0.4, 0, 0.2, 1),
+        fill 400ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ─── Headings ─────────────────────────────────────────── */
+
 h1, h2, h3, h4, h5, h6 {
     color: var(--text-primary);
 }
 
-/* ─── Parágrafos ───────────────────────────────────────── */
 p {
     color: var(--text-secondary);
 }
 
-/* ─── Links ────────────────────────────────────────────── */
+
 a {
     color: inherit;
 }
 
-/* ─── Inputs, Textareas, Selects ───────────────────────── */
+
 input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
 textarea,
 select {
@@ -114,24 +125,30 @@ select {
     border-color: var(--border);
 }
 
-input::placeholder,
-textarea::placeholder {
-    color: var(--text-faint);
+html.dark input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]),
+html.dark textarea,
+html.dark select {
+    background-color: #0e1526 !important;
+    border-color: #334155 !important;
+    color: #ffffff !important;
 }
 
-/* ─── Labels ───────────────────────────────────────────── */
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+    color: #64748b !important;
+}
+
+
 label {
     color: var(--text-primary);
 }
 
-/* ─── Spans genéricos ──────────────────────────────────── */
+
 span {
     color: inherit;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   NAVBAR
-   ═══════════════════════════════════════════════════════════ */
+
 .navbar-bg-gradient {
     background: linear-gradient(180deg, #ff7096 0%, #ff98b7 32%, #ffd5e4 70%, #fff2f6 92%, #ffffff 100%);
     position: relative;
@@ -154,9 +171,7 @@ html.dark .navbar-bg-gradient::before {
     opacity: 1;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   LANDING PAGE
-   ═══════════════════════════════════════════════════════════ */
+
 html.dark .landing-page-main {
     background-color: var(--bg-page) !important;
     color: var(--text-primary) !important;
@@ -167,7 +182,7 @@ html.dark section {
     color: var(--text-primary) !important;
 }
 
-/* Seções específicas com fundo alternativo */
+
 html.dark .about-section,
 html.dark .projects-section,
 html.dark .impact-section,
@@ -178,7 +193,6 @@ html.dark .cta-section {
     background-color: var(--bg-page) !important;
 }
 
-/* ─── Títulos de seção ─────────────────────────────────── */
 html.dark .hero-headline,
 html.dark .section-headline,
 html.dark .section-title,
@@ -198,7 +212,7 @@ html.dark .about-stat-num {
     color: #ffffff !important;
 }
 
-/* ─── Parágrafos de seção ──────────────────────────────── */
+
 html.dark .hero-subtitle,
 html.dark .section-subtext,
 html.dark .section-subtitle,
@@ -218,7 +232,7 @@ html.dark .about-stat-lbl {
     color: var(--text-secondary) !important;
 }
 
-/* ─── Cards e elementos elevados ───────────────────────── */
+
 html.dark .hero-metric-pill-item,
 html.dark .pillar-card,
 html.dark .project-card,
@@ -243,7 +257,7 @@ html.dark .testimonial-author-box {
     border-color: var(--border-soft) !important;
 }
 
-/* ─── Banners de destaque ──────────────────────────────── */
+
 html.dark .impact-banner-wrapper {
     background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%) !important;
     border-color: var(--border-soft) !important;
@@ -256,7 +270,7 @@ html.dark .cta-banner-v2 {
     border-color: #334155 !important;
 }
 
-/* ─── Tags e badges ────────────────────────────────────── */
+
 html.dark .badge-pill-pink {
     background-color: rgba(251, 39, 130, 0.18) !important;
     color: #ff66a3 !important;
@@ -280,7 +294,7 @@ html.dark .tag-sky {
     color: #38bdf8 !important;
 }
 
-/* ─── Ícones e botões circulares ───────────────────────── */
+
 html.dark .hero-pill-icon-box,
 html.dark .pillar-icon-box {
     background-color: rgba(251, 39, 130, 0.2) !important;
@@ -386,6 +400,27 @@ html.dark footer {
     background-color: #060911 !important;
     border-top: 1px solid var(--border-soft) !important;
     color: #f1f5f9 !important;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PÁGINAS SOBRE NÓS E CONTATO (Alto contraste no Tema Escuro)
+   ═══════════════════════════════════════════════════════════ */
+html.dark .sobre-card,
+html.dark .contato-card,
+html.dark .contato-info-box {
+    background-color: #121a2d !important;
+    background: #121a2d !important;
+    border-color: #2d3f5e !important;
+    color: #ffffff !important;
+}
+
+html.dark .contato-info-box p {
+    color: #cbd5e1 !important;
+}
+
+html.dark .contato-info-box .font-semibold,
+html.dark .contato-info-box strong {
+    color: #ffffff !important;
 }
 
 /* ═══════════════════════════════════════════════════════════

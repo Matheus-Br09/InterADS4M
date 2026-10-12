@@ -4,12 +4,11 @@ import { Link } from 'react-router-dom'
 import './css/LandingPage.css'
 
 
-import heroChildImg from '../assets/hero-child.jpg'
-import handsPuzzleImg from '../assets/hands-puzzle.jpg'
-import projectEduImg from '../assets/project-edu.jpg'
-import projectSupportImg from '../assets/project-support.jpg'
-import projectCommunityImg from '../assets/project-community.jpg'
-import projectCampaignImg from '../assets/project-campaign.jpg'
+import realOficinaUvaImg from '../assets/real-oficina-uva.jpg'
+import realCriancaDesenhoImg from '../assets/real-crianca-desenho.jpg'
+import realRodaConversaImg from '../assets/real-roda-conversa.jpg'
+import realRecreacaoPraiaImg from '../assets/real-recreacao-praia.jpg'
+import realOficinaArteImg from '../assets/real-oficina-arte.jpg'
 import helpHeartImg from '../assets/help-heart.jpg'
 import avatarMaeImg from '../assets/avatar-mae.jpg'
 import avatarVoluntarioImg from '../assets/avatar-voluntario.jpg'
@@ -126,8 +125,8 @@ export default function LandingPage() {
 
               <div className="hero-photo-card">
                 <img
-                  src={heroChildImg}
-                  alt="Criança apoiada pela SOS Tudo pelo Social"
+                  src={realOficinaUvaImg}
+                  alt="Crianças atendidas pelo instituto SOS Tudo pelo Social"
                 />
                 <div className="hero-shirt-tag">
                   <span className="hero-shirt-sos">SOS</span>
@@ -174,8 +173,8 @@ export default function LandingPage() {
             <div className="about-photo-wrapper">
               <div className="about-photo-box">
                 <img
-                  src={handsPuzzleImg}
-                  alt="Mãos segurando coração de quebra-cabeça"
+                  src={realOficinaArteImg}
+                  alt="Oficina educativa com as crianças e equipe do instituto"
                 />
               </div>
             </div>
@@ -298,7 +297,7 @@ export default function LandingPage() {
 
             <div className="project-card">
               <div className="project-image-box">
-                <img src={projectEduImg} alt="Área Educacional" />
+                <img src={realCriancaDesenhoImg} alt="Criança em atividade pedagógica de artes e desenvolvimento" />
               </div>
               <div className="project-body">
                 <div>
@@ -318,7 +317,7 @@ export default function LandingPage() {
 
             <div className="project-card">
               <div className="project-image-box">
-                <img src={projectSupportImg} alt="Acolhimento e Suporte" />
+                <img src={realRodaConversaImg} alt="Roda de acolhimento, conversa e suporte a jovens e famílias" />
               </div>
               <div className="project-body">
                 <div>
@@ -338,7 +337,7 @@ export default function LandingPage() {
 
             <div className="project-card">
               <div className="project-image-box">
-                <img src={projectCommunityImg} alt="Cidadania em Ação" />
+                <img src={realRecreacaoPraiaImg} alt="Crianças em atividade comunitária de lazer e convivência na praia" />
               </div>
               <div className="project-body">
                 <div>
@@ -359,7 +358,7 @@ export default function LandingPage() {
 
             <div className="project-card">
               <div className="project-image-box">
-                <img src={projectCampaignImg} alt="Eventos e Campanhas" />
+                <img src={realOficinaArteImg} alt="Oficina coletiva de expressão e campanhas comunitárias" />
               </div>
               <div className="project-body">
                 <div>

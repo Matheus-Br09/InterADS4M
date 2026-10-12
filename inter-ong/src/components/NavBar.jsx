@@ -92,23 +92,23 @@ export default function NavBar() {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all duration-200 border cursor-pointer shadow-xs bg-white/80 dark:bg-slate-800/90 text-slate-700 dark:text-slate-200 border-pink-200/70 dark:border-slate-700 hover:scale-105 active:scale-95"
+                className="theme-toggle-btn inline-flex items-center gap-2 px-3.5 py-2 rounded-full text-xs font-bold transition-all duration-300 border cursor-pointer shadow-xs bg-white/90 dark:bg-slate-800/95 text-slate-700 dark:text-slate-100 border-pink-200/70 dark:border-slate-700 hover:scale-105 active:scale-95"
                 title={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
                 aria-label={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
               >
                 {isDarkMode ? (
                   <>
-                    <svg className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 fill-amber-400 text-amber-400 transition-transform duration-300 rotate-0" viewBox="0 0 24 24">
                       <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
                     </svg>
-                    <span>Tema Claro</span>
+                    <span className="transition-opacity duration-300">Tema Claro</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4 fill-slate-700 text-slate-700" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 fill-slate-700 text-slate-700 transition-transform duration-300 rotate-0" viewBox="0 0 24 24">
                       <path d="M12.3 2a10 10 0 0 0 9.7 11.5 10 10 0 1 1-11.5-9.7c.6 0 1.2.1 1.8.2z" />
                     </svg>
-                    <span>Tema Escuro</span>
+                    <span className="transition-opacity duration-300">Tema Escuro</span>
                   </>
                 )}
               </button>
@@ -135,7 +135,7 @@ export default function NavBar() {
               <button
                 type="button"
                 onClick={toggleDarkMode}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-white/80 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-pink-200/50 dark:border-slate-700 shadow-xs"
+                className="theme-toggle-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-pink-200/50 dark:border-slate-700 shadow-xs transition-all duration-300"
                 aria-label={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
               >
                 {isDarkMode ? "☀️ Claro" : "🌙 Escuro"}
@@ -152,11 +152,10 @@ export default function NavBar() {
                 Doar
               </NavLink>
 
-
               <button
                 type="button"
                 onClick={toggleMobileMenu}
-                className="p-2.5 rounded-2xl bg-white/70 dark:bg-slate-800/80 text-gray-700 dark:text-slate-200 hover:text-[#fb2782] hover:bg-white border border-pink-200/50 dark:border-slate-700 shadow-sm transition-all duration-200 focus:outline-none"
+                className="p-2.5 rounded-2xl bg-white/70 dark:bg-slate-800 text-gray-700 dark:text-slate-100 hover:text-[#fb2782] hover:bg-white border border-pink-200/50 dark:border-slate-700 shadow-sm transition-all duration-200 focus:outline-none"
                 aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu de navegação"}
                 aria-expanded={isMobileMenuOpen}
                 aria-controls="mobile-nav-menu"
@@ -184,7 +183,6 @@ export default function NavBar() {
           </div>
         </div>
 
-
         <div
           id="mobile-nav-menu"
           role="navigation"
@@ -195,7 +193,7 @@ export default function NavBar() {
           }`}
         >
           <div className="px-4 sm:px-6 pt-2 space-y-1.5">
-            <div className="p-3 bg-white/90 dark:bg-slate-900/95 backdrop-blur-md rounded-2xl border border-white/80 dark:border-slate-800 shadow-lg space-y-1">
+            <div className="p-3 bg-white dark:bg-[#0e1526] rounded-2xl border border-pink-100 dark:border-slate-800 shadow-2xl space-y-1">
               <NavLink to="/" onClick={closeMobileMenu} className={mobileNavLinkClass} end>
                 <span>Início</span>
                 <span className="text-xs opacity-60">→</span>

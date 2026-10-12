@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { backend } from '../api/backend'
 import AvisoApi from '../components/AvisoApi'
+import realRodaConversaImg from '../assets/real-roda-conversa.jpg'
 import './css/Voluntariado.css'
 
 export default function Voluntariado() {
@@ -38,7 +39,7 @@ export default function Voluntariado() {
     <section className="volunteer-hero"><div className="hero-content">
       <span className="eyebrow">♥ Junte-se a nós</span><h1>Seja um<br /><span>voluntário</span></h1>
       <p>Sua atitude pode transformar realidades. Envie seu currículo e faça parte de um movimento que acredita em pessoas.</p>
-    </div><div className="hero-visual"><div className="hero-circle" /><img src="https://images.unsplash.com/photo-1559027615-cd4628902d4a?auto=format&fit=crop&w=900&q=85" alt="Pessoas trabalhando juntas" /></div></section>
+    </div><div className="hero-visual"><div className="hero-circle" /><img src={realRodaConversaImg} alt="Equipe e voluntários reunidos em roda de conversa no instituto" /></div></section>
     <section className="form-section"><div className="form-card">
       <div className="form-heading"><h2>Vamos conversar?</h2><p>A inscrição usa os dados da sua conta. Enviar novamente substitui a inscrição anterior e retorna para análise.</p></div>
       <AvisoApi erro={erro} mensagem={mensagem} />

@@ -2,20 +2,20 @@ import "./css/Contato.css";
 
 export default function Contato() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white p-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6">
 
-      <main className="flex flex-col lg:flex-row w-full max-w-6xl bg-gradient-to-r from-pink-400 to-rose-400 rounded-3xl p-8 gap-10 shadow-xl">
+      <main className="flex flex-col lg:flex-row w-full max-w-6xl bg-gradient-to-r from-pink-400 to-rose-400 dark:from-slate-900 dark:to-slate-800 rounded-3xl p-8 gap-10 shadow-xl dark:border dark:border-slate-800">
 
         {/* CARD DE CONTATO */}
-        <div className="w-[510px] bg-white rounded-3xl p-6 shadow-md space-y-5">
+        <div className="w-full lg:w-[510px] bg-white dark:bg-[#121a2d] contato-card rounded-3xl p-6 shadow-md space-y-5 dark:border dark:border-slate-800">
 
-          <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
-            <p className="text-sm text-gray-400">Email da empresa</p>
+          <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
+            <p className="text-sm text-gray-500 dark:text-slate-400">Email da empresa</p>
 
             <a href="mailto:sostudopelosocial@gmail.com"
                 aria-label="Enviar e-mail para sostudopelosocial@gmail.com">
 
-              <p className="font-semibold text-gray-800">
+              <p className="font-semibold text-gray-800 dark:text-white">
               sostudopelosocial@gmail.com
               </p>
 
@@ -23,33 +23,33 @@ export default function Contato() {
             
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+          <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
 
-            <p className="text-sm text-gray-400">Número de Telefone</p>
-            <p className="font-semibold text-gray-800">(81) 99281-2080</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Número de Telefone</p>
+            <p className="font-semibold text-gray-800 dark:text-white">(81) 99281-2080</p>
 
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+          <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
 
-            <p className="text-sm text-gray-400">Endereço</p>
-            <p className="font-semibold text-gray-800">
+            <p className="text-sm text-gray-500 dark:text-slate-400">Endereço</p>
+            <p className="font-semibold text-gray-800 dark:text-white">
               Rua Hosana Alves do Nascimento, nº 493
             </p>
-            <p className="text-gray-700">Casa 01 - Janga</p>
-            <p className="text-gray-700">Paulista / PE</p>
+            <p className="text-gray-700 dark:text-slate-300">Casa 01 - Janga</p>
+            <p className="text-gray-700 dark:text-slate-300">Paulista / PE</p>
 
           </div>
 
-          <div className="bg-gray-50 rounded-xl p-4 hover:shadow-md transition">
+          <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
 
-            <p className="text-sm text-gray-400">Instagram</p>
+            <p className="text-sm text-gray-500 dark:text-slate-400">Instagram</p>
 
             <a href="https://www.instagram.com/SosTudopelosocial"
                 target='_blank'
                 rel="noopener noreferrer"
                 aria-label="Visitar @Sostudopelosocial no Instagram (abre em nova aba)">
-              <p className="font-semibold text-pink-600">@SosTudopelosocial</p>
+              <p className="font-semibold text-pink-600 dark:text-pink-400">@SosTudopelosocial</p>
               
             </a>
             
@@ -60,8 +60,9 @@ export default function Contato() {
         <div className="flex-1">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3951.5527711809514!2d-34.83390742411175!3d-7.941686879106385!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x7ab3d11fee5da57%3A0x7e7b6c1816d65ae6!2sSOS%20TUDO%20PELO%20SOCIAL!5e0!3m2!1spt-BR!2sbr!4v1789083824825!5m2!1spt-BR!2sbr"
-            className="w-full h-[490px] rounded-3xl shadow-lg border border-white"
+            className="w-full h-[490px] rounded-3xl shadow-lg border border-white dark:border-slate-700"
             loading="lazy"
+            title="Localização da ONG SOS Tudo pelo Social"
           ></iframe>
         </div>
       </main>
