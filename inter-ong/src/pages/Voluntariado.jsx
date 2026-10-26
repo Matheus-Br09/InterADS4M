@@ -18,11 +18,17 @@ export default function Voluntariado() {
     const form = event.currentTarget
     const dados = new FormData(form)
 
-    // Validação de arquivo (apenas se foi enviado)
+    // Validação e remoção de arquivo vazio
     const arquivo = dados.get('arquivo_curriculo')
-    if (arquivo && arquivo.size > 0 && arquivo.size > 10 * 1024 * 1024) {
-      setErro(new Error('Escolha um currículo PDF de até 10 MB.'))
-      return
+    if (arquivo && arquivo.size > 0) {
+      // Arquivo foi enviado, validar tamanho
+      if (arquivo.size > 10 * 1024 * 1024) {
+        setErro(new Error('Escolha um currículo PDF de até 10 MB.'))
+        return
+      }
+    } else {
+      // Nenhum arquivo selecionado, remover do FormData
+      dados.delete('arquivo_curriculo')
     }
 
     ocupado.current = true
