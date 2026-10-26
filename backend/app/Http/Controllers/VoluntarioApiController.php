@@ -15,6 +15,13 @@ class VoluntarioApiController extends Controller
 
     public function store(Request $request): array
     {
+        // Debug: ver o que está vindo
+        \Log::info('Voluntario request', [
+            'has_file' => $request->hasFile('arquivo_curriculo'),
+            'all_keys' => array_keys($request->all()),
+            'file_info' => $request->file('arquivo_curriculo') ? 'File exists' : 'No file',
+        ]);
+
         // Verifica se é cadastro anônimo (sem login) ou autenticado
         $isAuthenticated = $request->user('apoiador') !== null;
 
