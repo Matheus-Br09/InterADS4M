@@ -20,6 +20,9 @@ Route::get('conteudos/{recurso}/{id}/arquivos/{campo}', [ConteudoApiController::
 Route::post('newsletter', [DashboardTesteController::class, 'storeNewsletter'])->middleware('throttle:newsletter');
 Route::get('estatisticas', [DashboardTesteController::class, 'apiApoiadores']);
 
+// Cadastro de voluntário PÚBLICO (sem necessidade de login)
+Route::post('voluntariado', [VoluntarioApiController::class, 'store'])->middleware('throttle:uploads');
+
 Route::middleware('auth:apoiador')->group(function () {
     Route::post('auth/sair', [ApoiadorAuthController::class, 'logout']);
     Route::put('auth/senha', [MinhaContaController::class, 'updateSenha'])->middleware('throttle:troca-senha-post');
@@ -33,7 +36,6 @@ Route::middleware('auth:apoiador')->group(function () {
         Route::post('apadrinhamentos', [ApoiosApiController::class, 'apadrinhar'])->middleware('throttle:doacao-unica');
         Route::delete('conta/{tipo}/{id}', [ApoiosApiController::class, 'cancelar'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos'])->whereNumber('id');
         Route::get('voluntariado', [VoluntarioApiController::class, 'minhaInscricao']);
-        Route::post('voluntariado', [VoluntarioApiController::class, 'store'])->middleware('throttle:uploads');
 
         Route::prefix('gestao')->middleware(['gestor', 'throttle:gestao'])->group(function () {
             Route::get('conteudos/{recurso}', [ConteudoApiController::class, 'index'])->whereIn('recurso', ['noticias', 'materiais', 'transparencia', 'programas']);

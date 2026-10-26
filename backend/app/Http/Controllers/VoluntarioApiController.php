@@ -15,18 +15,47 @@ class VoluntarioApiController extends Controller
 
     public function store(Request $request): array
     {
-        $dados = $request->validate([
-            'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
-            'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
-            'arquivo_curriculo' => ['required', 'file', 'mimes:pdf', 'max:10240'],
-        ]);
-        $dados['apoiador_id'] = $request->user('apoiador')->id;
-        $dados['arquivo_curriculo'] = $request->file('arquivo_curriculo')->store('curriculos', 'local');
+        // Verifica se é cadastro anônimo (sem login) ou autenticado
+        $isAuthenticated = $request->user('apoiador') !== null;
+
+        if ($isAuthenticated) {
+            // Usuário logado: usa dados da conta
+            $dados = $request->validate([
+                'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
+                'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
+                'arquivo_curriculo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            ]);
+            $dados['apoiador_id'] = $request->user('apoiador')->id;
+        } else {
+            // Cadastro anônimo: requer nome, email, celular
+            $dados = $request->validate([
+                'nome_completo' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'email', 'max:255'],
+                'celular' => ['required', 'string', 'max:20'],
+                'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
+                'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
+                'arquivo_curriculo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            ]);
+            $dados['apoiador_id'] = null;
+        }
+
+        // Upload do currículo se enviado
+        if ($request->hasFile('arquivo_curriculo')) {
+            $dados['arquivo_curriculo'] = $request->file('arquivo_curriculo')->store('curriculos', 'local');
+        }
+
         $dados['status'] = 'em_analise';
         $dados['data_inscricao'] = now();
-        $voluntario = Voluntario::updateOrCreate(['apoiador_id' => $dados['apoiador_id']], $dados);
 
-        return ['dados' => $voluntario];
+        // Se autenticado, atualiza ou cria baseado no apoiador_id
+        // Se anônimo, sempre cria novo registro
+        if ($isAuthenticated) {
+            $voluntario = Voluntario::updateOrCreate(['apoiador_id' => $dados['apoiador_id']], $dados);
+        } else {
+            $voluntario = Voluntario::create($dados);
+        }
+
+        return ['dados' => $voluntario, 'message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
     }
 
     public function index(): array

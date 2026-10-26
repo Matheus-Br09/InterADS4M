@@ -9,9 +9,10 @@ export default defineConfig(({ mode }) => {
     changeOrigin: true,
     cookieDomainRewrite: '',
   }
+  const allowedHosts = ['.ngrok-free.dev', '.ngrok-free.app', '.ngrok.io', '.ngrok.app']
   return {
     plugins: [react(), tailwindcss()],
-    server: { proxy: { '/api': proxy, '/img': proxy } },
-    preview: { proxy: { '/api': proxy, '/img': proxy } },
+    server: { allowedHosts, proxy: { '/api': proxy, '/img': proxy } },
+    preview: { allowedHosts, proxy: { '/api': proxy, '/img': proxy } },
   }
 })

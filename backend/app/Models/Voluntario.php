@@ -16,6 +16,9 @@ class Voluntario extends Model
 
     protected $fillable = [
         'apoiador_id',
+        'nome_completo',
+        'email',
+        'celular',
         'area_atuacao',
         'disponibilidade',
         'arquivo_curriculo',
