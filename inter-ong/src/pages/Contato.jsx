@@ -21,7 +21,7 @@ export default function Contato() {
             <a href="mailto:sostudopelosocial@gmail.com"
                 aria-label="Enviar e-mail para sostudopelosocial@gmail.com">
 
-              <p className="font-semibold text-gray-800 dark:text-white">
+              <p className="font-semibold break-all text-gray-800 dark:text-white">
               sostudopelosocial@gmail.com
               </p>
 
@@ -66,7 +66,7 @@ export default function Contato() {
                 target='_blank'
                 rel="noopener noreferrer"
                 aria-label="Visitar @Sostudopelosocial no Instagram (abre em nova aba)">
-              <p className="font-semibold text-pink-600 dark:text-pink-400">@SosTudopelosocial</p>
+              <p className="font-semibold break-all text-pink-600 dark:text-pink-400">@SosTudopelosocial</p>
               
             </a>
             

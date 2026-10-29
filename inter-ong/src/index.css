@@ -27,6 +27,9 @@
     --pink:         #fb2782;
     --pink-light:   #fff1f6;
 
+    /* Fundo das faixas de página (no claro, degradê suave; no escuro, liso) */
+    --fundo-secao:  linear-gradient(180deg, #ffffff 0%, #fff7f9 50%, #ffffff 100%);
+
     font-family: 'Readex Pro', sans-serif;
     color-scheme: light;
 }
@@ -53,6 +56,8 @@ html.dark {
     /* Marca (inalterada) */
     --pink:         #fb2782;
     --pink-light:   rgba(251, 39, 130, 0.15);
+
+    --fundo-secao:  var(--bg-page);
 
     color-scheme: dark;
 }
@@ -103,17 +108,21 @@ aside,
 }
 
 
-h1, h2, h3, h4, h5, h6 {
-    color: var(--text-primary);
-}
+/* Cores padrão de texto ficam na camada "base" do Tailwind: assim uma classe de cor
+   (text-white, text-slate-900…) em um <p> ou <h2> vence a cor padrão. Fora da camada,
+   a regra global ganhava da classe e causava texto claro sobre fundo claro. */
+@layer base {
+    h1, h2, h3, h4, h5, h6 {
+        color: var(--text-primary);
+    }
 
-p {
-    color: var(--text-secondary);
-}
+    p {
+        color: var(--text-secondary);
+    }
 
-
-a {
-    color: inherit;
+    a {
+        color: inherit;
+    }
 }
 
 
@@ -139,13 +148,14 @@ html.dark textarea::placeholder {
 }
 
 
-label {
-    color: var(--text-primary);
-}
+@layer base {
+    label {
+        color: var(--text-primary);
+    }
 
-
-span {
-    color: inherit;
+    span {
+        color: inherit;
+    }
 }
 
 
@@ -374,6 +384,31 @@ html.dark .text-gray-400 {
     color: var(--text-muted) !important;
 }
 
+/* ─── Painel da gestão no tema escuro ──────────────────── */
+html.dark .border-slate-300,
+html.dark .border-slate-400 {
+    border-color: var(--border) !important;
+}
+
+html.dark .hover\:bg-slate-100:hover {
+    background-color: var(--bg-card-alt) !important;
+}
+
+html.dark .text-pink-700,
+html.dark .hover\:text-pink-700:hover {
+    color: #ff66a3 !important;
+}
+
+/* Avisos coloridos: fundo translúcido e texto claro, em vez de caixa clara com texto escuro */
+html.dark .bg-yellow-50 { background-color: rgba(250, 204, 21, 0.12) !important; }
+html.dark .text-yellow-900 { color: #fde68a !important; }
+html.dark .bg-red-50 { background-color: rgba(248, 113, 113, 0.14) !important; }
+html.dark .text-red-800,
+html.dark .hover\:text-red-800:hover { color: #fca5a5 !important; }
+html.dark .border-red-300 { border-color: rgba(248, 113, 113, 0.5) !important; }
+html.dark .bg-green-50 { background-color: rgba(74, 222, 128, 0.14) !important; }
+html.dark .text-green-900 { color: #bbf7d0 !important; }
+
 /* ─── Brilho ambiente ──────────────────────────────────── */
 html.dark .hero-ambient-glow-sky,
 html.dark .hero-ambient-glow-pink {
@@ -394,6 +429,14 @@ html.dark .help-photo-box {
 footer {
     background-color: #0b1120;
     color: #f1f5f9;
+}
+
+/* O rodapé é sempre escuro: textos dentro dele herdam o claro do rodapé em vez da
+   cor padrão de parágrafo (que no tema claro é cinza escuro e some no fundo escuro). */
+@layer base {
+    footer h1, footer h2, footer h3, footer h4, footer p, footer label {
+        color: inherit;
+    }
 }
 
 html.dark footer {

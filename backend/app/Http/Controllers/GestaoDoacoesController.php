@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DoacaoUnica;
+use App\Support\BuscaLike;
 use Illuminate\Http\Request;
 
 class GestaoDoacoesController extends Controller
@@ -11,12 +12,21 @@ class GestaoDoacoesController extends Controller
 
     public function index(Request $request): array
     {
-        $filtros = $request->validate(['status' => ['nullable', 'in:pendente,concluido,cancelado,expirado']]);
+        $filtros = $request->validate([
+            'status' => ['nullable', 'in:pendente,concluido,cancelado,expirado'],
+            'busca' => ['nullable', 'string', 'max:100'],
+        ]);
 
         $consulta = DoacaoUnica::query()->select(self::CAMPOS);
 
         if (! empty($filtros['status'])) {
             $consulta->where('status', $filtros['status']);
+        }
+
+        if ($padrao = BuscaLike::padrao($filtros['busca'] ?? null)) {
+            $consulta->where(fn ($q) => $q
+                ->whereRaw(BuscaLike::condicao('nome_doador'), [$padrao])
+                ->orWhereRaw(BuscaLike::condicao('protocolo'), [$padrao]));
         }
 
         return ['dados' => $consulta->orderByDesc('data_doacao')->orderByDesc('id')->paginate(20)];

@@ -132,7 +132,7 @@ export default function Doar() {
             <div className="flex items-center justify-between mb-6 pb-4 border-b border-pink-100/80 dark:border-slate-800">
               <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white">Doação única</h2>
               <span className="text-xs font-semibold px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800">
-                Pix Instantâneo
+                Doação por Pix
               </span>
             </div>
 

@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { backend } from '../../api/backend'
+import logoImg from '../../assets/logo.png'
+import BotaoTema from './BotaoTema'
 
 const campo = 'mt-1 w-full rounded-xl border border-slate-300 bg-white p-3 text-slate-900 focus-visible:outline-2 focus-visible:outline-pink-600'
 
@@ -27,8 +29,9 @@ export default function GestaoEntrar() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-pink-50 px-4 py-12 text-slate-900">
-      <form onSubmit={entrar} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[var(--bg-page)] px-4 py-12 text-slate-900">
+      <form onSubmit={entrar} className="w-full max-w-sm rounded-2xl border border-[var(--border-soft)] border-t-4 border-t-[#fb2782] bg-white p-8 shadow-lg">
+        <img src={logoImg} alt="SOS Tudo pelo Social" className="mb-4 h-12 w-auto" />
         <h1 className="text-2xl font-bold">Painel da ONG</h1>
         <p className="mt-2 text-sm text-slate-600">Área restrita à equipe de gestão.</p>
         <fieldset disabled={enviando} className="mt-6 space-y-4">
@@ -44,6 +47,7 @@ export default function GestaoEntrar() {
           </button>
         </fieldset>
       </form>
+      <BotaoTema />
     </main>
   )
 }

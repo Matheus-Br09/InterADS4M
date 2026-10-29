@@ -1,6 +1,13 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { rotulo, STATUS_DOACAO, STATUS_VOLUNTARIO, formatarReais, calcularIdade, normalizarLista } from '../src/utils/gestao.js'
+import { rotulo, STATUS_DOACAO, STATUS_VOLUNTARIO, formatarReais, calcularIdade, normalizarLista, textoOuReserva, mensagemBuscaVazia } from '../src/utils/gestao.js'
+
+test('textoOuReserva devolve o texto, ou a reserva quando vazio', () => {
+  assert.equal(textoOuReserva('Ana', '(sem nome)'), 'Ana')
+  assert.equal(textoOuReserva('  ', '(sem nome)'), '(sem nome)')
+  assert.equal(textoOuReserva(null, '—'), '—')
+  assert.equal(textoOuReserva(undefined, '—'), '—')
+})
 
 test('rotulo traduz status conhecidos e mantém desconhecidos', () => {
   assert.equal(rotulo(STATUS_DOACAO, 'concluido'), 'Confirmada')
@@ -32,4 +39,10 @@ test('normalizarLista entende o paginador do Laravel', () => {
 
 test('normalizarLista entende array simples', () => {
   assert.deepEqual(normalizarLista([1, 2]), { itens: [1, 2], pagina: 1, ultima: 1 })
+})
+
+test('mensagemBuscaVazia avisa que a busca vale só dentro do filtro escolhido', () => {
+  assert.match(mensagemBuscaVazia('Pendentes'), /Pendentes/)
+  assert.match(mensagemBuscaVazia('Pendentes'), /Todas/)
+  assert.doesNotMatch(mensagemBuscaVazia('Todas'), /Tente o botão/)
 })

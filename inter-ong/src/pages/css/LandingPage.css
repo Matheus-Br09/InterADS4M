@@ -430,7 +430,7 @@
 .about-section {
   padding-top: 4.5rem;
   padding-bottom: 4.5rem;
-  background: linear-gradient(180deg, #ffffff 0%, #fff7f9 50%, #ffffff 100%);
+  background: var(--fundo-secao);
   position: relative;
 }
 
@@ -936,7 +936,7 @@
 .testimonials-section {
   padding-top: 4.5rem;
   padding-bottom: 4.5rem;
-  background: linear-gradient(180deg, #ffffff 0%, #fff8fa 50%, #ffffff 100%);
+  background: var(--fundo-secao);
 }
 
 .testimonials-grid {
@@ -1100,11 +1100,13 @@
   }
 
   .help-top-row {
-    grid-template-columns: 1fr;
+    /* minmax(0, 1fr): a coluna não cresce além da tela para caber a foto e as frases */
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .help-top-right {
     justify-content: flex-start;
+    flex-wrap: wrap;
   }
 
   .cta-banner-wrapper {
@@ -1184,5 +1186,18 @@
   .hero-float-badge {
     left: 0;
     bottom: -0.5rem;
+  }
+
+  /* Textos decorativos "Mais inclusão…": dentro da tela, sem cortar na borda */
+  .hero-floating-doodles {
+    right: 0;
+  }
+
+  .hero-doodle-line {
+    font-size: 1.35rem;
+  }
+
+  .hero-doodle-heart {
+    font-size: 1.35rem;
   }
 }

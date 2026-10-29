@@ -3,13 +3,14 @@ const H2 = 'text-xl font-bold text-slate-900 dark:text-white'
 export default function Privacidade() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-12 sm:px-6 text-slate-700 dark:text-slate-300">
-      <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Política de privacidade</h1>
-      <p className="mt-3">
+      <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">Política de privacidade</h1>
+      <div className="mt-4 h-1.5 w-20 rounded-full bg-[#fb2782]" aria-hidden="true" />
+      <p className="mt-5 text-lg">
         Esta página explica, de forma simples, como a SOS Tudo pelo Social cuida das informações que você nos entrega pelo site.
       </p>
 
       {/* REVISAR COM A ONG */}
-      <section className="mt-8 space-y-6">
+      <section className="mt-8 space-y-5 [&>div]:rounded-3xl [&>div]:border [&>div]:border-pink-100 [&>div]:bg-white [&>div]:p-6 [&>div]:shadow-sm dark:[&>div]:border-slate-800 dark:[&>div]:bg-slate-900">
         <div>
           <h2 className={H2}>Quais dados coletamos</h2>
           <ul className="mt-2 list-disc space-y-1 pl-6">

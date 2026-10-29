@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Mail\NovoVoluntario;
 use App\Models\Voluntario;
 use App\Support\AvisaGestao;
+use App\Support\BuscaLike;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
@@ -47,9 +48,22 @@ class VoluntarioApiController extends Controller
         return ['message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
     }
 
-    public function index(): array
+    public function index(Request $request): array
     {
-        return ['dados' => Voluntario::with('apoiador:id,nome_completo,email')->latest('id')->paginate(20)];
+        $filtros = $request->validate(['busca' => ['nullable', 'string', 'max:100']]);
+
+        $consulta = Voluntario::with('apoiador:id,nome_completo,email')->latest('id');
+
+        // Cadastros antigos guardam o nome no apoiador ligado. O e-mail do apoiador
+        // fica de fora: o modelo o esconde da API, então achar por ele seria um resultado sem explicação.
+        if ($padrao = BuscaLike::padrao($filtros['busca'] ?? null)) {
+            $consulta->where(fn ($q) => $q
+                ->whereRaw(BuscaLike::condicao('nome_completo'), [$padrao])
+                ->orWhereRaw(BuscaLike::condicao('email'), [$padrao])
+                ->orWhereHas('apoiador', fn ($a) => $a->whereRaw(BuscaLike::condicao('nome_completo'), [$padrao])));
+        }
+
+        return ['dados' => $consulta->paginate(20)];
     }
 
     public function update(Request $request, int $id): array
