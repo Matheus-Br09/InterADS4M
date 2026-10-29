@@ -81,8 +81,8 @@ export default function NavBar() {
                 Voluntariado
               </NavLink>
 
-              <NavLink to="/login" className={desktopNavLinkClass}>
-                Login / Cadastro
+              <NavLink to="/servicos" className={desktopNavLinkClass}>
+                Serviços
               </NavLink>
 
             </nav>
@@ -216,7 +216,7 @@ export default function NavBar() {
 
               <NavLink to="/noticias" onClick={closeMobileMenu} className={mobileNavLinkClass}>Notícias →</NavLink>
               <NavLink to="/voluntariado" onClick={closeMobileMenu} className={mobileNavLinkClass}>Voluntariado →</NavLink>
-              <NavLink to="/login" onClick={closeMobileMenu} className={mobileNavLinkClass}>Minha conta / Entrar →</NavLink>
+              <NavLink to="/servicos" onClick={closeMobileMenu} className={mobileNavLinkClass}>Serviços →</NavLink>
               <div className="pt-2">
                 <NavLink
                   to="/doar"

@@ -1,8 +1,11 @@
 import logoImg from '../assets/logo.png'
 import '../pages/css/Footer.css'
 import { Link } from 'react-router-dom'
+import { useConfig } from '../context/ConfigContext.jsx'
+import { linkInstagram } from '../utils/instagram.js'
 
 export default function Footer(){
+    const instagram = linkInstagram(useConfig()?.instagram)
     return(
         <footer className="flex flex-col gap-8 bg-blue-950 p-8 text-white lg:flex-row lg:justify-between" aria-label="Rodapé do site">
             <div className='w-full max-w-sm'>
@@ -11,7 +14,7 @@ export default function Footer(){
 
                 <nav aria-label="Redes sociais" className='flex mt-2 gap-3'>
                    <a
-                     href="https://www.instagram.com/SosTudopelosocial"
+                     href={instagram}
                      target='_blank'
                      rel="noopener noreferrer"
                      aria-label="Visitar nosso Instagram (abre em nova aba)"
@@ -40,6 +43,7 @@ export default function Footer(){
                         <li className='link-rapido'><Link to="/contato">Contato</Link></li>
                         <li className='link-rapido'><Link to="/programas">Programas</Link></li>
                         <li className='link-rapido'><Link to="/transparencia">Transparência</Link></li>
+                        <li className='link-rapido'><Link to="/privacidade">Política de privacidade</Link></li>
                     </ul>
                 </nav>
 
@@ -57,7 +61,7 @@ export default function Footer(){
 
                     <p className='contato-rapido'>
                         <a
-                            href="https://www.instagram.com/SosTudopelosocial"
+                            href={instagram}
                             target='_blank'
                             rel="noopener noreferrer"
                             aria-label="Visitar @Sostudopelosocial no Instagram (abre em nova aba)"

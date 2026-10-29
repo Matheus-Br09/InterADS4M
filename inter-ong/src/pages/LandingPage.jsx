@@ -1,5 +1,3 @@
-import { useEffect, useState } from 'react'
-import { backend } from '../api/backend'
 import { Link } from 'react-router-dom'
 import './css/LandingPage.css'
 
@@ -15,15 +13,6 @@ import avatarVoluntarioImg from '../assets/avatar-voluntario.jpg'
 import avatarParceiroImg from '../assets/avatar-parceiro.jpg'
 
 export default function LandingPage() {
-  const [estatisticas, setEstatisticas] = useState(null)
-  const [erroEstatisticas, setErroEstatisticas] = useState(false)
-  useEffect(() => {
-    const controller = new AbortController()
-    backend.estatisticas({ signal: controller.signal }).then(dados => {
-      if (!controller.signal.aborted) setEstatisticas(dados)
-    }).catch(() => { if (!controller.signal.aborted) setErroEstatisticas(true) })
-    return () => controller.abort()
-  }, [])
   return (
     <main className="landing-page-main" id="conteudo-principal">
 
@@ -74,49 +63,6 @@ export default function LandingPage() {
                   <span>♡</span>
                 </Link>
               </div>
-
-
-              <div className="hero-metrics-pills-row">
-
-                <div className="hero-metric-pill-item">
-                  <div className="hero-pill-icon-box">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="hero-pill-number">{estatisticas?.total ?? (erroEstatisticas ? '—' : '…')}</div>
-                    <div className="hero-pill-label">apoiadores cadastrados</div>
-                  </div>
-                </div>
-
-
-                <div className="hero-metric-pill-item">
-                  <div className="hero-pill-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="hero-pill-number">{estatisticas?.doadores_mensais ?? (erroEstatisticas ? '—' : '…')}</div>
-                    <div className="hero-pill-label">doadores mensais ativos</div>
-                  </div>
-                </div>
-
-
-                <div className="hero-metric-pill-item">
-                  <div className="hero-pill-icon-box">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="hero-pill-number">{estatisticas?.doadores_unicos ?? (erroEstatisticas ? '—' : '…')}</div>
-                    <div className="hero-pill-label">doadores únicos confirmados</div>
-                  </div>
-                </div>
-              </div>
-
             </div>
 
 
@@ -406,59 +352,9 @@ export default function LandingPage() {
                   <span className="text-pink-highlight">grandes transformações.</span>
                 </h2>
                 <p className="impact-desc">
-                  Contagens dos registros do sistema. Dados de demonstração e registros antigos dependem de revisão pela ONG.
+                  Cada doação, cada hora de voluntariado e cada palavra de incentivo ajudam a manter as portas abertas para as famílias que atendemos.
                 </p>
               </div>
-
-
-              <div className="impact-metrics-row">
-
-
-                <div className="impact-metric-card">
-                  <div className="impact-metric-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                    </svg>
-                  </div>
-                  <div className="impact-metric-num">{estatisticas?.total ?? (erroEstatisticas ? '—' : '…')}</div>
-                  <div className="impact-metric-lbl">apoiadores cadastrados</div>
-                </div>
-
-
-                <div className="impact-metric-card">
-                  <div className="impact-metric-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                    </svg>
-                  </div>
-                  <div className="impact-metric-num">{estatisticas?.doadores_mensais ?? (erroEstatisticas ? '—' : '…')}</div>
-                  <div className="impact-metric-lbl">doadores mensais ativos</div>
-                </div>
-
-
-                <div className="impact-metric-card">
-                  <div className="impact-metric-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                  </div>
-                  <div className="impact-metric-num">{estatisticas?.doadores_unicos ?? (erroEstatisticas ? '—' : '…')}</div>
-                  <div className="impact-metric-lbl">doadores únicos confirmados</div>
-                </div>
-
-
-                <div className="impact-metric-card">
-                  <div className="impact-metric-icon">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M5 9.2h3V19H5zM10.6 5h2.8v14h-2.8zm5.6 8H19v6h-2.8z" />
-                    </svg>
-                  </div>
-                  <div className="impact-metric-num">♥</div>
-                  <div className="impact-metric-lbl">apoio à comunidade</div>
-                </div>
-
-              </div>
-
             </div>
 
           </div>

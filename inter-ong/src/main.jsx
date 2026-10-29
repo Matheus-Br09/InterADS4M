@@ -13,7 +13,8 @@ import Sobre from './pages/Sobre.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
-import LoginECadastro from './pages/LoginECadastro.jsx'
+import Servicos from './pages/Servicos.jsx'
+import Privacidade from './pages/Privacidade.jsx'
 import GestaoMateriais from './pages/GestaoMateriais.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
@@ -51,10 +52,8 @@ const router = createBrowserRouter([
         path: "educacional",
         element: <Educacional />
       },
-      {
-        path: "login",
-        element: <LoginECadastro />
-      },
+      { path: "servicos", element: <Servicos /> },
+      { path: "privacidade", element: <Privacidade /> },
 
       {
         path: "gestao/materiais",
