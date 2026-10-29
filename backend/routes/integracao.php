@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApoiadorAuthController;
 use App\Http\Controllers\ApoiosApiController;
+use App\Http\Controllers\ConfigPublicaController;
 use App\Http\Controllers\ContaApiController;
 use App\Http\Controllers\ConteudoApiController;
 use App\Http\Controllers\DashboardTesteController;
@@ -19,6 +20,7 @@ Route::get('conteudos/{recurso}/{id}', [ConteudoApiController::class, 'show'])->
 Route::get('conteudos/{recurso}/{id}/arquivos/{campo}', [ConteudoApiController::class, 'arquivo'])->whereNumber('id')->name('api.conteudo.arquivo');
 Route::post('newsletter', [DashboardTesteController::class, 'storeNewsletter'])->middleware('throttle:newsletter');
 Route::get('estatisticas', [DashboardTesteController::class, 'apiApoiadores']);
+Route::get('config-publica', ConfigPublicaController::class);
 
 // Cadastro de voluntário PÚBLICO (sem necessidade de login)
 Route::post('voluntariado', [VoluntarioApiController::class, 'store'])->middleware('throttle:uploads');
