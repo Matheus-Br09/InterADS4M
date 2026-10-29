@@ -177,3 +177,83 @@ test('notícias, newsletter e voluntariado usam as rotas reais', async () => {
   assert.equal(fetch.mock.calls[3].arguments[0], '/api/v1/newsletter')
   assert.equal(fetch.mock.calls[4].arguments[0], '/api/v1/voluntariado')
 })
+
+test('doação anônima envia valor e dados opcionais por POST /api/v1/doacoes com CSRF', async () => {
+  const fetch = responder([json({ token: 'csrf' }), json({ dados: { protocolo: 'D-1' }, pix: { copia_e_cola: '000201' } }, 201)])
+  const dados = { valor: '50.00', nome_doador: 'Maria', email_doador: 'maria@example.org' }
+  await backend.doacao(dados)
+  const [url, options] = fetch.mock.calls[1].arguments
+  assert.equal(url, '/api/v1/doacoes')
+  assert.equal(options.method, 'POST')
+  assert.equal(options.headers['X-CSRF-TOKEN'], 'csrf')
+  assert.deepEqual(JSON.parse(options.body), dados)
+})
+
+test('gestão confirma doação com PATCH /api/v1/gestao/doacoes/7 e corpo {status:"concluido"}', async () => {
+  const fetch = responder([json({ token: 'csrf' }), json({ dados: { id: 7 } })])
+  await backend.atualizarDoacao(7, 'concluido')
+  const [url, options] = fetch.mock.calls[1].arguments
+  assert.equal(url, '/api/v1/gestao/doacoes/7')
+  assert.equal(options.method, 'PATCH')
+  assert.deepEqual(JSON.parse(options.body), { status: 'concluido' })
+})
+
+test('excluir voluntário usa DELETE e aceita 204', async () => {
+  const fetch = responder([json({ token: 'csrf' }), new Response(null, { status: 204 })])
+  assert.equal(await backend.excluirVoluntario(3), null)
+  const [url, options] = fetch.mock.calls[1].arguments
+  assert.equal(url, '/api/v1/gestao/voluntarios/3')
+  assert.equal(options.method, 'DELETE')
+})
+
+test('configPublica faz GET /api/v1/config-publica sem CSRF', async () => {
+  const fetch = responder([json({ dados: { pix_disponivel: true, whatsapp: null, instagram: null } })])
+  const resposta = await backend.configPublica()
+  assert.equal(resposta.dados.pix_disponivel, true)
+  assert.equal(fetch.mock.callCount(), 1)
+  const [url, options] = fetch.mock.calls[0].arguments
+  assert.equal(url, '/api/v1/config-publica')
+  assert.equal(options.method, undefined)
+  assert.equal(options.headers['X-CSRF-TOKEN'], undefined)
+})
+
+test('métodos da gestão montam método, URL e corpo corretos', async () => {
+  const fetch = responder([
+    json({ dados: [] }), json({ dados: [] }), json({ dados: [] }), json({ dados: [] }), json({ dados: [] }),
+    json({ token: 'c' }), json({ dados: {} }),
+    json({ token: 'c' }), json({ dados: {} }),
+    json({ token: 'c' }), json({ dados: {} }),
+    json({ token: 'c' }), json({ dados: {} }),
+    json({ token: 'c' }), new Response(null, { status: 204 }),
+    json({ token: 'c' }), json({ dados: {}, senha_temporaria: 'x' }, 201),
+    json({ token: 'c' }), new Response(null, { status: 204 }),
+  ])
+  await backend.gestaoDoacoes('pendente', 2)
+  await backend.gestaoDoacoes()
+  await backend.gestaoVoluntarios(3)
+  await backend.gestaoConteudos('noticias', 4)
+  await backend.gestaoGestores()
+  await backend.anonimizarDoacao(5)
+  await backend.atualizarVoluntario(6, { status: 'entrevista', data_entrevista: '2026-11-01' })
+  const form = new FormData()
+  await backend.publicarConteudo('materiais', form)
+  await backend.excluirConteudo('noticias', 8)
+  await backend.criarGestor({ nome_completo: 'Ana', email: 'ana@example.org' })
+  await backend.desativarGestor(9)
+  const chamadas = fetch.mock.calls.map(({ arguments: args }) => [args[0], args[1].method ?? 'GET'])
+  assert.deepEqual(chamadas.filter((_, i) => i < 5 || i % 2 === 0), [
+    ['/api/v1/gestao/doacoes?status=pendente&page=2', 'GET'],
+    ['/api/v1/gestao/doacoes?page=1', 'GET'],
+    ['/api/v1/gestao/voluntarios?page=3', 'GET'],
+    ['/api/v1/gestao/conteudos/noticias?page=4', 'GET'],
+    ['/api/v1/gestao/gestores', 'GET'],
+    ['/api/v1/gestao/doacoes/5', 'DELETE'],
+    ['/api/v1/gestao/voluntarios/6', 'PATCH'],
+    ['/api/v1/gestao/conteudos/materiais', 'POST'],
+    ['/api/v1/gestao/conteudos/noticias/8', 'DELETE'],
+    ['/api/v1/gestao/gestores', 'POST'],
+    ['/api/v1/gestao/gestores/9', 'DELETE'],
+  ])
+  assert.equal(fetch.mock.calls[10].arguments[1].body, form)
+  assert.equal(backend.curriculoUrl(6), '/api/v1/gestao/voluntarios/6/curriculo')
+})
