@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardTesteController;
 use App\Http\Controllers\DoacaoUnicaController;
 use App\Http\Controllers\GestaoDoacoesController;
 use App\Http\Controllers\GestaoGestoresController;
+use App\Http\Controllers\GestaoResumoController;
 use App\Http\Controllers\MinhaContaController;
 use App\Http\Controllers\SessaoApiController;
 use App\Http\Controllers\VoluntarioApiController;
@@ -46,6 +47,7 @@ Route::middleware('auth:apoiador')->group(function () {
             Route::patch('voluntarios/{id}', [VoluntarioApiController::class, 'update'])->whereNumber('id');
             Route::delete('voluntarios/{id}', [VoluntarioApiController::class, 'destroy'])->whereNumber('id');
             Route::get('voluntarios/{id}/curriculo', [VoluntarioApiController::class, 'curriculo'])->whereNumber('id');
+            Route::get('resumo', [GestaoResumoController::class, 'show']);
             Route::get('doacoes', [GestaoDoacoesController::class, 'index']);
             Route::patch('doacoes/{id}', [GestaoDoacoesController::class, 'update'])->whereNumber('id');
             Route::delete('doacoes/{id}', [GestaoDoacoesController::class, 'anonimizar'])->whereNumber('id');
