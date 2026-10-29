@@ -177,6 +177,13 @@ O Laravel já traz `backend/public/.htaccess` (feito para ele ser a pasta públi
 2. Crie um `.htaccess` na pasta pública (junto ao `index.html` do site):
 
 ```apache
+# Cabeçalhos de segurança também para o site estático (SPA)
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
 RewriteEngine On
 
 # Cabeçalhos que o Laravel precisa receber
@@ -217,7 +224,7 @@ Alternativa: um subdomínio (`api.<domínio>`) com `backend/public` como pasta r
 | `CORS_ALLOWED_ORIGINS` | `https://<domínio>` (nunca `*`) |
 | `TRUSTED_PROXIES` | deixe **vazio** (veja a nota abaixo) |
 | `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_SCHEME`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` | dados do e-mail da ONG na Hostinger |
-| `ONG_PIX_CHAVE`, `ONG_PIX_NOME`, `ONG_PIX_CIDADE` | dados Pix **confirmados com a ONG** |
+| `ONG_PIX_CHAVE`, `ONG_PIX_NOME`, `ONG_PIX_CIDADE` | dados Pix **confirmados com a ONG**. Formato da chave: CPF/CNPJ só dígitos; celular como `+55DDDNÚMERO`; e-mail como está; chave aleatória (EVP) como o banco informa |
 | `ONG_WHATSAPP`, `ONG_INSTAGRAM`, `ONG_EMAIL_GESTAO` | contatos da ONG (`ONG_EMAIL_GESTAO` recebe os avisos de doação e voluntário) |
 | `ONG_DOACAO_EXPIRA_DIAS` | opcional (padrão 7) |
 
@@ -249,6 +256,8 @@ php artisan gestor:criar "Nome da Pessoa" email@da-ong.org.br
 ```
 
 O comando mostra uma **senha temporária uma única vez**; anote e entregue por canal privado. Em `https://<domínio>/gestao/entrar` a pessoa entra e é obrigada a criar a própria senha. Os outros gestores são criados pelo próprio painel (aba Gestores). Guia para a equipe: [`docs/guia-painel-gestao.md`](docs/guia-painel-gestao.md).
+
+Se um gestor for desativado por engano, reative-o por SSH com `php artisan gestor:senha email@dele.com` (gera uma senha nova e devolve o acesso de gestor; entregue a senha por canal privado).
 
 #### 9. Rotina diária (cron)
 
@@ -286,7 +295,7 @@ Spec: `docs/superpowers/specs/2026-10-29-mvp-lancamento-design.md`.
 - [ ] 4. Um gestor publica uma notícia e um PDF de transparência sozinho, seguindo o guia.
 - [ ] 5. O site funciona no celular; o widget de acessibilidade muda fonte e contraste.
 - [ ] 6. Testes passando: `php artisan test` (backend), `npm test` e `npm run lint` (frontend).
-- [ ] 7. Chave Pix exibida confirmada pela ONG.
+- [ ] 7. Chave Pix exibida confirmada pela ONG, e um Pix real de R$ 5 feito escaneando o QR do site com o app de um banco, antes do anúncio.
 - [ ] 8. Teste com a ONG (critério de aceitação do documento acadêmico) antes do anúncio público.
 
 #### Lembretes
@@ -308,7 +317,7 @@ O login do gestor é `POST /api/v1/auth/entrar`. A resposta 403 com `codigo=troc
 - ✅ MVP de lançamento (Fase 1) pronto: doação via Pix com protocolo, cadastro de voluntários, painel de gestão, WhatsApp, acessibilidade, páginas de serviços e privacidade
 - ✅ API pública sem dados pessoais; rotas de gestão protegidas por login
 - ✅ Testes automatizados no backend e no frontend
-- ⏳ Fase 2: publicar na Hostinger (seção acima), confirmar a chave Pix com a ONG, teste de aceitação com a ONG, incluir prints no guia do painel, revisar textos de serviços e privacidade com a ONG
+- ⏳ Fase 2: publicar na Hostinger (seção acima), confirmar a chave Pix com a ONG (e fazer um Pix real de R$ 5 pelo QR do site antes de anunciar), teste de aceitação com a ONG, incluir prints no guia do painel, revisar textos de serviços e privacidade com a ONG
 - 🗑️ Removidos do MVP: login/"minha conta" do apoiador e apadrinhamento
 
 ---
