@@ -69,7 +69,7 @@ export default function GestaoLayout() {
           ))}
         </nav>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-8"><Outlet /></main>
+      <main className="mx-auto max-w-6xl px-4 py-8"><Outlet context={{ gestor }} /></main>
     </div>
   )
 }

@@ -17,9 +17,10 @@ import Servicos from './pages/Servicos.jsx'
 import Privacidade from './pages/Privacidade.jsx'
 import GestaoLayout from './pages/gestao/GestaoLayout.jsx'
 import GestaoEntrar from './pages/gestao/GestaoEntrar.jsx'
-import EmBreve from './pages/gestao/EmBreve.jsx'
 import GestaoDoacoes from "./pages/gestao/GestaoDoacoes.jsx"
 import GestaoVoluntarios from "./pages/gestao/GestaoVoluntarios.jsx"
+import GestaoConteudos from "./pages/gestao/GestaoConteudos.jsx"
+import GestaoGestores from "./pages/gestao/GestaoGestores.jsx"
 import GestaoTrocarSenha from './pages/gestao/GestaoTrocarSenha.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
@@ -41,8 +42,8 @@ const router = createBrowserRouter([
       // Telas das Tarefas 18 e 19 substituem estes avisos.
       { path: "doacoes", element: <GestaoDoacoes /> },
       { path: "voluntarios", element: <GestaoVoluntarios /> },
-      { path: "conteudos", element: <EmBreve titulo="Conteúdos" /> },
-      { path: "gestores", element: <EmBreve titulo="Gestores" /> },
+      { path: "conteudos", element: <GestaoConteudos /> },
+      { path: "gestores", element: <GestaoGestores /> },
     ]
   },
   {
