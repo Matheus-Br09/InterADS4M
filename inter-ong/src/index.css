@@ -430,3 +430,46 @@ html.dark .error-page {
     background-color: var(--bg-page) !important;
     color: var(--text-primary) !important;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ALTO CONTRASTE (painel de acessibilidade)
+   Vale também com o tema escuro ligado.
+   ═══════════════════════════════════════════════════════════ */
+html.alto-contraste,
+html.alto-contraste body {
+    background: #000 !important;
+    color: #fff !important;
+}
+
+html.alto-contraste *,
+html.alto-contraste *::before,
+html.alto-contraste *::after {
+    background-color: #000 !important;
+    background-image: none !important;
+    color: #fff !important;
+    border-color: #fff !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+}
+
+html.alto-contraste a,
+html.alto-contraste a * {
+    color: #ff0 !important;
+    text-decoration: underline !important;
+}
+
+html.alto-contraste button,
+html.alto-contraste input,
+html.alto-contraste select,
+html.alto-contraste textarea {
+    border: 2px solid #fff !important;
+}
+
+html.alto-contraste :focus-visible {
+    outline: 3px solid #ff0 !important;
+    outline-offset: 2px !important;
+}
+
+html.alto-contraste svg {
+    fill: currentColor;
+}

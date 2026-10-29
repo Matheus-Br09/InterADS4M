@@ -7,6 +7,7 @@ import ScrollToTop from './components/ScrollToTop.jsx'
 import { ThemeProvider } from './context/ThemeContext.jsx'
 import { ConfigProvider } from './context/ConfigContext.jsx'
 import BotaoWhatsapp from './components/BotaoWhatsapp.jsx'
+import AcessibilidadeWidget from './components/AcessibilidadeWidget.jsx'
 
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
         <Newsletter />
         <Footer />
         <BotaoWhatsapp />
+        <AcessibilidadeWidget />
       </div>
       </ConfigProvider>
     </ThemeProvider>
