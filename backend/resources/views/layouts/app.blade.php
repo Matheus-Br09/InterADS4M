@@ -14,7 +14,6 @@
             <nav class="space-x-4">
                 @if(Auth::guard('apoiador')->check())
                     <a href="{{ route('minha-conta') }}" class="text-gray-700 hover:text-blue-600 font-medium">Minha Conta</a>
-                    <a href="{{ route('apoio-unico.show') }}" class="text-gray-700 hover:text-blue-600 font-medium">Fazer Doação</a>
                 @else
                     <a href="{{ url('/entrar') }}" class="text-gray-700 hover:text-blue-600 font-medium">Entrar</a>
                     <a href="{{ url('/cadastro') }}" class="bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 text-sm font-medium">Cadastrar</a>

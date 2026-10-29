@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ApoiadorAuthController;
 use App\Http\Controllers\DashboardTesteController;
-use App\Http\Controllers\DoacaoUnicaController;
 use App\Http\Controllers\MinhaContaController;
 use App\Http\Middleware\RespostaJson;
 use Illuminate\Support\Facades\Route;
@@ -37,10 +36,6 @@ Route::post('/sair', [ApoiadorAuthController::class, 'logout'])->name('logout');
 // Área Restrita (Exige login do Apoiador)
 Route::middleware(['auth:apoiador', 'troca-senha'])->group(function () {
     Route::get('/minha-conta', [MinhaContaController::class, 'index'])->name('minha-conta');
-    Route::get('/apoio-unico', [DoacaoUnicaController::class, 'show'])->name('apoio-unico.show');
-    Route::post('/apoio-unico', [DoacaoUnicaController::class, 'store'])
-        ->middleware('throttle:doacao-unica')
-        ->name('apoio-unico.store');
 });
 
 // Troca da própria senha. Fica de fora do grupo acima de propósito: enquanto a

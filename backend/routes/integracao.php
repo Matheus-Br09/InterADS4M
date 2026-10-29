@@ -21,6 +21,7 @@ Route::get('conteudos/{recurso}/{id}/arquivos/{campo}', [ConteudoApiController::
 Route::post('newsletter', [DashboardTesteController::class, 'storeNewsletter'])->middleware('throttle:newsletter');
 Route::get('estatisticas', [DashboardTesteController::class, 'apiApoiadores']);
 Route::get('config-publica', ConfigPublicaController::class);
+Route::post('doacoes', [DoacaoUnicaController::class, 'store'])->middleware('throttle:doacao-unica');
 
 // Cadastro de voluntário PÚBLICO (sem necessidade de login)
 Route::post('voluntariado', [VoluntarioApiController::class, 'store'])->middleware('throttle:uploads');
@@ -33,7 +34,6 @@ Route::middleware('auth:apoiador')->group(function () {
         Route::get('auth/eu', [ContaApiController::class, 'perfil']);
         Route::patch('conta', [ContaApiController::class, 'update']);
         Route::get('conta/{tipo}', [ContaApiController::class, 'historico'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos']);
-        Route::post('doacoes', [DoacaoUnicaController::class, 'store'])->middleware('throttle:doacao-unica');
         Route::post('mensalidades', [ApoiosApiController::class, 'mensal'])->middleware('throttle:doacao-unica');
         Route::post('apadrinhamentos', [ApoiosApiController::class, 'apadrinhar'])->middleware('throttle:doacao-unica');
         Route::delete('conta/{tipo}/{id}', [ApoiosApiController::class, 'cancelar'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos'])->whereNumber('id');

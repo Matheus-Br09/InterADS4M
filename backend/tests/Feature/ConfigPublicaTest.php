@@ -10,6 +10,8 @@ class ConfigPublicaTest extends TestCase
     {
         config([
             'ong.pix_chave' => '12345678000199',
+            'ong.pix_nome' => 'SOS Tudo pelo Social',
+            'ong.pix_cidade' => 'PAULISTA',
             'ong.whatsapp' => '5581999990000',
             'ong.instagram' => 'https://www.instagram.com/sostudopelosocial/',
         ]);
@@ -32,6 +34,15 @@ class ConfigPublicaTest extends TestCase
 
         $this->assertStringNotContainsString('12345678000199', $corpo);
         $this->assertStringNotContainsString('gestao@ong.example', $corpo);
+    }
+
+    public function test_sem_nome_do_recebedor_o_pix_fica_indisponivel(): void
+    {
+        config(['ong.pix_chave' => '12345678000199', 'ong.pix_nome' => '', 'ong.pix_cidade' => 'PAULISTA']);
+
+        $this->getJson('/api/v1/config-publica')
+            ->assertOk()
+            ->assertJsonPath('dados.pix_disponivel', false);
     }
 
     public function test_sem_chave_pix_o_pix_fica_indisponivel(): void

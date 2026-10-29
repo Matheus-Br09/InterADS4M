@@ -70,12 +70,13 @@ trait CriaCenarioOng
         ], $atributos));
     }
 
-    protected function criarDoacaoUnica(Apoiador $apoiador, array $atributos = []): DoacaoUnica
+    protected function criarDoacaoUnica(?Apoiador $apoiador, array $atributos = []): DoacaoUnica
     {
         return DoacaoUnica::create(array_merge([
-            'apoiador_id' => $apoiador->id,
+            'apoiador_id' => $apoiador?->id,
             'valor' => 50.00,
             'metodo_pagamento' => 'Pix',
+            'status' => 'concluido',
             'data_doacao' => now(),
         ], $atributos));
     }

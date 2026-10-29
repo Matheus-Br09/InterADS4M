@@ -136,7 +136,7 @@ class DominioEOSchemaTest extends TestCase
         $this->assertSame('disponivel', $crianca->fresh()->status);
     }
 
-    public function test_doacao_unica_comeca_com_status_concluido(): void
+    public function test_doacao_unica_comeca_com_status_pendente(): void
     {
         $doacao = DoacaoUnica::create([
             'apoiador_id' => $this->criarApoiadorUnico()->id,
@@ -145,7 +145,7 @@ class DominioEOSchemaTest extends TestCase
             'data_doacao' => now(),
         ]);
 
-        $this->assertSame('concluido', $doacao->fresh()->status);
+        $this->assertSame('pendente', $doacao->fresh()->status);
     }
 
     public function test_doacao_mensal_comeca_com_status_ativo(): void

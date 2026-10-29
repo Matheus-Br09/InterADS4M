@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Support\PixBrCode;
+
 class ConfigPublicaController extends Controller
 {
     // Só o que o site pode mostrar a qualquer visitante: a chave Pix e o e-mail da gestão ficam de fora.
@@ -9,7 +11,7 @@ class ConfigPublicaController extends Controller
     {
         return [
             'dados' => [
-                'pix_disponivel' => filled(config('ong.pix_chave')),
+                'pix_disponivel' => PixBrCode::configurado(),
                 'whatsapp' => config('ong.whatsapp') ?: null,
                 'instagram' => config('ong.instagram') ?: null,
             ],

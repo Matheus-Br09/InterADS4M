@@ -36,7 +36,6 @@
         <div class="border p-4 rounded bg-gray-50">
             <div class="flex justify-between items-center mb-3">
                 <h3 class="font-bold text-lg text-gray-700">Doações Únicas</h3>
-                <a href="{{ route('apoio-unico.show') }}" class="text-sm text-blue-600 hover:underline font-semibold">+ Nova Doação</a>
             </div>
             @forelse($doacoesUnicas as $doacao)
                 <div class="text-sm border-b py-2 flex justify-between">

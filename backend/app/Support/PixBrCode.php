@@ -8,6 +8,12 @@ use InvalidArgumentException;
 // Gera o "Pix copia e cola" (BR Code estático) conforme o Manual do BR Code do Banco Central.
 class PixBrCode
 {
+    // O Pix só está disponível quando chave, nome e cidade do recebedor estão preenchidos.
+    public static function configurado(): bool
+    {
+        return filled(config('ong.pix_chave')) && filled(config('ong.pix_nome')) && filled(config('ong.pix_cidade'));
+    }
+
     public static function gerar(string $chave, string $nome, string $cidade, ?string $valor, string $txid): string
     {
         if ($txid !== '***' && ! preg_match('/^[A-Za-z0-9]{1,25}$/', $txid)) {

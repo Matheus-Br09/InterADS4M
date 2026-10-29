@@ -16,6 +16,9 @@ class DoacaoUnica extends Model
 
     protected $fillable = [
         'apoiador_id',
+        'nome_doador',
+        'email_doador',
+        'protocolo',
         'valor',
         'metodo_pagamento',
         'status',
