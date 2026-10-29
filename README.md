@@ -44,18 +44,11 @@ Plataforma web para a **ONG SOS** — divulgação de ações, angariação de d
 
 | Camada | Tecnologia |
 | --- | --- |
-| **Backend** | Laravel 13 (PHP 8.4.1+) |
-| Banco | MySQL 8.0 (via Docker) + Eloquent |
+| **Backend** | Laravel 13 (PHP 8.3 ou mais novo), só API em `/api/v1` |
+| Banco | MySQL em produção; SQLite no desenvolvimento local (padrão do `.env.example`) |
 | **Frontend SPA** | React 19 + Vite + React Router |
 | Estilo | Tailwind CSS |
-| Assets backend | Vite + Blade templates |
-| Testes | PHPUnit 12 |
-
----
-
-## 💡 Núcleo de dados da ONG
-
-15 modelos Eloquent, incluindo: `Apadrinhamento`, `Apoiador`, `Crianca`, `DoacaoMensal`, `DoacaoUnica`, `DocumentoTransparencia`, `MaterialDidatico`, `Newsletter`, `Noticia`, `ProgramaAcao`, `RecompensaApadrinhamento`, `Voluntario`.
+| Testes | PHPUnit 12 (backend); `node --test` e ESLint (frontend) |
 
 ---
 
@@ -63,170 +56,80 @@ Plataforma web para a **ONG SOS** — divulgação de ações, angariação de d
 
 ```
 InterADS4M/
-├── backend/             # API Laravel + garantias (Blade/Vite)
-│   ├── app/             # Controllers e Models
-│   ├── config/          # Guard custom "apoiador"
-│   ├── database/        # Migrations e seeders (dump do banco fica fora do git)
-│   ├── docker-compose.yml  # MySQL 8.0
-│   └── routes/web.php   # Todas as rotas
-├── inter-ong/           # SPA React (Vite)
-│   └── src/
-│       ├── components/  # NavBar, Footer
-│       └── pages/       # LandingPage, Doar, Sobre, Contato, Educacional
-└── relatorio_backend.md # Documentação do progresso
+├── backend/             # API Laravel (sem telas Blade; só e-mails em resources/views/mail)
+│   ├── app/             # Controllers, Models, comandos artisan
+│   ├── database/        # Migrations e seeders de demonstração
+│   └── routes/          # web.php (prefixo /api/v1), integracao.php (rotas da API), console.php (agenda)
+├── inter-ong/           # SPA React (Vite): site público e painel em /gestao
+├── docs/                # Guia do painel e specs/planos
+└── relatorio_backend.md # Documentação do progresso (histórico)
 ```
 
 ---
 
-## 🚀 Como rodar
+## 🚀 Como rodar (desenvolvimento)
 
 ### Backend
 
 ```bash
 cd backend
-docker compose up -d          # sobe o MySQL 8.0
 composer install
 cp .env.example .env
 php artisan key:generate
-php artisan migrate --force
-php artisan db:seed           # dados de demonstração da ONG
-npm install && npm run build  # assets (Vite/Tailwind)
-php artisan dev
+php artisan migrate
+php artisan serve             # API em http://localhost:8000/api/v1
 ```
 
-### Acesso ao painel de gestão
-
-O painel em `/` (indicadores, crianças, apoiadores, seed e cadastro de crianças) é
-**exclusivo da gestão da ONG** e exige um apoiador com `tipo_usuario = admin`.
-
-O seed cria a conta `gestor@exemplo.org` **sem senha utilizável** — de propósito:
-escrever um hash de senha no repositório publica a credencial de quem for usar
-aquele banco (já aconteceu, ver "Credenciais expostas no histórico do git" mais
-abaixo). A senha é definida por comando:
+O `.env.example` já usa SQLite. Para criar o primeiro acesso ao painel:
 
 ```bash
-php artisan gestor:senha gestor@exemplo.org "minha-senha-forte"   # senha definida
-php artisan gestor:senha gestor@exemplo.org                        # gera uma senha forte
+php artisan gestor:criar "Seu Nome" seu@email.org
 ```
 
-Para **redefinir a senha de um apoiador sem promover a gestor** (é o que a
-rotação de credenciais usa):
+O comando mostra uma **senha temporária uma única vez**; no primeiro login em `/gestao/entrar` a pessoa é obrigada a criar uma senha própria.
+
+### Frontend SPA
 
 ```bash
-php artisan apoiador:senha apoiador1@exemplo.org     # gera e mostra a senha nova
-php artisan apoiador:senha marina.costa@email.com "outra-senha-forte"
+cd inter-ong
+npm install
+npm run dev
 ```
 
-O comando também encerra as sessões que ainda valem com a senha antiga. Depois é
-só entrar em `/entrar` com o e-mail e a senha.
+Em desenvolvimento, use a mesma origem por proxy ou defina `VITE_BACKEND_URL` (ex.: `http://localhost:8000`).
 
-### Credenciais expostas no histórico do git
-
-O `backend/database/init.sql` (dump com CPF, e-mail, endereço, 12 hashes de senha
-e uma linha da tabela `sessions` de pessoas reais) e o `OngDadosSeeder` com
-credenciais de verdade ficaram versionados num repositório público. Isso foi
-corrigido: o dump saiu do repositório, os seeds passaram a usar e-mails de
-exemplo e senha inutilizável, e o **histórico do git foi reescrito** — por isso
-todos os commits têm SHA novo. Quem já clonou precisa atualizar:
+### Testes
 
 ```bash
-git fetch origin && git reset --hard origin/main
+cd backend && php artisan test
+cd inter-ong && npm test && npm run lint
 ```
 
-**O que a reescrita não desfaz:** quem já clonou antes mantém os arquivos, e o
-GitHub guarda commits órfãos por um tempo. Por isso a rotação de senhas é a
-parte que realmente protege as contas:
+### Comandos artisan que existem
 
-```bash
-php artisan apoiadores:listar                        # lista as contas e o comando de cada uma
-php artisan apoiadores:listar --rotacionar           # só as contas com pendência de senha
-```
+| Comando | Para que serve |
+| --- | --- |
+| `gestor:criar "Nome" email` | Cria um gestor com senha temporária (troca obrigatória no primeiro login) |
+| `doacoes:expirar` | Marca como expiradas as doações pendentes antigas (roda todo dia pelo agendador) |
+| `gestor:senha`, `apoiador:senha`, `apoiadores:listar`, `apoiadores:marcar-senha`, `apoiadores:exigir-troca` | Comandos legados de rotação de senha da época do cadastro de apoiadores; o MVP não tem mais cadastro público de apoiador (só gestores têm conta). Veja `php artisan list` |
 
-A lista sai do próprio banco, marca quem ainda responde `senha123` (a senha
-pública que estava no seed e no dump removidos), imprime o comando exato de
-cada conta (para não sobrar dígito de e-mail digitado errado) e mostra em
-`senha em` a data da última rotação — a tabela `apoiadores` nunca teve
-`created_at`/`updated_at`, então essa data é gravada em `senha_alterada_em` por
-cada rotação. `nunca` significa "ninguém rotacionou esta conta por aqui" e
-conta como pendência no `--rotacionar`.
+### Histórico: credenciais expostas no passado
 
-```bash
-php artisan gestor:senha gestor@exemplo.org        # conta da gestão (promove a gestor)
-php artisan apoiador:senha <email>                  # cada apoiador, mantendo o papel dele
-```
+Um dump antigo (`init.sql`) e um seed com dados e senhas reais ficaram versionados num repositório público. Foi corrigido: o dump saiu, os seeds usam e-mails de exemplo e senha inutilizável, e o **histórico do git foi reescrito** (todos os commits têm SHA novo). Quem clonou antes precisa atualizar com `git fetch origin && git reset --hard origin/main`. As contas reais daquela época devem ter a senha trocada. Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que hash de senha ou e-mail de domínio real volte para um seeder.
 
-**Rotacionou as contas antes de 26/09?** A coluna `senha_alterada_em` só
-existe a partir dessa migration, então quem já entregou senha nova às pessoas
-não tem a data gravada. Este comando carimba a data **sem trocar senha
-nenhuma** — o contrário seria obrigar a reentregar senha a quem já recebeu a
-sua:
+### API: o que é público e o que exige login
 
-```bash
-php artisan apoiadores:marcar-senha carol@sos.org.br    # uma conta
-php artisan apoiadores:marcar-senha --todos             # todas que ainda estão sem data
-php artisan apoiadores:marcar-senha --todos --reforcar  # sobrescreve as datas (use com cuidado)
-```
+Rotas reais em `backend/routes/integracao.php`, todas sob `/api/v1`:
 
-Sem `--reforcar`, nenhum comando sobrescreve a data de quem já tem — é a
-proteção contra um `--todos` acidental apagar o histórico de quem rotacionou
-quando.
+- **Públicas:** `GET csrf`, `GET conteudos/{noticias|materiais|transparencia|programas}` (e `/{id}`, e os arquivos), `GET estatisticas` (só números agregados), `GET config-publica` (Pix e contatos da ONG), `POST newsletter`, `POST doacoes` (doação via Pix, sem login) e `POST voluntariado` (cadastro de voluntário).
+- **Login do gestor:** `POST auth/entrar`, `POST auth/sair`, `GET auth/eu`, `PUT auth/senha`.
+- **Só gestor logado** (prefixo `gestao/`): conteúdos (criar, editar, excluir), voluntários (listar, mudar situação, baixar currículo, excluir), doações (listar, confirmar/cancelar, anonimizar) e gestores (listar, criar, desativar). Sem login a resposta é 401/403.
 
-Um teste (`tests/Feature/RotacaoDeSenhaTest.php`) impede que um hash de senha ou
-um e-mail de domínio real volte para qualquer seeder.
+Nenhuma rota pública devolve dado pessoal (voluntário, doador, criança); `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` varre as respostas para travar isso.
 
-**A senha que você entrega é a senha que a pessoa vai ter até ela trocar.** Se
-ela vai por WhatsApp ou e-mail, quem leu a conversa tem a conta — e o código não
-tem como encerrar isso sozinho. Este comando trava a conta na tela de troca até
-a pessoa criar uma senha própria, que é a única janela em que dá para forçar
-isso: depois que ela já entrou com a senha temporária, não dá mais para obrigar
-sem resetar a conta.
+**Limites de requisição** (em `AppServiceProvider`): `api` 120/min, `login` 10/min, `doacao-unica` 10/min, `uploads` 10/min, `gestao` 60/min, `newsletter` 5/min e `troca-senha-post` 10/min. No login, 5 erros para o mesmo e-mail e IP bloqueiam por 5 minutos. Senhas exigem 8+ caracteres com maiúscula, minúscula e número.
 
-```bash
-php artisan apoiadores:exigir-troca carol@sos.org.br   # uma conta
-php artisan apoiadores:exigir-troca --todos            # todas as contas de apoiador
-php artisan apoiadores:exigir-troca --todos --desfazer # cancela (ninguém entrou ainda)
-```
-
-`--todos` **ignora a conta da gestão** e avisa no terminal: travar o admin é a
-forma mais rápida de a ONG ficar sem acesso ao próprio painel. Para a conta da
-gestão, use o e-mail. A coluna `troca` de `php artisan apoiadores:listar` mostra
-quem está presa na troca (`obrigatoria`), separada da coluna `senha em` — conta
-rotacionada e conta que já trocou a senha são coisas diferentes.
-
-Um detalhe que só o teste pega: a troca **recusa** a senha que a conta já está
-usando. Sem isso a pessoa cola de volta a senha temporária, o formulário aceita
-e a senha entregue continua valendo — o pedido de "senha nova" vira enfeite.
-### Senha e tentativas de login
-
-- **Senha forte em todo lugar**: o cadastro público (`/cadastro`) e os dois
-  comandos de rotação exigem no mínimo 8 caracteres com maiúscula, minúscula e
-  número. `min:6` aceitava `123456`, que cai em segundos num ataque de
-  dicionário. A regra está em `app/Rules/SenhaForte.php` e o critério em
-  `app/Support/SenhaForte.php` - os três lugares falam a mesma língua.
-- **Senha gerada nunca sai fraca**: o gerador garante uma maiúscula, uma
-  minúscula, um número e um símbolo por construção, e embaralha. Antes, uma em
-  cada dez senhas geradas não tinha nenhum dígito e era reprovada pela própria
-  regra - o comando falhava ao acaso.
-- **Bloqueio por e-mail e IP**: 5 erros bloqueiam aquele par por 5
-  minutos, com mensagem dizendo quando volta. O limite por IP (10/min)
-  continua valendo; o bloqueio por e-mail/IP não impede tentativas distribuídas entre IPs. Login
-  certo zera o contador, e um e-mail inexistente trava igual a um existente
-  (senão a resposta revelaria quais e-mails têm conta). Chave em
-  `ApoiadorAuthController`, testes em `tests/Feature/BloqueioDeLoginTest.php`.
-
-Limites de requisição: `api` 120/min, `newsletter` 5/min, `cadastro` 5/min,
-`login` 10/min, `doacao-unica` 10/min (por IP) e `troca-senha-post` 10/min por e-mail/IP, em `AppServiceProvider`.
-
-As APIs JSON (`/api/criancas`, `/api/apoiadores`, `/api/programas`,
-`/api/apadrinhamentos`, `/api/noticias`, `/api/materiais-didaticos`,
-`/api/transparencia` e `POST /api/newsletter`) continuam **públicas** porque
-alimentam o site, mas devolvem só o que o site precisa mostrar:
-
-- `/api/apoiadores`: apenas números — total de apoiadores, doadores e valores agregados;
-- `/api/criancas`: nome, idade, imagem e se já tem padrinheiro (sem data de nascimento nem histórico);
-- `/api/apadrinhamentos`: a criança e as recompensas enviadas (sem dizer quem apadrinha nem quanto paga).
-
-Nada de `senha`, `cpf`, `email`, `celular`, endereço, valor pago ou papel na gestão sai dessas rotas. As listas são montadas campo a campo e `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` varre a resposta inteira de todas elas para travar isso.
+---
 
 ### Publicando na Hostinger (Fase 2)
 
@@ -270,7 +173,7 @@ O site é uma SPA: endereços como `/doar` ou `/gestao/entrar` não são arquivo
 
 O Laravel já traz `backend/public/.htaccess` (feito para ele ser a pasta pública inteira). Como aqui a pasta pública é a do site, os dois **não** podem ser o mesmo arquivo. Uma forma que funciona:
 
-1. Copie `backend/public/index.php` para a pasta pública com o nome `laravel.php` e ajuste os caminhos de `vendor/autoload.php` e `bootstrap/app.php` para onde está o backend (ex.: `__DIR__.'/../ong/backend/vendor/autoload.php'`).
+1. Copie `backend/public/index.php` para a pasta pública com o nome `laravel.php` e ajuste os **três** caminhos que o arquivo usa: `storage/framework/maintenance.php`, `vendor/autoload.php` e `bootstrap/app.php`, para onde está o backend (ex.: `__DIR__.'/../ong/backend/vendor/autoload.php'`). O número de `../` depende de onde a pasta pública fica em relação ao backend; na Hostinger ela costuma ser `~/domains/<domínio>/public_html` **(confirmar no painel da Hostinger)**, então ajuste os `../` de acordo.
 2. Crie um `.htaccess` na pasta pública (junto ao `index.html` do site):
 
 ```apache
@@ -327,7 +230,7 @@ A senha do banco e a do e-mail ficam **só** no `.env` do servidor. Nunca no Git
 ```bash
 cd ~/ong/backend
 composer install --no-dev --optimize-autoloader
-php artisan key:generate
+php artisan key:generate --force   # SÓ na primeira instalação
 php artisan migrate --force        # cria as tabelas; NÃO rode seeders
 php artisan storage:link           # imagens/PDFs públicos
 php artisan config:cache
@@ -336,6 +239,7 @@ php artisan route:cache
 
 - Currículos de voluntários ficam em disco **privado** (`storage/app/private/curriculos`) e só saem pelo painel. Imagens e PDFs públicos ficam no disco `public` (`storage/app/public`); o `storage:link` cria o atalho `public/storage` dentro do backend. Como aqui a pasta pública é outra, se alguma imagem não abrir crie também um atalho de `<pasta pública>/storage` para `~/ong/backend/storage/app/public` **(confirmar no painel da Hostinger** se o plano permite atalhos).
 - Se o `composer` não existir no servidor, rode `composer install --no-dev` no seu computador (mesma versão de PHP, 8.3) e envie a pasta `vendor/`.
+- **`key:generate` só uma vez, na primeira instalação.** Em produção ele pede confirmação, por isso o `--force`. Rodar de novo troca a chave da aplicação e invalida sessões e dados criptografados.
 - Depois de qualquer mudança no `.env`, rode `php artisan config:cache` de novo.
 
 #### 8. Primeiro gestor
@@ -363,7 +267,7 @@ Ative o certificado SSL gratuito do domínio no painel e force HTTPS **(confirma
 #### 11. Backup
 
 - Ligue o backup automático da Hostinger **(confirmar no painel da Hostinger** a frequência do plano).
-- Toda semana, faça um `mysqldump` do banco e uma cópia de `storage/app` (currículos e arquivos enviados) para um lugar seguro fora do servidor:
+- Toda semana, faça um `mysqldump` do banco e uma cópia de `storage/app` (currículos e arquivos enviados) para um lugar seguro fora do servidor. Rode os comandos **de dentro da pasta do backend** (`cd ~/ong/backend`):
 
 ```bash
 mysqldump -u <usuario> -p <banco> > backup-$(date +%F).sql
@@ -391,48 +295,11 @@ Spec: `docs/superpowers/specs/2026-10-29-mvp-lancamento-design.md`.
 - **`CORS_ALLOWED_ORIGINS` é a origem do site, nunca `*` em produção.** Várias origens, separe por vírgula, sem espaços.
 - **Nunca copie o banco ou o `storage/` locais para o servidor.**
 
-### Assets do backend (Vite + Tailwind, sem internet)
-
-As telas Blade são compiladas por `npm run build` e servidas de `public/build`.
-Nenhuma tela usa CDN ou fonte externa, porque o sistema roda offline no pen drive.
-
-```bash
-cd backend
-npm install
-npm run build      # rode de novo sempre que criar/renomear classes nas telas
-npm run dev        # opcional: recompila sozinho enquanto vc programa
-```
-
-Os testes não dependem do build. Para conferir o build de verdade, rode
-`php artisan test --filter=AssetsOfflineTest` depois de `npm run build`.
-
-### Cadastro de apoiador
-
-`POST /cadastro` valida o CPF no servidor (dígitos verificadores, sem dígitos
-repetidos) e guarda o valor só com números, mesmo que a pessoa digite com
-máscara. CPF inválido volta `422` com o erro no campo `cpf`, então a tela de
-cadastro da SPA deve mostrar a mensagem que o backend devolver.
-
-### Testes
-
-```bash
-cd backend
-php artisan test    # 239 testes: APIs, autenticação, painel, seeders, CPF, rotas, CORS/CSRF, limite de requisições, dados pessoais, rotação de senhas e assets offline
-```
-
-### Frontend SPA
-
-```bash
-cd inter-ong
-npm install
-npm run dev
-```
-
 ### Integração do frontend com a API
 
-O cliente React pode importar `inter-ong/src/api/backend.js`. A API usa a sessão do Laravel e fica em `/api/v1`; no desenvolvimento, o frontend deve usar a mesma origem por proxy ou definir `VITE_BACKEND_URL`. Antes do primeiro POST, chame `prepararCsrf()` e envie o token retornado no header `X-CSRF-TOKEN`. As requisições usam `credentials: include`.
+O cliente React fica em `inter-ong/src/api/backend.js`. A API usa a sessão do Laravel e fica em `/api/v1`; as requisições usam `credentials: include`. Antes de um POST/PUT/PATCH/DELETE, o cliente pede o token em `GET /api/v1/csrf` e o envia no header `X-CSRF-TOKEN` (já feito pelo `backend.js`).
 
-Os recursos públicos ficam em `GET /api/v1/conteudos/noticias`, `materiais`, `transparencia` e `programas`, além de `GET /api/v1/estatisticas`. Cadastro e login usam `POST /api/v1/auth/cadastro` e `POST /api/v1/auth/entrar`. A resposta 403 com `codigo=troca_senha_obrigatoria` indica que o usuário precisa chamar `PUT /api/v1/auth/senha`; 401 indica sessão ausente ou credencial inválida; 422 traz erros por campo.
+O login do gestor é `POST /api/v1/auth/entrar`. A resposta 403 com `codigo=troca_senha_obrigatoria` indica que a pessoa precisa chamar `PUT /api/v1/auth/senha`; 401 indica sessão ausente ou credencial inválida; 422 traz erros por campo.
 
 ---
 
@@ -457,12 +324,6 @@ Os recursos públicos ficam em `GET /api/v1/conteudos/noticias`, `materiais`, `t
 
 A combinar.
 
-### Correções da auditoria de 26/09/2026
+### Histórico (auditoria de 26/09/2026, antes do MVP)
 
-A suíte atual passou com **239 testes e 3.211 assertions**. Foram corrigidos o encerramento de sessões na rotação/troca de senha, a persistência indevida de senhas em dados de formulário na sessão, o rehash no login e a associação de recompensas no seed. Os testes de sessão usam o armazenamento real do Laravel, inclusive criptografia e isolamento entre usuários/guards.
-
-A revogação implementada pressupõe `SESSION_DRIVER=database`. Não trocar o driver sem adaptar e validar essa operação. As correções não executam rotação nem encerram retroativamente sessões do banco real.
-
-O formulário de doação registra **intenção pendente**, sem cobrança. As estatísticas de doação única incluem apenas registros `concluido`; valores antigos e dados de demonstração ainda precisam de conciliação antes de divulgar arrecadação real. O provedor e os webhooks de pagamento continuam pendentes.
-
-O `relatorio_backend.md` contém o estado atual, o contrato de integração com a SPA e os limites da validação em SQLite. Laravel Boost foi instalado somente para desenvolvimento, conforme as instruções locais do projeto.
+Texto mantido só como registro; o que vale hoje está nas seções acima. A revogação de sessões pressupõe `SESSION_DRIVER=database`: não troque o driver sem adaptar e validar essa operação. O `relatorio_backend.md` guarda o histórico do progresso do backend.
