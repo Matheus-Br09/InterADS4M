@@ -21,3 +21,20 @@ export function calcularIdade(dataNascimento, hoje = new Date()) {
   if (hoje.getMonth() + 1 < mes || (hoje.getMonth() + 1 === mes && hoje.getDate() < dia)) idade--
   return idade
 }
+
+// Normaliza uma lista do painel em { itens, pagina, ultima }.
+// Aceita o paginador do Laravel, { dados, paginacao } e um array simples.
+export function normalizarLista(dados) {
+  if (Array.isArray(dados)) return { itens: dados, pagina: 1, ultima: 1 }
+  if (Array.isArray(dados?.dados)) {
+    const p = dados.paginacao || {}
+    const porPagina = Number(p.por_pagina) || 0
+    const total = Number(p.total) || 0
+    return {
+      itens: dados.dados,
+      pagina: Number(p.pagina) || 1,
+      ultima: porPagina > 0 ? Math.max(1, Math.ceil(total / porPagina)) : 1,
+    }
+  }
+  return { itens: dados?.data || [], pagina: dados?.current_page || 1, ultima: dados?.last_page || 1 }
+}

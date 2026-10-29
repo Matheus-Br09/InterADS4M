@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
+import { normalizarLista } from '../../utils/gestao.js'
 
 // Carrega uma página de uma lista do painel e permite recarregar.
 // `chave` identifica o filtro: ao mudar, volta para a página 1.
@@ -16,8 +17,7 @@ export default function useLista(carregar, chave = '') {
     carregar(pagina, { signal: controller.signal })
       .then(({ dados }) => {
         if (controller.signal.aborted) return
-        const itens = Array.isArray(dados) ? dados : dados.data
-        setEstado({ itens, pagina: dados.current_page || 1, ultima: dados.last_page || 1, carregando: false, erro: null })
+        setEstado({ ...normalizarLista(dados), carregando: false, erro: null })
       })
       .catch((erro) => { if (!controller.signal.aborted) setEstado((e) => ({ ...e, carregando: false, erro })) })
     return () => controller.abort()

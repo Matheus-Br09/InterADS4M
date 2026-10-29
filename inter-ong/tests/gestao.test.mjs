@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { rotulo, STATUS_DOACAO, STATUS_VOLUNTARIO, formatarReais, calcularIdade } from '../src/utils/gestao.js'
+import { rotulo, STATUS_DOACAO, STATUS_VOLUNTARIO, formatarReais, calcularIdade, normalizarLista } from '../src/utils/gestao.js'
 
 test('rotulo traduz status conhecidos e mantém desconhecidos', () => {
   assert.equal(rotulo(STATUS_DOACAO, 'concluido'), 'Confirmada')
@@ -18,4 +18,18 @@ test('calcularIdade respeita o aniversário', () => {
   assert.equal(calcularIdade('2000-10-29', hoje), 26)
   assert.equal(calcularIdade('2000-10-30', hoje), 25)
   assert.equal(calcularIdade('', hoje), null)
+})
+
+test('normalizarLista entende {dados, paginacao}', () => {
+  const r = normalizarLista({ dados: [1, 2], paginacao: { pagina: 2, por_pagina: 20, total: 45 } })
+  assert.deepEqual(r, { itens: [1, 2], pagina: 2, ultima: 3 })
+  assert.equal(normalizarLista({ dados: [], paginacao: { pagina: 1, por_pagina: 20, total: 0 } }).ultima, 1)
+})
+
+test('normalizarLista entende o paginador do Laravel', () => {
+  assert.deepEqual(normalizarLista({ data: [1], current_page: 3, last_page: 5 }), { itens: [1], pagina: 3, ultima: 5 })
+})
+
+test('normalizarLista entende array simples', () => {
+  assert.deepEqual(normalizarLista([1, 2]), { itens: [1, 2], pagina: 1, ultima: 1 })
 })
