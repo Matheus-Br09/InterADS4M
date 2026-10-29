@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NovoVoluntario;
 use App\Models\Voluntario;
+use App\Support\AvisaGestao;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,6 +63,8 @@ class VoluntarioApiController extends Controller
         } else {
             $voluntario = Voluntario::create($dados);
         }
+
+        AvisaGestao::enviar(new NovoVoluntario($voluntario));
 
         return ['dados' => $voluntario, 'message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
     }

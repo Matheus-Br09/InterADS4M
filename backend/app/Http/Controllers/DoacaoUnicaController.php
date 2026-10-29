@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NovaDoacao;
 use App\Models\DoacaoUnica;
+use App\Support\AvisaGestao;
 use App\Support\PixBrCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -32,6 +34,8 @@ class DoacaoUnicaController extends Controller
             'status' => 'pendente',
             'data_doacao' => now(),
         ]);
+
+        AvisaGestao::enviar(new NovaDoacao($doacao));
 
         $copiaECola = PixBrCode::gerar(
             config('ong.pix_chave'),
