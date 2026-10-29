@@ -48,26 +48,14 @@ async function gravar(path, method, dados) {
 }
 
 export const backend = {
-  cadastrar: (dados) => gravar('/auth/cadastro', 'POST', dados),
   entrar: (dados) => gravar('/auth/entrar', 'POST', dados),
   sair: () => gravar('/auth/sair', 'POST'),
   conta: (options) => get('/auth/eu', options),
-  atualizarConta: (dados) => gravar('/conta', 'PATCH', dados),
   trocarSenha: (dados) => gravar('/auth/senha', 'PUT', dados),
   doacao: (dados) => gravar('/doacoes', 'POST', dados),
-  mensalidade: (dados) => gravar('/mensalidades', 'POST', dados),
-  apadrinhamento: (dados) => gravar('/apadrinhamentos', 'POST', dados),
-  historico: (tipo, options) => get(`/conta/${tipo}`, options),
-  cancelarApoio: (tipo, id) => gravar(`/conta/${tipo}/${id}`, 'DELETE'),
-  criancas: (options) => request('/api/criancas', options),
-  voluntariado: (options) => get('/voluntariado', options),
   inscreverVoluntario: (dados) => gravar('/voluntariado', 'POST', dados),
   conteudos: (tipo, pagina = 1, options) => get(`/conteudos/${tipo}?page=${pagina}`, options),
-  estatisticas: (options) => get('/estatisticas', options),
   newsletter: (dados) => gravar('/newsletter', 'POST', dados),
-  publicarMaterial: (dados) => gravar('/gestao/conteudos/materiais', 'POST', dados),
-  publicarNoticia: (dados) => gravar('/gestao/conteudos/noticias', 'POST', dados),
-  excluirNoticia: (id) => gravar(`/gestao/conteudos/noticias/${id}`, 'DELETE'),
   configPublica: (options) => get('/config-publica', options),
   gestaoDoacoes: (status, pagina = 1, options) => get(`/gestao/doacoes?${status ? `status=${encodeURIComponent(status)}&` : ''}page=${pagina}`, options),
   atualizarDoacao: (id, status) => gravar(`/gestao/doacoes/${id}`, 'PATCH', { status }),
@@ -83,5 +71,4 @@ export const backend = {
   criarGestor: (dados) => gravar('/gestao/gestores', 'POST', dados),
   desativarGestor: (id) => gravar(`/gestao/gestores/${id}`, 'DELETE'),
   arquivoConteudo: (tipo, id, campo = 'arquivo_pdf') => `${API_BASE}/api/v1/conteudos/${tipo}/${id}/arquivos/${campo}`,
-  imagemCrianca: (arquivo) => `${API_BASE}/img/${encodeURIComponent((arquivo || '').split('/').pop())}`,
 }

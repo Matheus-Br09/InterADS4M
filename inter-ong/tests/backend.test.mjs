@@ -26,19 +26,9 @@ test('login usa cookie e CSRF; logout usa o token renovado depois do login', asy
   assert.equal(calls[3][1].headers['X-CSRF-TOKEN'], 'depois')
 })
 
-test('cadastro envia os dados pelo POST correto', async () => {
-  const fetch = responder([json({ token: 'csrf' }), json({ dados: { id: 1 } }, 201)])
-  const dados = { nome_completo: 'Teste', email: 'teste@example.org', cpf: '11122233387', senha: 'Teste123', senha_confirmation: 'Teste123', celular: '81999999999', logradouro: 'Rua Teste' }
-  await backend.cadastrar(dados)
-  const [url, options] = fetch.mock.calls[1].arguments
-  assert.equal(url, '/api/v1/auth/cadastro')
-  assert.equal(options.method, 'POST')
-  assert.deepEqual(JSON.parse(options.body), dados)
-})
-
-test('erros de validação preservam campos e não repetem o cadastro', async () => {
+test('erros de validação preservam campos e não repetem a gravação', async () => {
   const fetch = responder([json({ token: 'csrf' }), json({ message: 'CPF inválido.', errors: { cpf: ['CPF inválido.'] } }, 422)])
-  await assert.rejects(backend.cadastrar({}), (error) => {
+  await assert.rejects(backend.entrar({}), (error) => {
     assert.equal(error.status, 422)
     assert.deepEqual(error.errors, { cpf: ['CPF inválido.'] })
     return true
@@ -78,7 +68,7 @@ test('HTML no lugar de API gera diagnóstico legível', async () => {
 
 test('falha de rede tem mensagem legível e não repete gravação', async () => {
   const fetch = mock.method(globalThis, 'fetch', async () => { throw new TypeError('Failed to fetch') })
-  await assert.rejects(backend.cadastrar({}), /conectar ao servidor/)
+  await assert.rejects(backend.entrar({}), /conectar ao servidor/)
   assert.equal(fetch.mock.callCount(), 1)
 })
 
@@ -112,70 +102,10 @@ test('download de material usa a rota pública, sem expor caminho de armazenamen
   assert.equal(backend.arquivoConteudo('materiais', 21), '/api/v1/conteudos/materiais/21/arquivos/arquivo_pdf')
 })
 
-test('gestão publica PDF por multipart na rota protegida com CSRF', async () => {
-  const fetch = responder([json({ token: 'seguro' }), json({ dados: { id: 30, titulo: 'Guia' } })])
-  const dados = new FormData()
-  dados.append('titulo', 'Guia')
-  dados.append('categoria', 'Educação')
-  dados.append('arquivo_pdf', new Blob(['%PDF-1.4'], { type: 'application/pdf' }), 'guia.pdf')
-  dados.append('imagem_capa', '')
-  assert.equal((await backend.publicarMaterial(dados)).dados.id, 30)
-  const [url, options] = fetch.mock.calls[1].arguments
-  assert.equal(url, '/api/v1/gestao/conteudos/materiais')
-  assert.equal(options.method, 'POST')
-  assert.equal(options.headers['X-CSRF-TOKEN'], 'seguro')
-  assert.equal(options.headers['Content-Type'], undefined)
-  assert.equal(options.body, dados)
-})
-
-test('gestão preserva a mensagem de acesso negado e trata limite de upload', async () => {
-  responder([json({ token: 'a' }), json({ mensagem: 'Acesso restrito a gestores da ONG.' }, 403), json({ token: 'b' }), new Response('Too large', { status: 413 })])
-  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 403, message: 'Acesso restrito a gestores da ONG.' })
-  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 413, message: 'O arquivo excede o limite de envio do servidor. Escolha um PDF menor.' })
-})
-
-test('upload informa quando o PHP não consegue criar arquivo temporário', async () => {
-  const aviso = '<b>Warning</b>: PHP Request Startup: File upload error - unable to create a temporary file on line 0 {"message":"Unauthenticated."}'
-  responder([json({ token: 'a' }), new Response(aviso, { status: 401 })])
-  await assert.rejects(backend.publicarMaterial(new FormData()), { status: 401, message: /arquivo temporário/ })
-})
-
-
-test('apoios enviam o contrato e preservam o status pendente do servidor', async () => {
-  const fetch = responder([
-    json({ token: 'a' }), json({ dados: { id: 1, status: 'pendente' } }, 201),
-    json({ token: 'b' }), json({ dados: { id: 2, status: 'pendente' } }),
-    json({ token: 'c' }), json({ dados: { id: 3, status: 'pendente' } }),
-  ])
-  assert.equal((await backend.doacao({ valor: '25', metodo_pagamento: 'pix' })).dados.status, 'pendente')
-  assert.equal((await backend.mensalidade({ valor_mensal: '50', dia_vencimento: 10, metodo_pagamento: 'pix' })).dados.status, 'pendente')
-  assert.equal((await backend.apadrinhamento({ crianca_id: 7, valor_mensal: '50' })).dados.status, 'pendente')
-  const calls = fetch.mock.calls
-  assert.equal(calls[1].arguments[0], '/api/v1/doacoes')
-  assert.equal(calls[3].arguments[0], '/api/v1/mensalidades')
-  assert.equal(calls[5].arguments[0], '/api/v1/apadrinhamentos')
-  assert.deepEqual(JSON.parse(calls[5].arguments[1].body), { crianca_id: 7, valor_mensal: '50' })
-})
-
-test('histórico e cancelamento usam rotas da conta autenticada', async () => {
-  const fetch = responder([json({ dados: [] }), json({ token: 'a' }), new Response(null, { status: 204 })])
-  assert.deepEqual(await backend.historico('doacoes'), { dados: [] })
-  await backend.cancelarApoio('doacoes', 4)
-  assert.equal(fetch.mock.calls[0].arguments[0], '/api/v1/conta/doacoes')
-  assert.equal(fetch.mock.calls[2].arguments[0], '/api/v1/conta/doacoes/4')
-  assert.equal(fetch.mock.calls[2].arguments[1].method, 'DELETE')
-})
-
-test('notícias, newsletter e voluntariado usam as rotas reais', async () => {
-  const fetch = responder([json({ token: 'a' }), json({ dados: { id: 1 } }), json({ token: 'b' }), json({ mensagem: 'Inscrito' }, 201), json({ dados: { status: 'em_analise' } })])
-  const dados = new FormData()
-  dados.append('titulo', 'Notícia')
-  await backend.publicarNoticia(dados)
+test('newsletter usa a rota real', async () => {
+  const fetch = responder([json({ token: 'b' }), json({ mensagem: 'Inscrito' }, 201)])
   await backend.newsletter({ email: 'teste@example.org' })
-  assert.equal((await backend.voluntariado()).dados.status, 'em_analise')
-  assert.equal(fetch.mock.calls[1].arguments[0], '/api/v1/gestao/conteudos/noticias')
-  assert.equal(fetch.mock.calls[3].arguments[0], '/api/v1/newsletter')
-  assert.equal(fetch.mock.calls[4].arguments[0], '/api/v1/voluntariado')
+  assert.equal(fetch.mock.calls[1].arguments[0], '/api/v1/newsletter')
 })
 
 test('doação anônima envia valor e dados opcionais por POST /api/v1/doacoes com CSRF', async () => {

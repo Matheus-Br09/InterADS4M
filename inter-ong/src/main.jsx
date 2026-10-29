@@ -15,7 +15,10 @@ import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import Servicos from './pages/Servicos.jsx'
 import Privacidade from './pages/Privacidade.jsx'
-import GestaoMateriais from './pages/GestaoMateriais.jsx'
+import GestaoLayout from './pages/gestao/GestaoLayout.jsx'
+import GestaoEntrar from './pages/gestao/GestaoEntrar.jsx'
+import EmBreve from './pages/gestao/EmBreve.jsx'
+import GestaoTrocarSenha from './pages/gestao/GestaoTrocarSenha.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
 
@@ -24,6 +27,22 @@ import Noticias from './pages/Noticias.jsx'
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui
 
 const router = createBrowserRouter([
+  // Painel de gestão: fora do site público (sem menu, newsletter e rodapé)
+  { path: "gestao/entrar", element: <GestaoEntrar />, errorElement: <ErrorPage /> },
+  { path: "gestao/trocar-senha", element: <GestaoTrocarSenha />, errorElement: <ErrorPage /> },
+  {
+    path: "gestao",
+    element: <GestaoLayout />,
+    errorElement: <ErrorPage />,
+    children: [
+      { index: true, element: <Navigate to="doacoes" replace /> },
+      // Telas das Tarefas 18 e 19 substituem estes avisos.
+      { path: "doacoes", element: <EmBreve titulo="Doações" /> },
+      { path: "voluntarios", element: <EmBreve titulo="Voluntários" /> },
+      { path: "conteudos", element: <EmBreve titulo="Conteúdos" /> },
+      { path: "gestores", element: <EmBreve titulo="Gestores" /> },
+    ]
+  },
   {
     path: "/",
     errorElement: <ErrorPage />,
@@ -31,7 +50,6 @@ const router = createBrowserRouter([
     children: [
       { path: "programas", element: <Noticias key="programas" recurso="programas" titulo="Programas e ações" /> },
       { path: "transparencia", element: <Noticias key="transparencia" recurso="transparencia" titulo="Transparência" /> },
-      { path: 'gestao', element: <Navigate to='/gestao/materiais' replace /> },
       {
         index: true,
         element: <LandingPage />
@@ -55,10 +73,6 @@ const router = createBrowserRouter([
       { path: "servicos", element: <Servicos /> },
       { path: "privacidade", element: <Privacidade /> },
 
-      {
-        path: "gestao/materiais",
-        element: <GestaoMateriais />
-      },
       {
         path: "voluntariado",
         element: <Voluntariado />
