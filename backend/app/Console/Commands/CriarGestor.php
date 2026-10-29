@@ -32,7 +32,7 @@ class CriarGestor extends Command
         $this->line("Senha gerada: <info>{$senha}</info>");
         $this->line('Anote agora: ela não será mostrada de novo. No primeiro acesso o sistema pede para trocá-la.');
         $this->newLine();
-        $this->line('Entre em <info>/entrar</info> com este e-mail para acessar o painel.');
+        $this->line('Entre em <info>/gestao/entrar</info> com este e-mail para acessar o painel.');
 
         return self::SUCCESS;
     }
