@@ -37,7 +37,7 @@ class ListaApoiadores extends Command
 
         if ($contas->isEmpty()) {
             $this->warn('Nenhum apoiador no banco.');
-            $this->line('Rodou <info>php artisan db:seed</info>?');
+            $this->line('Para cadastrar um gestor, rode <info>php artisan gestor:criar "Nome" email</info>.');
 
             return self::SUCCESS;
         }
