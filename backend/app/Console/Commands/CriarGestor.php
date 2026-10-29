@@ -2,10 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Apoiador;
-use App\Support\SenhaForte;
+use App\Support\CriaGestor;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Hash;
 
 class CriarGestor extends Command
 {
@@ -20,24 +18,14 @@ class CriarGestor extends Command
         $nome = trim((string) $this->argument('nome'));
         $email = mb_strtolower(trim((string) $this->argument('email')));
 
-        if (Apoiador::whereRaw('LOWER(email) = ?', [$email])->exists()) {
+        if (CriaGestor::emailJaExiste($email)) {
             $this->error("Já existe uma conta com o e-mail {$email}.");
             $this->line('Para dar acesso de gestor a uma conta que já existe, use <info>php artisan gestor:senha</info>.');
 
             return self::FAILURE;
         }
 
-        $senha = SenhaForte::gerar();
-
-        Apoiador::create([
-            'nome_completo' => $nome,
-            'email' => $email,
-            'senha' => Hash::make($senha),
-            'senha_alterada_em' => now(),
-            'trocar_senha_obrigatorio' => true,
-            'tipo_usuario' => 'admin',
-            'data_cadastro' => now()->toDateString(),
-        ]);
+        [, $senha] = CriaGestor::criar($nome, $email);
 
         $this->info("Gestor {$nome} criado.");
         $this->newLine();
