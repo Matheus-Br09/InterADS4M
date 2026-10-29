@@ -188,6 +188,7 @@ class DashboardTesteController extends Controller
         $validated = $request->validate([
             'email' => 'required|email|unique:newsletter,email',
             'nome' => 'nullable|string|max:100',
+            'aceite_privacidade' => 'accepted',
         ]);
 
         $lead = Newsletter::create([

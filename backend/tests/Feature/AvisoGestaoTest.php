@@ -35,6 +35,8 @@ class AvisoGestaoTest extends TestCase
             'celular' => '(11) 98765-4321',
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ];
     }
 

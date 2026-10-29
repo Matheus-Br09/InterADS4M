@@ -38,7 +38,6 @@ Route::middleware('auth:apoiador')->group(function () {
         Route::post('mensalidades', [ApoiosApiController::class, 'mensal'])->middleware('throttle:doacao-unica');
         Route::post('apadrinhamentos', [ApoiosApiController::class, 'apadrinhar'])->middleware('throttle:doacao-unica');
         Route::delete('conta/{tipo}/{id}', [ApoiosApiController::class, 'cancelar'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos'])->whereNumber('id');
-        Route::get('voluntariado', [VoluntarioApiController::class, 'minhaInscricao']);
 
         Route::prefix('gestao')->middleware(['gestor', 'throttle:gestao'])->group(function () {
             Route::get('conteudos/{recurso}', [ConteudoApiController::class, 'index'])->whereIn('recurso', ['noticias', 'materiais', 'transparencia', 'programas']);
@@ -48,6 +47,7 @@ Route::middleware('auth:apoiador')->group(function () {
             Route::delete('conteudos/{recurso}/{id}', [ConteudoApiController::class, 'destroy'])->whereNumber('id');
             Route::get('voluntarios', [VoluntarioApiController::class, 'index']);
             Route::patch('voluntarios/{id}', [VoluntarioApiController::class, 'update'])->whereNumber('id');
+            Route::delete('voluntarios/{id}', [VoluntarioApiController::class, 'destroy'])->whereNumber('id');
             Route::get('voluntarios/{id}/curriculo', [VoluntarioApiController::class, 'curriculo'])->whereNumber('id');
             Route::get('doacoes', [GestaoDoacoesController::class, 'index']);
             Route::patch('doacoes/{id}', [GestaoDoacoesController::class, 'update'])->whereNumber('id');

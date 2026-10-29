@@ -25,6 +25,13 @@ class DoacaoUnica extends Model
         'data_doacao',
     ];
 
+    protected function casts(): array
+    {
+        return [
+            'data_doacao' => 'datetime',
+        ];
+    }
+
     public function apoiador(): BelongsTo
     {
         return $this->belongsTo(Apoiador::class, 'apoiador_id');

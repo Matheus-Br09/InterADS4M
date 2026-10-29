@@ -27,11 +27,11 @@ class LimiteDeRequisicoesTest extends TestCase
     public function test_a_newsletter_para_de_aceitar_depois_de_cinco_envios_no_minuto(): void
     {
         for ($i = 1; $i <= 5; $i++) {
-            $this->postJson('/api/newsletter', ['email' => "interesse{$i}@exemplo.com"])
+            $this->postJson('/api/newsletter', ['email' => "interesse{$i}@exemplo.com", 'aceite_privacidade' => true])
                 ->assertCreated();
         }
 
-        $this->postJson('/api/newsletter', ['email' => 'interesse6@exemplo.com'])
+        $this->postJson('/api/newsletter', ['email' => 'interesse6@exemplo.com', 'aceite_privacidade' => true])
             ->assertStatus(429)
             ->assertHeader('Retry-After');
 

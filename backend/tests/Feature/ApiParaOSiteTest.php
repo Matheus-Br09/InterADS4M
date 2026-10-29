@@ -102,7 +102,7 @@ class ApiParaOSiteTest extends TestCase
 
     public function test_o_site_pode_enviar_a_newsletter_de_outra_origem(): void
     {
-        $this->postJson('/api/newsletter', ['email' => 'interessada@exemplo.com'], [
+        $this->postJson('/api/newsletter', ['email' => 'interessada@exemplo.com', 'aceite_privacidade' => true], [
             'Origin' => self::ORIGEM_LOCAL,
             'Accept' => 'application/json',
         ])

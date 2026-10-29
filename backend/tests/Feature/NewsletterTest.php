@@ -15,6 +15,7 @@ class NewsletterTest extends TestCase
         $response = $this->postJson('/api/newsletter', [
             'email' => 'interessada@exemplo.com',
             'nome' => 'Maria Interessada',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertCreated()
@@ -30,7 +31,7 @@ class NewsletterTest extends TestCase
 
     public function test_inscricao_na_newsletter_aceita_apenas_o_endereco_de_email(): void
     {
-        $this->postJson('/api/newsletter', ['email' => 'sem-nome@exemplo.com'])
+        $this->postJson('/api/newsletter', ['email' => 'sem-nome@exemplo.com', 'aceite_privacidade' => true])
             ->assertCreated()
             ->assertJsonPath('dados.nome', null);
 
@@ -45,7 +46,7 @@ class NewsletterTest extends TestCase
             'data_inscricao' => now(),
         ]);
 
-        $this->postJson('/api/newsletter', ['email' => 'repetida@exemplo.com'])
+        $this->postJson('/api/newsletter', ['email' => 'repetida@exemplo.com', 'aceite_privacidade' => true])
             ->assertStatus(422)
             ->assertJsonValidationErrors('email');
 
@@ -54,7 +55,7 @@ class NewsletterTest extends TestCase
 
     public function test_recusa_e_mail_invalido_na_newsletter(): void
     {
-        $this->postJson('/api/newsletter', ['email' => 'nao-e-email'])
+        $this->postJson('/api/newsletter', ['email' => 'nao-e-email', 'aceite_privacidade' => true])
             ->assertStatus(422)
             ->assertJsonValidationErrors('email');
 
@@ -63,8 +64,17 @@ class NewsletterTest extends TestCase
 
     public function test_recusa_newsletter_sem_e_mail(): void
     {
-        $this->postJson('/api/newsletter', ['nome' => 'Sem e-mail'])
+        $this->postJson('/api/newsletter', ['nome' => 'Sem e-mail', 'aceite_privacidade' => true])
             ->assertStatus(422)
             ->assertJsonValidationErrors('email');
+    }
+
+    public function test_newsletter_exige_aceite(): void
+    {
+        $this->postJson('/api/newsletter', ['email' => 'sem-aceite@exemplo.com'])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('aceite_privacidade');
+
+        $this->assertDatabaseCount('newsletter', 0);
     }
 }
