@@ -1,14 +1,15 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap');
 
-:root {
-  --pink: #f72574;
+/* Cores desta página vêm das variáveis do index.css (seguem o tema claro/escuro).
+   Não redefinir --pink aqui: um :root próprio vazava para o site inteiro. */
+.volunteer-page {
   --pink-dark: #e71968;
-  --pink-light: #fff1f7;
-  --pink-border: #ffd0e2;
+  --pink-light: var(--bg-subtle);
+  --pink-border: var(--border-soft);
   --blue: #a7e4fa;
-  --dark: #15213d;
-  --text: #526780;
+  --dark: var(--text-primary);
+  --text: var(--text-secondary);
 }
 
 * {
@@ -18,7 +19,7 @@
 .volunteer-page {
   font-family: "Nunito Sans", sans-serif;
   color: var(--dark);
-  background: #fff;
+  background: var(--bg-page);
   overflow: hidden;
 }
 
@@ -43,7 +44,7 @@
   gap: 8px;
   padding: 7px 14px;
   border: 1px solid var(--pink-border);
-  background: #fff6fa;
+  background: var(--bg-subtle);
   border-radius: 30px;
   color: var(--pink);
   font-size: 13px;
@@ -129,7 +130,7 @@
   width: 315px;
   height: 355px;
   object-fit: cover;
-  border: 6px solid #fff;
+  border: 6px solid var(--bg-page);
   border-radius: 30px;
   box-shadow: 0 20px 50px rgba(21, 33, 61, 0.12);
 }
@@ -155,7 +156,7 @@
   padding: 40px 45px;
   border: 1px solid var(--pink-border);
   border-radius: 30px;
-  background: #fff;
+  background: var(--bg-card);
   box-shadow: 0 20px 55px rgba(247, 37, 116, 0.07);
 }
 
@@ -196,7 +197,7 @@
 .field label {
   font-size: 13px;
   font-weight: 800;
-  color: #234969;
+  color: var(--text-primary);
 }
 
 .field label b,
@@ -211,7 +212,7 @@
   padding: 14px 16px;
   border: 1px solid var(--pink-border);
   border-radius: 12px;
-  background: #fff;
+  background: var(--bg-card);
   color: var(--dark);
   font-family: inherit;
   font-size: 14px;
@@ -231,7 +232,7 @@
 
 .field input::placeholder,
 .field textarea::placeholder {
-  color: #9aabc0;
+  color: var(--text-muted);
 }
 
 .field input:focus,
@@ -318,7 +319,7 @@
   position: relative;
   padding: 45px 20px 80px;
   text-align: center;
-  background: linear-gradient(180deg, #fff 0%, #fff8fb 100%);
+  background: var(--fundo-secao);
 }
 
 .cta-heart {
