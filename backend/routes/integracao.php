@@ -29,10 +29,12 @@ Route::post('voluntariado', [VoluntarioApiController::class, 'store'])->middlewa
 
 Route::middleware('auth:apoiador')->group(function () {
     Route::post('auth/sair', [ApoiadorAuthController::class, 'logout']);
-    Route::put('auth/senha', [MinhaContaController::class, 'updateSenha'])->middleware('throttle:troca-senha-post');
+    // Só gestor tem conta no MVP; a troca de senha fica fora de 'troca-senha' para
+    // que o gestor preso na troca obrigatória consiga sair desse estado.
+    Route::put('auth/senha', [MinhaContaController::class, 'updateSenha'])->middleware(['gestor', 'throttle:troca-senha-post']);
 
     Route::middleware('troca-senha')->group(function () {
-        Route::get('auth/eu', [ContaApiController::class, 'perfil']);
+        Route::get('auth/eu', [ContaApiController::class, 'perfil'])->middleware('gestor');
 
         Route::prefix('gestao')->middleware(['gestor', 'throttle:gestao'])->group(function () {
             Route::get('conteudos/{recurso}', [ConteudoApiController::class, 'index'])->whereIn('recurso', ['noticias', 'materiais', 'transparencia', 'programas']);

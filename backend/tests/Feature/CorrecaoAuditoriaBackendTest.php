@@ -80,7 +80,7 @@ class CorrecaoAuditoriaBackendTest extends TestCase
 
     public function test_senha_repetida_nao_fica_no_old_input(): void
     {
-        $apoiador = $this->criarApoiador(['senha' => Hash::make('Auditoria123')]);
+        $apoiador = $this->criarGestor(['senha' => Hash::make('Auditoria123')]);
 
         $this->actingAs($apoiador, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha_atual' => 'Auditoria123', 'senha' => 'Auditoria123', 'senha_confirmation' => 'Auditoria123',

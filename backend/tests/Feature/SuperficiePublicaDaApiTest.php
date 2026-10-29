@@ -104,11 +104,6 @@ class SuperficiePublicaDaApiTest extends TestCase
                     continue;
                 }
 
-                // Rotas internas do framework (arquivos privados do storage).
-                if (str_starts_with($rota->uri(), 'storage/')) {
-                    continue;
-                }
-
                 $achadas[] = $metodo.' '.$rota->uri();
             }
         }
