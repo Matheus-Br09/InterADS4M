@@ -47,6 +47,8 @@ async function gravar(path, method, dados) {
   }
 }
 
+const parteBusca = (busca) => (busca.trim() ? `busca=${encodeURIComponent(busca.trim())}&` : '')
+
 export const backend = {
   entrar: (dados) => gravar('/auth/entrar', 'POST', dados),
   sair: () => gravar('/auth/sair', 'POST'),
@@ -57,10 +59,11 @@ export const backend = {
   conteudos: (tipo, pagina = 1, options) => get(`/conteudos/${tipo}?page=${pagina}`, options),
   newsletter: (dados) => gravar('/newsletter', 'POST', dados),
   configPublica: (options) => get('/config-publica', options),
-  gestaoDoacoes: (status, pagina = 1, options) => get(`/gestao/doacoes?${status ? `status=${encodeURIComponent(status)}&` : ''}page=${pagina}`, options),
+  gestaoResumo: (options) => get('/gestao/resumo', options),
+  gestaoDoacoes: (status, pagina = 1, options, busca = '') => get(`/gestao/doacoes?${status ? `status=${encodeURIComponent(status)}&` : ''}${parteBusca(busca)}page=${pagina}`, options),
   atualizarDoacao: (id, status) => gravar(`/gestao/doacoes/${id}`, 'PATCH', { status }),
   anonimizarDoacao: (id) => gravar(`/gestao/doacoes/${id}`, 'DELETE'),
-  gestaoVoluntarios: (pagina = 1, options) => get(`/gestao/voluntarios?page=${pagina}`, options),
+  gestaoVoluntarios: (pagina = 1, options, busca = '') => get(`/gestao/voluntarios?${parteBusca(busca)}page=${pagina}`, options),
   atualizarVoluntario: (id, dados) => gravar(`/gestao/voluntarios/${id}`, 'PATCH', dados),
   excluirVoluntario: (id) => gravar(`/gestao/voluntarios/${id}`, 'DELETE'),
   curriculoUrl: (id) => `${API_BASE}/api/v1/gestao/voluntarios/${id}/curriculo`,

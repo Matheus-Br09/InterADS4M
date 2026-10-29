@@ -3,6 +3,14 @@ export const STATUS_VOLUNTARIO = { em_analise: 'Em análise', entrevista_marcada
 
 export const rotulo = (tabela, chave) => tabela[chave] || chave || ''
 
+// A busca vale só dentro do botão de situação escolhido; a mensagem de "nada achado" avisa disso.
+export const mensagemBuscaVazia = (nomeFiltro, nomeTodas = 'Todas') => (nomeFiltro === nomeTodas
+  ? 'Nenhuma doação encontrada para essa busca.'
+  : `Nenhuma doação encontrada em “${nomeFiltro}”. Tente o botão “${nomeTodas}”.`)
+
+// Texto reserva para dados que faltam (cadastros antigos): "(sem nome)", "—".
+export const textoOuReserva = (valor, reserva) => (typeof valor === 'string' && valor.trim() ? valor : reserva)
+
 export function formatarReais(valor) {
   const numero = Number(valor)
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(Number.isFinite(numero) ? numero : 0)

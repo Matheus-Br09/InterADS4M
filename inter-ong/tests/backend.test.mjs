@@ -187,3 +187,17 @@ test('métodos da gestão montam método, URL e corpo corretos', async () => {
   assert.equal(fetch.mock.calls[10].arguments[1].body, form)
   assert.equal(backend.curriculoUrl(6), '/api/v1/gestao/voluntarios/6/curriculo')
 })
+
+test('busca e resumo da gestão montam a URL com texto codificado', async () => {
+  const fetch = responder([json({ dados: {} }), json({ dados: {} }), json({ dados: {} }), json({ dados: {} })])
+  await backend.gestaoDoacoes('pendente', 2, undefined, 'ana paula')
+  await backend.gestaoDoacoes('', 1, undefined, '  ')
+  await backend.gestaoVoluntarios(3, undefined, 'bia@exemplo.com')
+  await backend.gestaoResumo()
+  assert.deepEqual(fetch.mock.calls.map(({ arguments: args }) => args[0]), [
+    '/api/v1/gestao/doacoes?status=pendente&busca=ana%20paula&page=2',
+    '/api/v1/gestao/doacoes?page=1',
+    '/api/v1/gestao/voluntarios?busca=bia%40exemplo.com&page=3',
+    '/api/v1/gestao/resumo',
+  ])
+})
