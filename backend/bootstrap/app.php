@@ -15,8 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Hospedagem compartilhada atrás de proxy: sem isso o Laravel não enxerga o HTTPS.
-        $middleware->trustProxies(at: '*');
+        // Proxies confiáveis vêm de TRUSTED_PROXIES (config/trustedproxy.php); '*' deixaria burlar os limites por IP.
         $middleware->append(CabecalhosDeSeguranca::class);
 
         $middleware->alias([

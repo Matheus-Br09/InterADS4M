@@ -30,10 +30,56 @@ class CabecalhosDeSegurancaTest extends TestCase
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000');
     }
 
-    public function test_proxy_com_https_conta_como_conexao_segura(): void
+    public function test_proxy_confiavel_com_https_conta_como_conexao_segura(): void
     {
-        $this->get('/api/v1/config-publica', ['X-Forwarded-Proto' => 'https', 'X-Forwarded-For' => '203.0.113.9'])
+        config(['trustedproxy.proxies' => ['10.0.0.1']]);
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->get('/api/v1/config-publica', ['X-Forwarded-Proto' => 'https'])
             ->assertHeader('Strict-Transport-Security', 'max-age=31536000');
+    }
+
+    public function test_sem_proxy_confiavel_o_ip_vem_da_conexao_e_nao_do_cabecalho(): void
+    {
+        $this->assertSame([], config('trustedproxy.proxies'));
+
+        Route::get('/_teste/ip', fn (\Illuminate\Http\Request $r) => $r->ip().'|'.($r->isSecure() ? 'https' : 'http'));
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->get('/_teste/ip', ['X-Forwarded-For' => '1.2.3.4', 'X-Forwarded-Proto' => 'https'])
+            ->assertSee('10.0.0.1|http', false);
+    }
+
+    public function test_com_proxy_confiavel_o_ip_encaminhado_e_usado(): void
+    {
+        config(['trustedproxy.proxies' => ['10.0.0.1']]);
+
+        Route::get('/_teste/ip', fn (\Illuminate\Http\Request $r) => $r->ip());
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->get('/_teste/ip', ['X-Forwarded-For' => '1.2.3.4'])
+            ->assertSee('1.2.3.4', false);
+    }
+
+    public function test_falsos_x_forwarded_for_nao_driblam_o_limite_de_login(): void
+    {
+        $gestor = $this->criarGestor();
+
+        for ($i = 1; $i <= 10; $i++) {
+            $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+                ->postJson('/api/v1/auth/entrar', ['email' => $gestor->email, 'senha' => 'errada'], ['X-Forwarded-For' => "9.9.9.{$i}"]);
+        }
+
+        $this->withServerVariables(['REMOTE_ADDR' => '10.0.0.1'])
+            ->postJson('/api/v1/auth/entrar', ['email' => $gestor->email, 'senha' => 'errada'], ['X-Forwarded-For' => '9.9.9.200'])
+            ->assertStatus(429);
+    }
+
+    public function test_lista_de_proxies_ignora_curingas_e_espacos(): void
+    {
+        $this->assertSame([], \App\Support\ProxiesConfiaveis::aPartirDe(null));
+        $this->assertSame([], \App\Support\ProxiesConfiaveis::aPartirDe(' , '));
+        $this->assertSame(['10.0.0.1', '172.16.0.0/12'], \App\Support\ProxiesConfiaveis::aPartirDe(' 10.0.0.1, *, 172.16.0.0/12 '));
     }
 
     public function test_disco_local_nao_serve_curriculos_por_url(): void
