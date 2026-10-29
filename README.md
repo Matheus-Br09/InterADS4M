@@ -10,7 +10,7 @@
 
 Plataforma web para a **ONG SOS** — divulgação de ações, angariação de doações e gestão de apoiadores, voluntários e crianças atendidas. Sistema em dois repositórios: API REST e views em **Laravel** + SPA em **React**.
 
-> Projeto colaborativo — Carlos & Matheus. Status: **em desenvolvimento**.
+> Projeto colaborativo — Carlos & Matheus. Status: **MVP pronto, em preparação para publicação**.
 
 ---
 
@@ -18,17 +18,25 @@ Plataforma web para a **ONG SOS** — divulgação de ações, angariação de d
 
 ### Área pública (SPA React)
 
-- 🏠 Landing page institucional
-- ❤️ **Doações** — página de doações e apoio único
-- 🧭 Sobre a ONG, contato e conteúdo educacional
+- 🏠 Landing page institucional, páginas de serviços e política de privacidade
+- ❤️ **Doações via Pix** — sem login; o visitante recebe um protocolo e a gestão confirma o pagamento conferindo o extrato
+- 🙋 **Cadastro de voluntários** (maiores de 18 anos, currículo opcional)
+- 📚 Notícias, materiais educativos e documentos de transparência
+- 💬 Link para o WhatsApp da ONG e widget de acessibilidade (fonte e contraste)
 
-### Backend / Área do apoiador (Laravel)
+### Painel de gestão (`/gestao/entrar`)
 
-- 📋 **Cadastro e login de apoiadores** (guard custom `apoiador`, senha forte e bloqueio por tentativas)
-- 🏠 **Painel `minha-conta`** — área protegida do apoiador
-- 💰 **Apoio único** — doação avulsa com autenticação
-- 📚 **Conteúdo da ONG** — crianças, programas, notícias, materiais didáticos e documentos de transparência
-- 📧 Cadastro na newsletter
+- 💰 Doações: confirmar, cancelar e apagar dados do doador (pedido de exclusão)
+- 🙋 Voluntários: mudar a situação, baixar currículo e excluir
+- 📰 Conteúdos: publicar e excluir notícias, materiais (PDF) e transparência (PDF)
+- 👥 Gestores: adicionar e desativar acessos
+- Guia para a equipe da ONG: [`docs/guia-painel-gestao.md`](docs/guia-painel-gestao.md)
+
+### Backend (Laravel, API em `/api/v1`)
+
+- Nenhum endpoint público devolve dado pessoal; as rotas de gestão exigem login (401/403 sem ele)
+- E-mail para a gestão a cada nova doação ou novo voluntário
+- Rotina diária `doacoes:expirar` marca como expiradas as doações pendentes antigas
 
 ---
 
@@ -220,44 +228,168 @@ alimentam o site, mas devolvem só o que o site precisa mostrar:
 
 Nada de `senha`, `cpf`, `email`, `celular`, endereço, valor pago ou papel na gestão sai dessas rotas. As listas são montadas campo a campo e `tests/Feature/ApiPublicaNaoExpoeDadoPessoalTest.php` varre a resposta inteira de todas elas para travar isso.
 
-### Publicando (quando sair de desenvolvimento)
+### Publicando na Hostinger (Fase 2)
 
-Hoje o projeto **não está em produção**, e o `.env.example` está com os valores
-de desenvolvimento. Nada aqui trava o trabalho local; esta é a lista do que
-precisa estar diferente no dia da publicação, e é toda em `.env` — sem editar
-código:
+Passo a passo para colocar o site no ar. Tudo aqui usa `.env` e comandos; não
+precisa mexer em código. Pontos marcados com **(confirmar no painel da Hostinger)**
+dependem do plano contratado e só se confirmam na conta real.
 
-```dotenv
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://seudominio.com.br
-CORS_ALLOWED_ORIGINS=https://seudominio.com.br
-SESSION_SECURE_COOKIE=true      # só se o acesso for por HTTPS
-```
+#### 1. Antes de começar
 
-E os comandos, na ordem:
+- Plano da Hostinger com **PHP 8.3 ou mais novo** (o `backend/composer.json` exige `^8.3`), **MySQL**, **acesso SSH** e **cron**. **(confirmar no painel da Hostinger** se o plano tem SSH e cron.)
+- Domínio `.org.br` registrado no CNPJ da ONG, apontado para a hospedagem.
+- Chave Pix **confirmada diretamente com a ONG**, antes de colocar o site no ar.
+- Um e-mail da ONG criado na Hostinger, para o site enviar os avisos (`MAIL_*`).
+
+#### 2. Como as peças se encaixam (mesmo domínio, recomendado)
+
+- O site (React) fica na raiz do domínio: `/`.
+- A API (Laravel) responde em `/api/v1` **no mesmo domínio**. Assim não há problema de CORS e o cookie de login funciona direto.
+- O Laravel fica **fora** da pasta pública do site (por exemplo `~/ong/backend`), para ninguém acessar `.env` ou `storage/` pela internet.
+- O site não precisa saber o endereço da API: com `VITE_BACKEND_URL` **vazio**, ele chama o mesmo domínio.
+
+#### 3. Construir o site (no seu computador)
 
 ```bash
-cd backend
-composer install --no-dev --optimize-autoloader
-php artisan migrate --force
-npm ci && npm run build
-php artisan config:cache && php artisan route:cache && php artisan view:cache
-php artisan storage:link
+cd inter-ong
+npm ci
+npm run build        # gera a pasta inter-ong/dist
 ```
 
-Duas coisas que só valem a pena conferir porque não aparecem em erro nenhum:
+Deixe `VITE_BACKEND_URL` vazio (mesmo domínio). Envie **o conteúdo** de `inter-ong/dist` para a pasta pública do domínio (em geral `public_html`) **(confirmar no painel da Hostinger)**.
 
-- **`SESSION_SECURE_COOKIE` só com HTTPS.** Ligado em `http://localhost` ou em
-  IP de rede local, o navegador simplesmente não devolve o cookie e **todo
-  mundo fica deslogado**, sem mensagem.
-- **`CORS_ALLOWED_ORIGINS` com a origem do site, não do backend.** O valor é a
-  origem de onde o `fetch` sai, ou seja, o endereço do site público. Asterisco
-  em produção deixa qualquer página da internet ler as respostas da API. Várias
-  origens separe por vírgula, sem espaços sobrando.
+#### 4. Enviar o backend
 
-Depois de publicar, `php artisan apoiadores:listar` continua sendo o jeito de
-conferir se nenhuma conta ficou com a senha antiga.
+Envie a pasta `backend/` para fora da pasta pública (ex.: `~/ong/backend`), **sem** `.env`, `vendor/`, `node_modules/` nem `storage/` do seu computador. Pode ser por Git no servidor (via SSH) ou pelo gerenciador de arquivos.
+
+> **Nunca copie o banco de dados local nem a pasta `storage/` do computador para o servidor.** O banco local tem dados de pessoas reais de testes antigos. Em produção o banco começa vazio.
+
+#### 5. Ligar o domínio à API (`.htaccess`)
+
+O site é uma SPA: endereços como `/doar` ou `/gestao/entrar` não são arquivos de verdade e precisam cair no `index.html`. E tudo que começa com `/api` precisa ir para o Laravel. A Hostinger costuma usar servidor LiteSpeed, que lê o `.htaccess` do mesmo jeito que o Apache **(confirmar no painel da Hostinger)**.
+
+O Laravel já traz `backend/public/.htaccess` (feito para ele ser a pasta pública inteira). Como aqui a pasta pública é a do site, os dois **não** podem ser o mesmo arquivo. Uma forma que funciona:
+
+1. Copie `backend/public/index.php` para a pasta pública com o nome `laravel.php` e ajuste os caminhos de `vendor/autoload.php` e `bootstrap/app.php` para onde está o backend (ex.: `__DIR__.'/../ong/backend/vendor/autoload.php'`).
+2. Crie um `.htaccess` na pasta pública (junto ao `index.html` do site):
+
+```apache
+RewriteEngine On
+
+# Cabeçalhos que o Laravel precisa receber
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteCond %{HTTP:x-xsrf-token} .
+RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+# Tudo que começa com /api vai para o Laravel
+RewriteRule ^api(/.*)?$ laravel.php [L]
+
+# Arquivos reais do site (JS, CSS, imagens) são servidos como são
+RewriteCond %{REQUEST_FILENAME} -f [OR]
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^ - [L]
+
+# Qualquer outra rota do site cai no index.html (a SPA decide a tela)
+RewriteRule ^ index.html [L]
+```
+
+Este trecho **não foi testado em uma conta real da Hostinger**: depois de enviar, teste `https://<domínio>/api/v1/csrf` (deve responder JSON) e `https://<domínio>/gestao/entrar` (deve abrir a tela de login). Se algo falhar, ajuste com o suporte da Hostinger.
+
+Alternativa: um subdomínio (`api.<domínio>`) com `backend/public` como pasta raiz dele. Nesse caso `VITE_BACKEND_URL` e `CORS_ALLOWED_ORIGINS` precisam ser preenchidos e o cookie de login exige conferência extra; por isso o mesmo domínio é o recomendado.
+
+#### 6. Banco de dados e `.env` de produção
+
+1. Crie o banco MySQL no painel da Hostinger e anote nome, usuário e senha.
+2. No servidor, copie `backend/.env.example` para `backend/.env` e preencha. O bloco **"Produção (Hostinger)"** do próprio `.env.example` lista o que trocar; resumo:
+
+| Chave | O que colocar |
+|---|---|
+| `APP_ENV`, `APP_DEBUG` | `production` e `false` |
+| `APP_URL` | `https://<domínio>` |
+| `APP_TIMEZONE` | `America/Recife` |
+| `DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` | `mysql` e os dados do banco criado |
+| `LOG_LEVEL` | `warning` |
+| `SESSION_SECURE_COOKIE` | `true` (o site usa HTTPS) |
+| `CORS_ALLOWED_ORIGINS` | `https://<domínio>` (nunca `*`) |
+| `TRUSTED_PROXIES` | deixe **vazio** (veja a nota abaixo) |
+| `MAIL_MAILER`, `MAIL_HOST`, `MAIL_PORT`, `MAIL_SCHEME`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_FROM_ADDRESS` | dados do e-mail da ONG na Hostinger |
+| `ONG_PIX_CHAVE`, `ONG_PIX_NOME`, `ONG_PIX_CIDADE` | dados Pix **confirmados com a ONG** |
+| `ONG_WHATSAPP`, `ONG_INSTAGRAM`, `ONG_EMAIL_GESTAO` | contatos da ONG (`ONG_EMAIL_GESTAO` recebe os avisos de doação e voluntário) |
+| `ONG_DOACAO_EXPIRA_DIAS` | opcional (padrão 7) |
+
+A senha do banco e a do e-mail ficam **só** no `.env` do servidor. Nunca no Git, nunca no chat.
+
+> **`TRUSTED_PROXIES`:** deixe vazio. Só preencha com o IP/faixa do proxy da Hostinger se o site não reconhecer que está em HTTPS ou mostrar o IP errado do visitante. Sintomas: cabeçalho HSTS ausente, cookie seguro não funcionando (todo mundo deslogado), redirecionamentos estranhos. O IP real do proxy: **confirmar no painel da Hostinger** ou com o suporte.
+
+#### 7. Comandos no servidor (via SSH, dentro da pasta do backend)
+
+```bash
+cd ~/ong/backend
+composer install --no-dev --optimize-autoloader
+php artisan key:generate
+php artisan migrate --force        # cria as tabelas; NÃO rode seeders
+php artisan storage:link           # imagens/PDFs públicos
+php artisan config:cache
+php artisan route:cache
+```
+
+- Currículos de voluntários ficam em disco **privado** (`storage/app/private/curriculos`) e só saem pelo painel. Imagens e PDFs públicos ficam no disco `public` (`storage/app/public`); o `storage:link` cria o atalho `public/storage` dentro do backend. Como aqui a pasta pública é outra, se alguma imagem não abrir crie também um atalho de `<pasta pública>/storage` para `~/ong/backend/storage/app/public` **(confirmar no painel da Hostinger** se o plano permite atalhos).
+- Se o `composer` não existir no servidor, rode `composer install --no-dev` no seu computador (mesma versão de PHP, 8.3) e envie a pasta `vendor/`.
+- Depois de qualquer mudança no `.env`, rode `php artisan config:cache` de novo.
+
+#### 8. Primeiro gestor
+
+```bash
+php artisan gestor:criar "Nome da Pessoa" email@da-ong.org.br
+```
+
+O comando mostra uma **senha temporária uma única vez**; anote e entregue por canal privado. Em `https://<domínio>/gestao/entrar` a pessoa entra e é obrigada a criar a própria senha. Os outros gestores são criados pelo próprio painel (aba Gestores). Guia para a equipe: [`docs/guia-painel-gestao.md`](docs/guia-painel-gestao.md).
+
+#### 9. Rotina diária (cron)
+
+No painel da Hostinger, crie uma tarefa cron para rodar **a cada minuto** **(confirmar no painel da Hostinger** o menu e o caminho do PHP):
+
+```
+* * * * * cd ~/ong/backend && php artisan schedule:run >> /dev/null 2>&1
+```
+
+É ela que dispara `doacoes:expirar` uma vez por dia (marca como expiradas as doações pendentes antigas). Sem o cron, doações velhas ficam "Pendentes" para sempre.
+
+#### 10. SSL
+
+Ative o certificado SSL gratuito do domínio no painel e force HTTPS **(confirmar no painel da Hostinger)**. Só depois confira `SESSION_SECURE_COOKIE=true`; sem HTTPS o login do painel não funciona.
+
+#### 11. Backup
+
+- Ligue o backup automático da Hostinger **(confirmar no painel da Hostinger** a frequência do plano).
+- Toda semana, faça um `mysqldump` do banco e uma cópia de `storage/app` (currículos e arquivos enviados) para um lugar seguro fora do servidor:
+
+```bash
+mysqldump -u <usuario> -p <banco> > backup-$(date +%F).sql
+tar czf storage-$(date +%F).tar.gz storage/app
+```
+
+Esses arquivos têm dados pessoais: guarde com cuidado e não envie ao Git.
+
+#### 12. Checklist antes de anunciar (critérios de pronto, spec §9)
+
+Spec: `docs/superpowers/specs/2026-10-29-mvp-lancamento-design.md`.
+
+- [ ] 1. Visitante doa via Pix sem login e recebe protocolo; a gestão recebe e-mail, vê a doação pendente e marca como confirmada.
+- [ ] 2. Maior de 18 se cadastra como voluntário (com e sem currículo); menor de 18 é recusado no site e no servidor; a gestão recebe e-mail e vê o cadastro.
+- [ ] 3. Nenhum endereço público devolve dado pessoal; rotas de gestão sem login dão 401/403.
+- [ ] 4. Um gestor publica uma notícia e um PDF de transparência sozinho, seguindo o guia.
+- [ ] 5. O site funciona no celular; o widget de acessibilidade muda fonte e contraste.
+- [ ] 6. Testes passando: `php artisan test` (backend), `npm test` e `npm run lint` (frontend).
+- [ ] 7. Chave Pix exibida confirmada pela ONG.
+- [ ] 8. Teste com a ONG (critério de aceitação do documento acadêmico) antes do anúncio público.
+
+#### Lembretes
+
+- **`SESSION_SECURE_COOKIE` só com HTTPS.** Ligado em `http://localhost`, o navegador não devolve o cookie e todo mundo fica deslogado, sem mensagem.
+- **`CORS_ALLOWED_ORIGINS` é a origem do site, nunca `*` em produção.** Várias origens, separe por vírgula, sem espaços.
+- **Nunca copie o banco ou o `storage/` locais para o servidor.**
 
 ### Assets do backend (Vite + Tailwind, sem internet)
 
@@ -306,13 +438,11 @@ Os recursos públicos ficam em `GET /api/v1/conteudos/noticias`, `materiais`, `t
 
 ## 🔄 Status atual
 
-- ✅ Backend: autenticação do apoiador, dados da ONG importados
-- ✅ Painel de gestão protegido por `tipo_usuario = admin` + comando `gestor:senha`
-- ✅ Cadastro público com validação de CPF no servidor
-- ✅ Telas Blade com Vite/Tailwind locais (funciona sem internet)
-- ✅ 239 testes automatizados no backend
-- ✅ Frontend: estrutura inicial com páginas placeholder
-- ⏳ Pendente: ligar a tela de cadastro/login da SPA ao backend (hoje ela faz GET, sem enviar os campos, para `NomeDoArquivoLogin.php`, que nao existe, e valida CPF num servico de terceiro), rodar a rotação de senha nas contas reais, restringir CORS antes de publicar, registrar a autorização dos responsáveis das crianças, revisar as fotos do acervo, upload de arquivos, endpoints REST restantes
+- ✅ MVP de lançamento (Fase 1) pronto: doação via Pix com protocolo, cadastro de voluntários, painel de gestão, WhatsApp, acessibilidade, páginas de serviços e privacidade
+- ✅ API pública sem dados pessoais; rotas de gestão protegidas por login
+- ✅ Testes automatizados no backend e no frontend
+- ⏳ Fase 2: publicar na Hostinger (seção acima), confirmar a chave Pix com a ONG, teste de aceitação com a ONG, incluir prints no guia do painel, revisar textos de serviços e privacidade com a ONG
+- 🗑️ Removidos do MVP: login/"minha conta" do apoiador e apadrinhamento
 
 ---
 
