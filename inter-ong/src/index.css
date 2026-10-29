@@ -433,8 +433,10 @@ footer {
 
 /* O rodapé é sempre escuro: textos dentro dele herdam o claro do rodapé em vez da
    cor padrão de parágrafo (que no tema claro é cinza escuro e some no fundo escuro). */
-footer h1, footer h2, footer h3, footer h4, footer p, footer label {
-    color: inherit;
+@layer base {
+    footer h1, footer h2, footer h3, footer h4, footer p, footer label {
+        color: inherit;
+    }
 }
 
 html.dark footer {
