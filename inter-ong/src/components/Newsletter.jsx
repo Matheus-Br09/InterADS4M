@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react'
 import { backend } from '../api/backend'
+import { Link } from 'react-router-dom'
 import AvisoApi from './AvisoApi'
 
 export default function Newsletter() {
@@ -13,9 +14,9 @@ export default function Newsletter() {
     const form = event.currentTarget
     const dados = Object.fromEntries(new FormData(form))
     ocupado.current = true; setEnviando(true); setErro(null); setMensagem('')
-    try { const resposta = await backend.newsletter(dados); setMensagem(resposta.mensagem); form.reset() }
+    try { const resposta = await backend.newsletter(dados); setMensagem(resposta.message || resposta.mensagem || 'Inscrição feita!'); form.reset() }
     catch (error) { setErro(error) }
     finally { ocupado.current = false; setEnviando(false) }
   }
-  return <section className="bg-pink-50 p-8 text-slate-800" aria-label="Newsletter"><div className="mx-auto max-w-3xl"><h2 className="text-xl font-bold">Receba novidades da ONG</h2><AvisoApi erro={erro} mensagem={mensagem} /><form onSubmit={enviar} className="mt-4"><fieldset disabled={enviando} className="flex flex-wrap gap-3"><label>Nome (opcional)<input name="nome" maxLength={100} autoComplete="name" className="block rounded-lg border bg-white p-2" /></label><label>E-mail<input name="email" type="email" required autoComplete="email" className="block rounded-lg border bg-white p-2" /></label><button className="self-end rounded-lg bg-pink-600 px-4 py-2 text-white" type="submit">{enviando ? 'Enviando…' : 'Inscrever-se'}</button></fieldset></form></div></section>
+  return <section className="bg-pink-50 p-8 text-slate-800" aria-label="Newsletter"><div className="mx-auto max-w-3xl"><h2 className="text-xl font-bold">Receba novidades da ONG</h2><AvisoApi erro={erro} mensagem={mensagem} /><form onSubmit={enviar} className="mt-4"><fieldset disabled={enviando} className="flex flex-wrap gap-3"><label>Nome (opcional)<input name="nome" maxLength={100} autoComplete="name" className="block rounded-lg border bg-white p-2" /></label><label>E-mail<input name="email" type="email" required autoComplete="email" className="block rounded-lg border bg-white p-2" /></label><label className="flex basis-full items-start gap-2 text-sm"><input type="checkbox" name="aceite_privacidade" value="1" required className="mt-1" /><span>Li e aceito a <Link to="/privacidade" className="underline">política de privacidade</Link></span></label><button className="self-end rounded-lg bg-pink-600 px-4 py-2 text-white" type="submit">{enviando ? 'Enviando…' : 'Inscrever-se'}</button></fieldset></form></div></section>
 }
