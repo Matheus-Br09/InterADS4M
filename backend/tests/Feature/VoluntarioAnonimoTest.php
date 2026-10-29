@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Voluntario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -26,7 +27,8 @@ class VoluntarioAnonimoTest extends TestCase
         ]);
 
         $response->assertStatus(200);
-        $response->assertJsonStructure(['dados' => ['id', 'nome_completo', 'email', 'celular', 'area_atuacao', 'disponibilidade', 'status']]);
+        // A rota é pública: a resposta só confirma, não devolve o cadastro.
+        $response->assertExactJson(['message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.']);
 
         $this->assertDatabaseHas('voluntarios', [
             'nome_completo' => 'João Silva',
@@ -88,10 +90,13 @@ class VoluntarioAnonimoTest extends TestCase
 
         $response->assertStatus(200);
 
-        $voluntario = $response->json('dados');
-        $this->assertNotNull($voluntario['arquivo_curriculo']);
+        // O caminho do arquivo não volta na resposta (é dado interno).
+        $response->assertJsonMissingPath('dados');
 
-        Storage::disk('local')->assertExists($voluntario['arquivo_curriculo']);
+        $voluntario = Voluntario::where('email', 'maria@email.com')->sole();
+        $this->assertNotNull($voluntario->arquivo_curriculo);
+
+        Storage::disk('local')->assertExists($voluntario->arquivo_curriculo);
     }
 
     public function test_cadastro_anonimo_curriculo_opcional(): void

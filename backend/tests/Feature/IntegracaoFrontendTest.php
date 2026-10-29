@@ -54,22 +54,14 @@ class IntegracaoFrontendTest extends TestCase
         $this->assertDatabaseCount('noticias', 0);
     }
 
-    public function test_api_entrega_csrf_e_cadastro_json(): void
+    public function test_api_entrega_csrf(): void
     {
         $this->getJson('/api/v1/csrf')->assertOk()->assertJsonStructure(['token']);
-
-        $response = $this->postJson('/api/v1/auth/cadastro', [
-            'nome_completo' => 'Pessoa Frontend', 'email' => 'frontend@example.org', 'cpf' => '11122233387',
-            'senha' => 'SenhaFrontend123', 'senha_confirmation' => 'SenhaFrontend123',
-        ]);
-
-        $response->assertCreated()->assertJsonPath('dados.email', 'frontend@example.org');
-        $this->assertAuthenticated('apoiador');
     }
 
     public function test_api_de_login_retorna_conta_e_logout(): void
     {
-        $apoiador = $this->criarApoiador(['email' => 'frontend@example.org', 'senha' => Hash::make('SenhaFrontend123')]);
+        $apoiador = $this->criarGestor(['email' => 'frontend@example.org', 'senha' => Hash::make('SenhaFrontend123')]);
 
         $this->postJson('/api/v1/auth/entrar', ['email' => $apoiador->email, 'senha' => 'SenhaFrontend123'])
             ->assertOk()->assertJsonPath('dados.id', $apoiador->id);
@@ -84,34 +76,5 @@ class IntegracaoFrontendTest extends TestCase
         $this->getJson('/api/v1/conteudos/programas')->assertOk()
             ->assertJsonPath('dados.0.titulo', 'Programa frontend')
             ->assertJsonStructure(['dados', 'paginacao']);
-    }
-
-    public function test_api_de_doacao_registra_intencao_pendente(): void
-    {
-        $apoiador = $this->criarApoiador();
-        $this->actingAs($apoiador, 'apoiador')->postJson('/api/v1/doacoes', ['valor' => '25.00', 'metodo_pagamento' => 'pix'])
-            ->assertCreated()->assertJsonPath('dados.status', 'pendente');
-        $this->assertDatabaseHas('doacoes_unicas', ['apoiador_id' => $apoiador->id, 'status' => 'pendente']);
-    }
-
-    public function test_lista_publica_permite_registrar_apadrinhamento_pendente_sem_ativar_crianca(): void
-    {
-        $apoiador = $this->criarApoiador();
-        $crianca = $this->criarCrianca(['status' => 'disponivel']);
-
-        $lista = $this->getJson('/api/criancas')->assertOk()
-            ->assertJsonPath('dados.0.id', $crianca->id);
-
-        $this->actingAs($apoiador, 'apoiador')->postJson('/api/v1/apadrinhamentos', [
-            'crianca_id' => $lista->json('dados.0.id'), 'valor_mensal' => '50.00',
-        ])->assertOk()->assertJsonPath('dados.status', 'pendente');
-
-        $this->assertDatabaseHas('apadrinhamentos', [
-            'apoiador_id' => $apoiador->id, 'crianca_id' => $crianca->id,
-            'valor_mensal' => 50, 'status' => 'pendente',
-        ]);
-        $this->getJson('/api/criancas')->assertOk()
-            ->assertJsonPath('dados.0.apadrinhada', false)
-            ->assertJsonPath('dados.0.status', 'disponivel');
     }
 }

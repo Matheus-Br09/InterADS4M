@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\ApoiadorAuthController;
-use App\Http\Controllers\ApoiosApiController;
 use App\Http\Controllers\ConfigPublicaController;
 use App\Http\Controllers\ContaApiController;
 use App\Http\Controllers\ConteudoApiController;
@@ -14,7 +13,7 @@ use App\Http\Controllers\VoluntarioApiController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('csrf', [SessaoApiController::class, 'csrf']);
-Route::post('auth/cadastro', [ApoiadorAuthController::class, 'register'])->middleware('throttle:cadastro');
+// Login só da gestão da ONG: apoiador comum não tem mais conta no site.
 Route::post('auth/entrar', [ApoiadorAuthController::class, 'login'])->middleware('throttle:login');
 Route::get('conteudos/{recurso}', [ConteudoApiController::class, 'index'])->whereIn('recurso', ['noticias', 'materiais', 'transparencia', 'programas']);
 Route::get('conteudos/{recurso}/{id}', [ConteudoApiController::class, 'show'])->whereNumber('id');
@@ -33,11 +32,6 @@ Route::middleware('auth:apoiador')->group(function () {
 
     Route::middleware('troca-senha')->group(function () {
         Route::get('auth/eu', [ContaApiController::class, 'perfil']);
-        Route::patch('conta', [ContaApiController::class, 'update']);
-        Route::get('conta/{tipo}', [ContaApiController::class, 'historico'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos']);
-        Route::post('mensalidades', [ApoiosApiController::class, 'mensal'])->middleware('throttle:doacao-unica');
-        Route::post('apadrinhamentos', [ApoiosApiController::class, 'apadrinhar'])->middleware('throttle:doacao-unica');
-        Route::delete('conta/{tipo}/{id}', [ApoiosApiController::class, 'cancelar'])->whereIn('tipo', ['doacoes', 'mensalidades', 'apadrinhamentos'])->whereNumber('id');
 
         Route::prefix('gestao')->middleware(['gestor', 'throttle:gestao'])->group(function () {
             Route::get('conteudos/{recurso}', [ConteudoApiController::class, 'index'])->whereIn('recurso', ['noticias', 'materiais', 'transparencia', 'programas']);

@@ -42,7 +42,9 @@ class VoluntarioApiController extends Controller
 
         AvisaGestao::enviar(new NovoVoluntario($voluntario));
 
-        return ['dados' => $voluntario, 'message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
+        // A rota é pública: a resposta não devolve o cadastro (data de
+        // nascimento, caminho do currículo), só a confirmação.
+        return ['message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
     }
 
     public function index(): array

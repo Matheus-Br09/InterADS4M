@@ -39,12 +39,12 @@ class GestorDeAcessoTest extends TestCase
 
         Artisan::call('gestor:senha', ['email' => 'gestora@ong.org.br', 'senha' => 'Nova-senha-123']);
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'Nova-senha-123'))
-            ->assertRedirect('/minha-conta');
+        $this->postJson('/api/v1/auth/entrar', $this->credenciaisDoApoiador($apoiador, 'Nova-senha-123'))
+            ->assertOk();
 
         $this->assertAuthenticatedAs($apoiador->fresh(), 'apoiador');
 
-        $this->get('/')->assertOk()->assertSee('Painel de Testes ONG SOS');
+        $this->getJson('/api/v1/gestao/doacoes')->assertOk();
     }
 
     public function test_comando_promove_um_apoiador_comum_e_libera_o_painel(): void
@@ -52,12 +52,12 @@ class GestorDeAcessoTest extends TestCase
         $apoiador = $this->criarApoiador(['email' => 'apoiador@ong.org.br']);
 
         $this->actingAs($apoiador, 'apoiador');
-        $this->get('/')->assertRedirect('/entrar');
+        $this->getJson('/api/v1/gestao/doacoes')->assertForbidden();
 
         Artisan::call('gestor:senha', ['email' => 'apoiador@ong.org.br', 'senha' => 'Outra-senha-123']);
 
         $this->actingAs($apoiador->fresh(), 'apoiador');
-        $this->get('/')->assertOk();
+        $this->getJson('/api/v1/gestao/doacoes')->assertOk();
     }
 
     public function test_comando_aceita_o_e_maiusculo(): void

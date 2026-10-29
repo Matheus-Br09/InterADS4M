@@ -80,8 +80,8 @@ class RotacaoDeSenhaTest extends TestCase
         $this->assertTrue(Hash::check($senha, $apoiador->refresh()->senha));
         $this->assertNotNull($apoiador->senha_alterada_em, 'a rotacao da gestao tambem fica com data');
 
-        $this->post('/entrar', ['email' => $apoiador->email, 'senha' => $senha])
-            ->assertRedirect('/minha-conta');
+        $this->postJson('/api/v1/auth/entrar', ['email' => $apoiador->email, 'senha' => $senha])
+            ->assertOk();
     }
 
     public function test_a_senha_gerada_troca_a_senha_antiga(): void
@@ -90,12 +90,12 @@ class RotacaoDeSenhaTest extends TestCase
         Artisan::call('gestor:senha', ['email' => $apoiador->email]);
         preg_match('/Senha gerada: (\S+)/', Artisan::output(), $achado);
 
-        $this->post('/entrar', ['email' => $apoiador->email, 'senha' => 'senha123'])
-            ->assertSessionHasErrors('email');
+        $this->postJson('/api/v1/auth/entrar', ['email' => $apoiador->email, 'senha' => 'senha123'])
+            ->assertUnauthorized();
         $this->assertGuest('apoiador');
 
-        $this->post('/entrar', ['email' => $apoiador->email, 'senha' => $achado[1]])
-            ->assertRedirect('/minha-conta');
+        $this->postJson('/api/v1/auth/entrar', ['email' => $apoiador->email, 'senha' => $achado[1]])
+            ->assertOk();
     }
 
     public function test_apoiador_senha_redefine_sem_promover_a_gestor(): void
@@ -109,9 +109,10 @@ class RotacaoDeSenhaTest extends TestCase
         $this->assertSame('apoiador', $apoiador->refresh()->tipo_usuario);
         $this->assertNotNull($apoiador->senha_alterada_em, 'a rotacao tem que ficar com data');
 
+        // A conta continua sem acesso ao sistema (só a gestão entra no MVP), mas
+        // a senha nova é a que vale.
         preg_match('/Senha gerada: (\S+)/', $saida, $achado);
-        $this->post('/entrar', ['email' => $apoiador->email, 'senha' => $achado[1]])
-            ->assertRedirect('/minha-conta');
+        $this->assertTrue(Hash::check($achado[1], $apoiador->senha));
     }
 
     public function test_apoiador_senha_derruba_a_sessao_que_ainda_valia(): void

@@ -18,17 +18,6 @@ use Symfony\Component\HttpFoundation\Response;
  */
 class TrocaSenhaObrigatoria
 {
-    /*
-    * Rotas liberadas mesmo com a conta presa. A de troca é a saída do estado
-    * (sem ela a conta ficaria sem caminho nenhum) e a de sair evita que a
-    * pessoa fiqueobligada a continuar.
-    */
-    private const ROTAS_LIBERADAS = [
-        'senha.edit',
-        'senha.update',
-        'logout',
-    ];
-
     public function handle(Request $request, Closure $next): Response
     {
         $usuario = $request->user('apoiador');
@@ -39,16 +28,9 @@ class TrocaSenhaObrigatoria
             return $next($request);
         }
 
-        if (in_array($request->route()?->getName(), self::ROTAS_LIBERADAS, true)) {
-            return $next($request);
-        }
-
-        if ($request->is('api/*')) {
-            return response()->json(['message' => 'Troque sua senha para continuar.', 'codigo' => 'troca_senha_obrigatoria'], 403);
-        }
-
-        return redirect()
-            ->route('senha.edit')
-            ->with('aviso', 'Crie uma senha nova para continuar usando o sistema.');
+        // As rotas de saída do estado (PUT auth/senha e POST auth/sair) ficam
+        // fora do grupo 'troca-senha' em routes/integracao.php, então tudo o que
+        // chega aqui com a conta presa é recusado.
+        return response()->json(['message' => 'Troque sua senha para continuar.', 'codigo' => 'troca_senha_obrigatoria'], 403);
     }
 }

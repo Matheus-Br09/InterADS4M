@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Apoiador;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CriaCenarioOng;
 use Tests\TestCase;
@@ -12,74 +13,61 @@ use Tests\TestCase;
 | testes travam a conta, não o IP, e travam também a resposta que entrega
 | informação sobre quais e-mails existem.
 |
-| As mensagens são conferidas na tela depois do redirect (followingRedirects)
-| em vez de dentro do array da sessão: o que interessa é o que o apoiador lê.
+| O login é só pela API (POST /api/v1/auth/entrar), usada pelo painel da gestão.
 */
 class BloqueioDeLoginTest extends TestCase
 {
     use CriaCenarioOng;
     use RefreshDatabase;
 
+    private const ENTRAR = '/api/v1/auth/entrar';
+
     public function test_cinco_erros_bloqueiam_a_conta_mesmo_com_a_senha_certa(): void
     {
-        $apoiador = $this->criarApoiador();
+        $gestor = $this->criarGestor();
 
-        for ($i = 1; $i <= 5; $i++) {
-            $this->from('/entrar')->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha-errada'))
-                ->assertRedirect('/entrar')
-                ->assertSessionHasErrors('email');
-        }
+        $this->errarLogin($gestor, 5);
 
-        $this->from('/entrar')->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha123'))
-            ->assertRedirect('/entrar')
-            ->assertSessionHasErrors('email');
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($gestor, 'senha123'))
+            ->assertStatus(429);
 
         $this->assertGuest('apoiador');
     }
 
-    public function test_a_tela_diz_que_a_conta_esta_bloqueada_e_por_quanto_tempo(): void
+    public function test_a_resposta_diz_que_a_conta_esta_bloqueada_e_por_quanto_tempo(): void
     {
-        $apoiador = $this->criarApoiador();
+        $gestor = $this->criarGestor();
 
-        $this->errarLogin($apoiador, 5);
+        $this->errarLogin($gestor, 5);
 
-        $resposta = $this->followingRedirects()
-            ->from('/entrar')
-            ->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha123'));
+        $resposta = $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($gestor, 'senha123'))
+            ->assertStatus(429)
+            ->assertJsonPath('message', 'Muitas tentativas de acesso. Tente novamente mais tarde.')
+            ->assertHeader('Retry-After');
 
-        $resposta->assertOk();
-        $resposta->assertSee('Muitas tentativas de acesso');
-        $resposta->assertSee('Tente novamente em');
-        $this->assertMatchesRegularExpression(
-            '/Tente novamente em \d+ segundos/',
-            strip_tags($resposta->getContent()),
-            'A tela precisa dizer em quantos segundos a conta volta a funcionar.',
-        );
+        $this->assertIsInt($resposta->json('tentar_em'));
+        $this->assertGreaterThan(0, $resposta->json('tentar_em'));
     }
 
-    public function test_a_tela_nao_diz_mais_que_a_senha_esta_errada_quando_o_problema_e_o_bloqueio(): void
+    public function test_a_resposta_nao_diz_mais_que_a_senha_esta_errada_quando_o_problema_e_o_bloqueio(): void
     {
-        $apoiador = $this->criarApoiador();
+        $gestor = $this->criarGestor();
 
-        $this->errarLogin($apoiador, 5);
+        $this->errarLogin($gestor, 5);
 
-        $resposta = $this->followingRedirects()
-            ->from('/entrar')
-            ->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha-errada'));
-
-        $resposta->assertSee('Muitas tentativas de acesso');
-        $resposta->assertDontSee('não correspondem aos nossos registros');
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($gestor, 'senha-errada'))
+            ->assertStatus(429)
+            ->assertJsonMissing(['message' => 'E-mail ou senha inválidos.']);
     }
 
     public function test_o_bloqueio_e_por_conta_e_nao_derruba_o_login_dos_outros(): void
     {
-        $alvo = $this->criarApoiador();
-        $outro = $this->criarApoiador(['email' => 'outra@exemplo.com']);
+        $alvo = $this->criarGestor();
+        $outro = $this->criarGestor(['email' => 'outra@exemplo.com']);
 
         $this->errarLogin($alvo, 5);
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($outro))
-            ->assertRedirect('/minha-conta');
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($outro))->assertOk();
 
         $this->assertAuthenticatedAs($outro, 'apoiador');
     }
@@ -92,51 +80,52 @@ class BloqueioDeLoginTest extends TestCase
     public function test_e_mail_inexistente_e_bloqueado_do_mesmo_jeito_para_nao_entregar_a_lista_de_quem_existe(): void
     {
         for ($i = 1; $i <= 5; $i++) {
-            $this->from('/entrar')->post('/entrar', ['email' => 'ninguem@exemplo.com', 'senha' => 'senha-errada']);
+            $this->postJson(self::ENTRAR, ['email' => 'ninguem@exemplo.com', 'senha' => 'senha-errada'])
+                ->assertUnauthorized();
         }
 
-        $resposta = $this->followingRedirects()
-            ->from('/entrar')
-            ->post('/entrar', ['email' => 'ninguem@exemplo.com', 'senha' => 'senha123']);
-
-        $resposta->assertSee('Muitas tentativas de acesso');
-        $resposta->assertDontSee('não correspondem aos nossos registros');
+        $this->postJson(self::ENTRAR, ['email' => 'ninguem@exemplo.com', 'senha' => 'senha123'])
+            ->assertStatus(429)
+            ->assertJsonPath('message', 'Muitas tentativas de acesso. Tente novamente mais tarde.');
     }
 
-    public function test_um_login_bem_sucedido_zeta_o_contador_da_conta(): void
+    public function test_um_login_bem_sucedido_zera_o_contador_da_conta(): void
     {
-        $apoiador = $this->criarApoiador();
+        $gestor = $this->criarGestor();
 
-        $this->errarLogin($apoiador, 4);
+        $this->errarLogin($gestor, 4);
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($apoiador))
-            ->assertRedirect('/minha-conta');
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($gestor))->assertOk();
+        $this->postJson('/api/v1/auth/sair')->assertNoContent();
 
         // Com o contador zerado, a conta aguenta mais 4 erros: se o login
         // correto não limpasse o histórico, a 5a tentativa errada já barraria.
-        $this->errarLogin($apoiador, 4);
+        $this->errarLogin($gestor, 4);
 
-        $resposta = $this->followingRedirects()
-            ->from('/entrar')
-            ->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha-errada'));
-
-        $resposta->assertSee('não correspondem aos nossos registros');
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($gestor, 'senha-errada'))
+            ->assertUnauthorized()
+            ->assertJsonPath('message', 'E-mail ou senha inválidos.');
     }
 
-    public function test_o_e_mail_digitado_volta_no_formulario_para_nao_ter_de_digitar_de_novo(): void
+    public function test_apoiador_comum_tambem_fica_bloqueado_depois_de_errar(): void
     {
+        // O bloqueio vale antes de saber quem é a conta: senão o 403 de
+        // "acesso restrito" viraria um jeito de testar senhas sem limite.
         $apoiador = $this->criarApoiador();
 
-        $this->from('/entrar')->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha-errada'))
-            ->assertRedirect('/entrar')
-            ->assertSessionHasInput('email', $apoiador->email);
+        $this->errarLogin($apoiador, 5);
+
+        $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($apoiador))
+            ->assertStatus(429);
+
+        $this->assertGuest('apoiador');
     }
 
-    private function errarLogin($apoiador, int $tentativas): void
+    private function errarLogin(Apoiador $conta, int $tentativas): void
     {
         for ($i = 1; $i <= $tentativas; $i++) {
-            $this->from('/entrar')->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'senha-errada'))
-                ->assertSessionHasErrors('email');
+            $this->postJson(self::ENTRAR, $this->credenciaisDoApoiador($conta, 'senha-errada'))
+                ->assertUnauthorized();
         }
     }
 }

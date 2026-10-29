@@ -27,11 +27,11 @@ class LimiteDeRequisicoesTest extends TestCase
     public function test_a_newsletter_para_de_aceitar_depois_de_cinco_envios_no_minuto(): void
     {
         for ($i = 1; $i <= 5; $i++) {
-            $this->postJson('/api/newsletter', ['email' => "interesse{$i}@exemplo.com", 'aceite_privacidade' => true])
+            $this->postJson('/api/v1/newsletter', ['email' => "interesse{$i}@exemplo.com", 'aceite_privacidade' => true])
                 ->assertCreated();
         }
 
-        $this->postJson('/api/newsletter', ['email' => 'interesse6@exemplo.com', 'aceite_privacidade' => true])
+        $this->postJson('/api/v1/newsletter', ['email' => 'interesse6@exemplo.com', 'aceite_privacidade' => true])
             ->assertStatus(429)
             ->assertHeader('Retry-After');
 
@@ -48,13 +48,13 @@ class LimiteDeRequisicoesTest extends TestCase
     public function test_o_login_para_de_aceitar_tentativa_depois_de_dez_por_minuto(): void
     {
         for ($i = 1; $i <= 10; $i++) {
-            $this->from('/entrar')->post('/entrar', [
+            $this->postJson('/api/v1/auth/entrar', [
                 'email' => 'nao-e-email',
                 'senha' => 'senha-errada',
-            ])->assertRedirect();
+            ])->assertUnprocessable();
         }
 
-        $this->from('/entrar')->post('/entrar', [
+        $this->postJson('/api/v1/auth/entrar', [
             'email' => 'nao-e-email',
             'senha' => 'senha-errada',
         ])->assertStatus(429);
@@ -62,24 +62,26 @@ class LimiteDeRequisicoesTest extends TestCase
 
     public function test_o_login_ainda_deixa_entrar_dentro_do_limite(): void
     {
-        $apoiador = $this->criarApoiador();
+        $apoiador = $this->criarGestor();
 
-        $this->post('/entrar', ['email' => $apoiador->email, 'senha' => 'senha123'])
-            ->assertRedirect('/minha-conta');
+        $this->postJson('/api/v1/auth/entrar', ['email' => $apoiador->email, 'senha' => 'senha123'])
+            ->assertOk();
 
         $this->assertAuthenticatedAs($apoiador, 'apoiador');
     }
 
     public function test_as_apis_publicas_tem_limite_geral_e_as_de_escrita_tem_o_proprio(): void
     {
-        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/criancas'));
-        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/apoiadores'));
-        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/noticias'));
+        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/v1/estatisticas'));
+        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/v1/config-publica'));
+        $this->assertContem('api', $this->middlewareEfetivo('GET', '/api/v1/conteudos/noticias'));
 
-        $this->assertContem('newsletter', $this->middlewareEfetivo('POST', '/api/newsletter'));
-        $this->assertContem('cadastro', $this->middlewareEfetivo('POST', '/cadastro'));
-        $this->assertContem('login', $this->middlewareEfetivo('POST', '/entrar'));
-        $this->assertContem('doacao-unica', $this->middlewareEfetivo('POST', '/apoio-unico'));
+        $this->assertContem('newsletter', $this->middlewareEfetivo('POST', '/api/v1/newsletter'));
+        $this->assertContem('login', $this->middlewareEfetivo('POST', '/api/v1/auth/entrar'));
+        $this->assertContem('doacao-unica', $this->middlewareEfetivo('POST', '/api/v1/doacoes'));
+        $this->assertContem('uploads', $this->middlewareEfetivo('POST', '/api/v1/voluntariado'));
+        $this->assertContem('troca-senha-post', $this->middlewareEfetivo('PUT', '/api/v1/auth/senha'));
+        $this->assertContem('gestao', $this->middlewareEfetivo('GET', '/api/v1/gestao/doacoes'));
     }
 
     private function assertContem(string $limite, array $middleware): void

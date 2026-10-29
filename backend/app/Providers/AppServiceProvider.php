@@ -30,8 +30,6 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('newsletter', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
 
-        RateLimiter::for('cadastro', fn (Request $request) => Limit::perMinute(5)->by((string) $request->ip()));
-
         RateLimiter::for('login', fn (Request $request) => Limit::perMinute(10)->by((string) $request->ip()));
 
         // A doação única grava pedido e intenção no banco: 10 por minuto por IP

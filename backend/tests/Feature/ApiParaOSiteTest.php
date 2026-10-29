@@ -12,11 +12,10 @@ use Illuminate\Support\Facades\Route;
 use Tests\Concerns\CriaCenarioOng;
 use Tests\TestCase;
 
-// O site em inter-ong/ roda em outra origem e chama o backend por fetch.
-// Por isso as rotas de API ficam em routes/api.php (sem cookie de sessão e
-// sem token de CSRF) e a config/cors.php libera a origem. Estes testes
-// travam esse acordo; os formulários do próprio backend continuam
-// protegidos por CSRF porque são telas do Laravel.
+// O site em inter-ong/ chama o backend por fetch em /api/v1 (o routes/api.php
+// antigo, sem sessão e sem CSRF, saiu do MVP). A config/cors.php libera a
+// origem para leitura, e toda rota que grava continua exigindo o token de CSRF
+// que o site busca em GET /api/v1/csrf. Estes testes travam esse acordo.
 class ApiParaOSiteTest extends TestCase
 {
     use CriaCenarioOng;
@@ -26,29 +25,26 @@ class ApiParaOSiteTest extends TestCase
 
     public function test_o_site_le_as_apis_publicas_sem_login(): void
     {
-        $apoiador = $this->criarApoiador();
-        $crianca = $this->criarCrianca(['nome' => 'Ben Tennyson']);
-        $this->criarApadrinhamento($apoiador, $crianca);
+        $this->criarApoiador();
+        $this->criarNoticia(['titulo' => 'Mutirão de saúde']);
         $this->assertGuest('apoiador');
 
-        // Público para o site ler, mas só com o que ele mostra: a lista de
-        // apoiadores com nome e contato não é pública
+        // Público para o site ler, mas só com o que ele mostra: os números da
+        // transparência, nunca a lista de apoiadores
         // (ver ApiPublicaNaoExpoeDadoPessoalTest).
-        $this->getJson('/api/apoiadores')
+        $this->getJson('/api/v1/estatisticas')
             ->assertOk()
             ->assertJsonPath('total', 1)
             ->assertJsonMissingPath('dados');
 
-        $this->getJson('/api/criancas')
+        $this->getJson('/api/v1/conteudos/noticias')
             ->assertOk()
-            ->assertJsonPath('total', 1)
-            ->assertJsonPath('dados.0.nome', 'Ben Tennyson')
-            ->assertJsonPath('dados.0.apadrinhada', true);
+            ->assertJsonPath('dados.0.titulo', 'Mutirão de saúde');
     }
 
     public function test_leitura_da_api_vem_com_permissao_para_o_site_leer(): void
     {
-        $this->getJson('/api/criancas', ['Origin' => self::ORIGEM_LOCAL])
+        $this->getJson('/api/v1/estatisticas', ['Origin' => self::ORIGEM_LOCAL])
             ->assertOk()
             ->assertHeader('Access-Control-Allow-Origin', '*');
     }
@@ -71,11 +67,11 @@ class ApiParaOSiteTest extends TestCase
     {
         config(['cors.allowed_origins' => OrigensCors::aPartirDe('https://ongsos.org.br,https://www.ongsos.org.br')]);
 
-        $this->getJson('/api/criancas', ['Origin' => 'https://ongsos.org.br'])
+        $this->getJson('/api/v1/estatisticas', ['Origin' => 'https://ongsos.org.br'])
             ->assertOk()
             ->assertHeader('Access-Control-Allow-Origin', 'https://ongsos.org.br');
 
-        $this->getJson('/api/criancas', ['Origin' => 'https://www.ongsos.org.br'])
+        $this->getJson('/api/v1/estatisticas', ['Origin' => 'https://www.ongsos.org.br'])
             ->assertOk()
             ->assertHeader('Access-Control-Allow-Origin', 'https://www.ongsos.org.br');
     }
@@ -84,7 +80,7 @@ class ApiParaOSiteTest extends TestCase
     {
         config(['cors.allowed_origins' => OrigensCors::aPartirDe('https://ongsos.org.br,https://www.ongsos.org.br')]);
 
-        $this->getJson('/api/criancas', ['Origin' => 'https://site-que-nao-e-a-ong.example'])
+        $this->getJson('/api/v1/estatisticas', ['Origin' => 'https://site-que-nao-e-a-ong.example'])
             ->assertOk()
             ->assertHeaderMissing('Access-Control-Allow-Origin');
     }
@@ -95,16 +91,15 @@ class ApiParaOSiteTest extends TestCase
         // Sem o trim, a segunda origem não bate e o navegador acusa CORS.
         config(['cors.allowed_origins' => OrigensCors::aPartirDe(' https://ongsos.org.br , https://www.ongsos.org.br ')]);
 
-        $this->getJson('/api/criancas', ['Origin' => 'https://www.ongsos.org.br'])
+        $this->getJson('/api/v1/estatisticas', ['Origin' => 'https://www.ongsos.org.br'])
             ->assertOk()
             ->assertHeader('Access-Control-Allow-Origin', 'https://www.ongsos.org.br');
     }
 
     public function test_o_site_pode_enviar_a_newsletter_de_outra_origem(): void
     {
-        $this->postJson('/api/newsletter', ['email' => 'interessada@exemplo.com', 'aceite_privacidade' => true], [
+        $this->postJson('/api/v1/newsletter', ['email' => 'interessada@exemplo.com', 'aceite_privacidade' => true], [
             'Origin' => self::ORIGEM_LOCAL,
-            'Accept' => 'application/json',
         ])
             ->assertCreated()
             ->assertHeader('Access-Control-Allow-Origin', '*');
@@ -112,18 +107,21 @@ class ApiParaOSiteTest extends TestCase
         $this->assertDatabaseHas('newsletter', ['email' => 'interessada@exemplo.com']);
     }
 
-    public function test_o_site_nao_precisa_de_token_de_sessao_para_postar(): void
+    public function test_toda_rota_que_grava_exige_token_de_csrf(): void
     {
-        $this->assertNotContains(
-            PreventRequestForgery::class,
-            $this->middlewareEfetivo('POST', '/api/newsletter'),
-            'POST /api/newsletter nao pode exigir token de sessao: o site nao tem como enviar.',
-        );
-    }
+        $alvos = [
+            'POST /api/v1/auth/entrar',
+            'POST /api/v1/auth/sair',
+            'PUT /api/v1/auth/senha',
+            'POST /api/v1/newsletter',
+            'POST /api/v1/doacoes',
+            'POST /api/v1/voluntariado',
+            'POST /api/v1/gestao/conteudos/noticias',
+            'PATCH /api/v1/gestao/voluntarios/1',
+            'DELETE /api/v1/gestao/doacoes/1',
+        ];
 
-    public function test_os_formularios_do_backend_continuam_com_protecao_de_csrf(): void
-    {
-        foreach (['POST /cadastro', 'POST /entrar', 'POST /apoio-unico', 'POST /criancas/salvar'] as $alvo) {
+        foreach ($alvos as $alvo) {
             [$metodo, $uri] = explode(' ', $alvo);
 
             $this->assertContains(

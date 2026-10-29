@@ -14,9 +14,9 @@ use Tests\TestCase;
  * é a mesma que trafega por WhatsApp/e-mail. A troca obrigatória faz essa senha
  * morrer no primeiro acesso da pessoa.
  *
- * O estado é marcado por comando (`apoiadores:exigir-troca`) porque a tela de
- * troca só existe depois do login — não há caminho de interface para travar a
- * conta antes da entrega.
+ * O estado é marcado por comando (`apoiadores:exigir-troca`) porque a troca
+ * (PUT /api/v1/auth/senha) só existe depois do login — não há caminho de
+ * interface para travar a conta antes da entrega.
  */
 class TrocaSenhaObrigatoriaTest extends TestCase
 {
@@ -25,37 +25,29 @@ class TrocaSenhaObrigatoriaTest extends TestCase
 
     private const SENHA_ENTREGUE = 'Entregue-Temporaria-7';
 
-    public function test_login_de_conta_marcada_cai_na_troca_de_senha(): void
+    public function test_login_de_conta_marcada_avisa_que_a_troca_e_obrigatoria(): void
     {
-        $apoiador = $this->criarApoiador([
+        $gestor = $this->criarGestor([
             'email' => 'ana@ong.org.br',
             'senha' => Hash::make(self::SENHA_ENTREGUE),
             'trocar_senha_obrigatorio' => true,
         ]);
 
-        $response = $this->post('/entrar', $this->credenciaisDoApoiador($apoiador, self::SENHA_ENTREGUE));
+        $this->postJson('/api/v1/auth/entrar', $this->credenciaisDoApoiador($gestor, self::SENHA_ENTREGUE))
+            ->assertOk()
+            ->assertJsonPath('dados.trocar_senha_obrigatorio', true);
 
-        $response->assertRedirect(route('senha.edit'));
         $this->assertAuthenticated('apoiador');
     }
 
-    public function test_conta_marcada_nao_acha_a_minha_conta(): void
+    public function test_conta_marcada_nao_acha_o_proprio_perfil(): void
     {
-        $apoiador = $this->criarApoiador(['trocar_senha_obrigatorio' => true]);
+        $gestor = $this->criarGestor(['trocar_senha_obrigatorio' => true]);
 
-        $response = $this->actingAs($apoiador, 'apoiador')->get('/minha-conta');
-
-        $response->assertRedirect(route('senha.edit'));
-        $response->assertSessionHas('aviso');
-    }
-
-    public function test_conta_marcada_nao_acha_a_doacao_unica(): void
-    {
-        $apoiador = $this->criarApoiador(['trocar_senha_obrigatorio' => true]);
-
-        $this->actingAs($apoiador, 'apoiador')
-            ->get('/apoio-unico')
-            ->assertRedirect(route('senha.edit'));
+        $this->actingAs($gestor, 'apoiador')
+            ->getJson('/api/v1/auth/eu')
+            ->assertForbidden()
+            ->assertJsonPath('codigo', 'troca_senha_obrigatoria');
     }
 
     public function test_gestor_marcado_tambem_fica_preso(): void
@@ -63,8 +55,18 @@ class TrocaSenhaObrigatoriaTest extends TestCase
         $gestor = $this->criarGestor(['trocar_senha_obrigatorio' => true]);
 
         $this->actingAs($gestor, 'apoiador')
-            ->get('/')
-            ->assertRedirect(route('senha.edit'));
+            ->getJson('/api/v1/gestao/doacoes')
+            ->assertForbidden()
+            ->assertJsonPath('codigo', 'troca_senha_obrigatoria');
+    }
+
+    public function test_conta_marcada_ainda_consegue_sair(): void
+    {
+        $gestor = $this->criarGestor(['trocar_senha_obrigatorio' => true]);
+
+        $this->actingAs($gestor, 'apoiador')->postJson('/api/v1/auth/sair')->assertNoContent();
+
+        $this->assertGuest('apoiador');
     }
 
     /*
@@ -73,33 +75,33 @@ class TrocaSenhaObrigatoriaTest extends TestCase
     */
     public function test_troca_valida_libera_o_acesso_e_derruba_a_senha_entregue(): void
     {
-        $apoiador = $this->criarApoiador([
+        $gestor = $this->criarGestor([
             'email' => 'ana@ong.org.br',
             'senha' => Hash::make(self::SENHA_ENTREGUE),
             'senha_alterada_em' => now(),
             'trocar_senha_obrigatorio' => true,
         ]);
 
-        $response = $this->actingAs($apoiador, 'apoiador')->post('/minha-conta/senha', [
+        // Com a troca obrigatória, a senha atual não é pedida: a pessoa acabou
+        // de entrar com a senha entregue.
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha' => 'SenhaDela-9',
             'senha_confirmation' => 'SenhaDela-9',
-        ]);
+        ])->assertOk()->assertJsonPath('message', 'Senha alterada com sucesso.');
 
-        $response->assertRedirect(route('minha-conta'));
-        $response->assertSessionHas('success');
+        $gestor->refresh();
 
-        $apoiador->refresh();
-
-        $this->assertFalse($apoiador->trocar_senha_obrigatorio);
-        $this->assertTrue($apoiador->senha_alterada_em->isToday());
-        $this->assertTrue(Hash::check('SenhaDela-9', $apoiador->senha));
-        $this->assertFalse(Hash::check(self::SENHA_ENTREGUE, $apoiador->senha));
+        $this->assertFalse($gestor->trocar_senha_obrigatorio);
+        $this->assertTrue($gestor->senha_alterada_em->isToday());
+        $this->assertTrue(Hash::check('SenhaDela-9', $gestor->senha));
+        $this->assertFalse(Hash::check(self::SENHA_ENTREGUE, $gestor->senha));
 
         // Liberada mesmo: o painel responde e a senha antiga não entra mais.
-        $this->actingAs($apoiador->fresh(), 'apoiador')->get('/minha-conta')->assertOk();
+        $this->actingAs($gestor->fresh(), 'apoiador')->getJson('/api/v1/gestao/doacoes')->assertOk();
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($apoiador->fresh(), self::SENHA_ENTREGUE))
-            ->assertSessionHasErrors('email');
+        $this->postJson('/api/v1/auth/sair');
+        $this->postJson('/api/v1/auth/entrar', $this->credenciaisDoApoiador($gestor->fresh(), self::SENHA_ENTREGUE))
+            ->assertUnauthorized();
     }
 
     /*
@@ -109,69 +111,71 @@ class TrocaSenhaObrigatoriaTest extends TestCase
     */
     public function test_recusa_a_mesma_senha_que_a_conta_ja_usa(): void
     {
-        $apoiador = $this->criarApoiador([
+        $gestor = $this->criarGestor([
             'senha' => Hash::make(self::SENHA_ENTREGUE),
             'trocar_senha_obrigatorio' => true,
         ]);
 
-        $response = $this->actingAs($apoiador, 'apoiador')->post('/minha-conta/senha', [
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha' => self::SENHA_ENTREGUE,
             'senha_confirmation' => self::SENHA_ENTREGUE,
-        ]);
+        ])->assertJsonValidationErrors('senha');
 
-        $response->assertSessionHasErrors('senha');
+        $gestor->refresh();
 
-        $apoiador->refresh();
-
-        $this->assertTrue($apoiador->trocar_senha_obrigatorio, 'a conta continua presa na troca');
-        $this->assertTrue(Hash::check(self::SENHA_ENTREGUE, $apoiador->senha));
+        $this->assertTrue($gestor->trocar_senha_obrigatorio, 'a conta continua presa na troca');
+        $this->assertTrue(Hash::check(self::SENHA_ENTREGUE, $gestor->senha));
     }
 
     public function test_troca_exige_senha_forte_e_confirmacao(): void
     {
-        $apoiador = $this->criarApoiador(['trocar_senha_obrigatorio' => true]);
+        $gestor = $this->criarGestor(['trocar_senha_obrigatorio' => true]);
 
-        $fraca = $this->actingAs($apoiador, 'apoiador')->post('/minha-conta/senha', [
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha' => 'abc123',
             'senha_confirmation' => 'abc123',
-        ]);
-        $fraca->assertSessionHasErrors('senha');
+        ])->assertJsonValidationErrors('senha');
 
-        $semConfirmacao = $this->actingAs($apoiador, 'apoiador')->post('/minha-conta/senha', [
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha' => 'SenhaBoa-9',
-        ]);
-        $semConfirmacao->assertSessionHasErrors('senha');
+        ])->assertJsonValidationErrors('senha');
 
-        $this->assertTrue($apoiador->fresh()->trocar_senha_obrigatorio);
+        $this->assertTrue($gestor->fresh()->trocar_senha_obrigatorio);
     }
 
     public function test_troca_exige_login(): void
     {
-        $this->get('/minha-conta/senha')->assertRedirect(route('login'));
+        $this->putJson('/api/v1/auth/senha', ['senha' => 'SenhaBoa-9', 'senha_confirmation' => 'SenhaBoa-9'])
+            ->assertUnauthorized();
     }
 
     public function test_conta_nao_marcada_entra_direto_no_painel(): void
     {
-        $apoiador = $this->criarApoiador(['trocar_senha_obrigatorio' => false]);
+        $gestor = $this->criarGestor(['trocar_senha_obrigatorio' => false]);
 
-        $this->actingAs($apoiador, 'apoiador')->get('/minha-conta')->assertOk();
+        $this->postJson('/api/v1/auth/entrar', $this->credenciaisDoApoiador($gestor))
+            ->assertOk()
+            ->assertJsonPath('dados.trocar_senha_obrigatorio', false);
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($apoiador))
-            ->assertRedirect(route('minha-conta'));
+        $this->getJson('/api/v1/gestao/doacoes')->assertOk();
     }
 
-    public function test_troca_voluntaria_libera_o_painel_tambem(): void
+    public function test_troca_voluntaria_exige_a_senha_atual(): void
     {
-        $apoiador = $this->criarApoiador(['senha' => Hash::make(self::SENHA_ENTREGUE)]);
+        $gestor = $this->criarGestor(['senha' => Hash::make(self::SENHA_ENTREGUE)]);
 
-        $this->actingAs($apoiador, 'apoiador')->get(route('senha.edit'))->assertOk();
-
-        $this->actingAs($apoiador, 'apoiador')->post('/minha-conta/senha', [
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
             'senha' => 'Outra-Senha-8',
             'senha_confirmation' => 'Outra-Senha-8',
-        ])->assertRedirect(route('minha-conta'));
+        ])->assertJsonValidationErrors('senha_atual');
 
-        $this->assertTrue(Hash::check('Outra-Senha-8', $apoiador->fresh()->senha));
+        $this->actingAs($gestor, 'apoiador')->putJson('/api/v1/auth/senha', [
+            'senha_atual' => self::SENHA_ENTREGUE,
+            'senha' => 'Outra-Senha-8',
+            'senha_confirmation' => 'Outra-Senha-8',
+        ])->assertOk();
+
+        $this->assertTrue(Hash::check('Outra-Senha-8', $gestor->fresh()->senha));
     }
 
     public function test_comando_marca_uma_conta(): void
@@ -252,26 +256,5 @@ class TrocaSenhaObrigatoriaTest extends TestCase
         Artisan::call('apoiadores:listar', ['--rotacionar' => true]);
         $filtrada = Artisan::output();
         $this->assertStringNotContainsString('bruno@ong.org.br', $filtrada);
-    }
-
-    /*
-    * O cadastro público não pode se marcar sozinho: se conseguisse, qualquer
-    * pessoa poderia travar a própria conta — e o estado viraria mais um campo
-    * que o `create` do controller não deveria aceitar.
-    */
-    public function test_cadastro_publico_nao_marca_a_conta_sozinho(): void
-    {
-        $this->post('/cadastro', [
-            'nome_completo' => 'Apoiante Demonstracao',
-            'email' => 'apoiante@exemplo.com',
-            'cpf' => '111.222.333-87',
-            'senha' => 'Senha123',
-            'senha_confirmation' => 'Senha123',
-            'trocar_senha_obrigatorio' => 1,
-        ]);
-
-        $apoiador = Apoiador::where('email', 'apoiante@exemplo.com')->firstOrFail();
-
-        $this->assertFalse($apoiador->trocar_senha_obrigatorio);
     }
 }
