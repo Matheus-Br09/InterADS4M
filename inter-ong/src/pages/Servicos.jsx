@@ -22,15 +22,16 @@ const SERVICOS = [
 export default function Servicos() {
   return (
     <main className="mx-auto max-w-5xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Nossos serviços</h1>
-      <p className="mt-3 max-w-2xl text-slate-600 dark:text-slate-300">
+      <h1 className="text-4xl font-extrabold text-slate-900 dark:text-white sm:text-5xl">Nossos serviços</h1>
+      <div className="mt-4 h-1.5 w-20 rounded-full bg-[#fb2782]" aria-hidden="true" />
+      <p className="mt-5 max-w-2xl text-lg text-slate-600 dark:text-slate-300">
         A SOS Tudo pelo Social atende pessoas neurodivergentes e suas famílias em Paulista, Pernambuco.
       </p>
 
-      <div className="mt-8 grid gap-6 sm:grid-cols-2">
+      <div className="mt-10 grid gap-6 sm:grid-cols-2">
         {SERVICOS.map((servico) => (
-          <section key={servico.titulo} className="rounded-2xl border border-pink-100 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-            <h2 className="text-xl font-bold text-[#fb2782] dark:text-pink-400">{servico.titulo}</h2>
+          <section key={servico.titulo} className="rounded-3xl border border-pink-100 bg-white p-7 shadow-md transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+            <h2 className="text-2xl font-bold text-pink-700 dark:text-pink-400">{servico.titulo}</h2>
             {/* REVISAR COM A ONG */}
             <p className="mt-2 text-slate-700 dark:text-slate-300">{servico.texto}</p>
           </section>
