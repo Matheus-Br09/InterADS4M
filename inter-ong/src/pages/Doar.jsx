@@ -19,6 +19,7 @@ export default function Doar() {
 
   const [modalAberto, setModalAberto] = useState(false)
   const [copiado, setCopiado] = useState(false)
+  const [falhaCopia, setFalhaCopia] = useState(false)
   const [doacao, setDoacao] = useState(null)
   const [qrCode, setQrCode] = useState(null)
 
@@ -64,6 +65,7 @@ export default function Doar() {
       setQrCode(imagem)
       setDoacao({ ...resultado.dados, pix: resultado.pix })
       setCopiado(false)
+      setFalhaCopia(false)
       setModalAberto(true)
     } catch (error) {
       setErro(error)
@@ -74,11 +76,15 @@ export default function Doar() {
   }
 
   function copiar(texto) {
-    if (!navigator.clipboard) return
+    setFalhaCopia(false)
+    if (!navigator.clipboard) {
+      setFalhaCopia(true)
+      return
+    }
     navigator.clipboard.writeText(texto).then(() => {
       setCopiado(true)
       setTimeout(() => setCopiado(false), 3500)
-    }).catch(() => {})
+    }).catch(() => setFalhaCopia(true))
   }
 
   const valorAtual = normalizarValor(valor)
@@ -131,6 +137,24 @@ export default function Doar() {
             </div>
 
             <AvisoApi erro={erro} />
+
+            {doacao && !modalAberto && (
+              <div role="status" className="mb-6 rounded-2xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/40 p-4 text-sm text-slate-800 dark:text-slate-100">
+                <p className="font-bold">
+                  Pix gerado — protocolo <span className="font-mono select-all">{doacao.protocolo}</span>
+                </p>
+                <p className="mt-1 text-slate-600 dark:text-slate-300">
+                  Se ainda não pagou, abra o Pix de novo. Gerar outro Pix cria uma nova doação.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setModalAberto(true)}
+                  className="mt-3 px-4 py-2 rounded-xl bg-[#fb2782] text-white font-bold text-sm hover:bg-pink-600 cursor-pointer"
+                >
+                  Ver Pix novamente
+                </button>
+              </div>
+            )}
 
             <form onSubmit={enviar} className="space-y-6">
               <fieldset disabled={enviando} className="space-y-6">
@@ -216,11 +240,9 @@ export default function Doar() {
           aria-modal="true"
           aria-labelledby="pix-modal-title"
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/75 backdrop-blur-md animate-in fade-in duration-200"
-          onClick={() => setModalAberto(false)}
         >
           <div
             className="relative w-full max-w-lg max-h-[95vh] overflow-y-auto bg-white dark:bg-[#121a2d] border border-pink-200 dark:border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl modal-pop-in text-slate-800 dark:text-slate-100"
-            onClick={e => e.stopPropagation()}
           >
             <button
               ref={botaoFechar}
@@ -279,6 +301,25 @@ export default function Doar() {
                 {copiado ? '✓ Copiado!' : 'Copiar Pix copia e cola'}
               </button>
               <p role="status" className="sr-only">{copiado ? 'Código Pix copiado.' : ''}</p>
+              {falhaCopia && (
+                <p role="alert" className="text-sm font-semibold text-red-600 dark:text-red-400">
+                  Não foi possível copiar. Selecione o texto e copie manualmente.
+                </p>
+              )}
+
+              <div>
+                <label htmlFor="copia-e-cola" className="block text-xs uppercase font-bold text-slate-500 dark:text-slate-400 mb-1">
+                  Código Pix copia e cola
+                </label>
+                <textarea
+                  id="copia-e-cola"
+                  readOnly
+                  rows={4}
+                  value={doacao.pix.copia_e_cola}
+                  onFocus={e => e.target.select()}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-[#0e1526] text-slate-900 dark:text-white font-mono text-xs break-all"
+                />
+              </div>
 
               <div>
                 <label htmlFor="chave-pix" className="block text-xs uppercase font-bold text-slate-500 dark:text-slate-400 mb-1">
