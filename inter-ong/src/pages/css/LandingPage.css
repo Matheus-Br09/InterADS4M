@@ -335,7 +335,7 @@
 }
 
 .hero-shirt-sub {
-  color: #1e293b;
+  color: var(--text-primary);
   font-weight: 700;
   font-size: 0.7rem;
 }
@@ -382,7 +382,7 @@
 .hero-floating-doodles {
   position: absolute;
   top: -1.75rem;
-  right: -2.5rem;
+  right: 0;
   z-index: 2;
   text-align: right;
   pointer-events: none;
