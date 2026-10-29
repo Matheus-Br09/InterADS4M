@@ -31,7 +31,7 @@ export default function GestaoTrocarSenha() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-pink-50 px-4 py-12 text-slate-900">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-page)] px-4 py-12 text-slate-900">
       <form onSubmit={trocar} className="w-full max-w-sm rounded-2xl bg-white p-8 shadow-lg">
         <h1 className="text-2xl font-bold">Crie sua senha</h1>
         <p className="mt-2 text-sm text-slate-600">Por segurança, troque a senha que você recebeu por uma só sua. Use pelo menos 8 caracteres, com letra maiúscula, minúscula e número.</p>

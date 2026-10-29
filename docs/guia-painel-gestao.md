@@ -20,7 +20,9 @@ Este guia é para a equipe da ONG. Não precisa saber de computação: é só se
 
 ![print: tela "Painel da ONG" com os campos E-mail e Senha](.)
 
-Dentro do painel, no alto, há quatro abas: **Doações**, **Voluntários**, **Conteúdos** e **Gestores**. Para sair, clique em **Sair**, no canto de cima. Faça isso sempre que usar um computador que não é só seu.
+Logo no alto do painel há três números de resumo: **Doações para confirmar**, **Voluntários em análise** e **Confirmadas, feitas neste mês** (soma das doações já confirmadas que a pessoa fez neste mês; uma doação feita no fim de um mês e confirmada só no mês seguinte conta no mês em que foi feita, então esse número pode diferir do extrato do banco). Eles se atualizam sozinhos quando você confirma uma doação ou muda a situação de um voluntário.
+
+No cabeçalho, ao lado do seu nome, o botão **Claro / Escuro** troca o visual do painel (a escolha vale também para o site e fica guardada no seu navegador). Abaixo do resumo, há quatro abas: **Doações**, **Voluntários**, **Conteúdos** e **Gestores**. Para sair, clique em **Sair**, no canto de cima. Faça isso sempre que usar um computador que não é só seu.
 
 Se a tela mostrar um erro de carregamento, clique em **Tentar novamente**.
 
@@ -49,7 +51,7 @@ Quando alguém doa pelo site, a pessoa recebe um **protocolo** e faz o Pix. Voc�
 
 O aviso amarelo no alto da tela lembra: *confira no extrato do banco o valor e o protocolo antes de confirmar.* Nunca confirme só porque a pessoa disse que pagou.
 
-Os botões no alto da lista (**Pendentes**, **Confirmadas**, **Canceladas**, **Expiradas**, **Todas**) mudam o que você vê. Doações pendentes por muito tempo viram **Expiradas** sozinhas; se o dinheiro chegar depois, ainda dá para clicar em **Confirmar pagamento** nelas.
+Os botões no alto da lista (**Pendentes**, **Confirmadas**, **Canceladas**, **Expiradas**, **Todas**) mudam o que você vê. Para achar uma doação específica, digite o nome do doador ou o protocolo em **Buscar por nome ou protocolo**: a lista mostra só as que combinam (a busca vale dentro do botão escolhido; use **Todas** para procurar em tudo). Doações antigas, de antes dos protocolos, mostram "—" no lugar do protocolo. Doações pendentes por muito tempo viram **Expiradas** sozinhas; se o dinheiro chegar depois, ainda dá para clicar em **Confirmar pagamento** nelas.
 
 ![print: aba Doações com uma doação pendente e os botões Confirmar pagamento e Cancelar](.)
 
@@ -58,19 +60,19 @@ Os botões no alto da lista (**Pendentes**, **Confirmadas**, **Canceladas**, **E
 Se um doador pedir que seus dados sejam apagados:
 
 1. Na aba **Doações**, escolha **Todas** e ache a doação pelo protocolo ou nome.
-2. Clique em **Apagar dados do doador** e confirme.
+2. Clique no link pequeno **Apagar dados do doador**, no canto de baixo do cartão, e confirme.
 
 O **nome e o e-mail** somem para sempre. O valor continua registrado (para a prestação de contas), e aparece "Dados apagados" no lugar do nome.
 
 ## 4. Responder um voluntário (aba Voluntários)
 
-Quando alguém se cadastra como voluntário (só maiores de 18 anos), você recebe um e-mail. Na aba **Voluntários** aparece um cartão com **nome, e-mail, celular, idade, área e disponibilidade**.
+Quando alguém se cadastra como voluntário (só maiores de 18 anos), você recebe um e-mail. Na aba **Voluntários** aparece um cartão com o **nome** em destaque e, abaixo, e-mail, celular, idade, área e disponibilidade. Para achar alguém, digite o nome ou o e-mail em **Buscar por nome ou e-mail**. Em cadastros antigos que não guardaram algum dado, aparece "(sem nome)" ou "—"; a idade só aparece quando há data de nascimento.
 
 1. Entre em contato com a pessoa pelo e-mail ou celular que ela deixou.
 2. No cartão, no campo **Situação**, escolha o andamento: **Em análise**, **Entrevista marcada**, **Aprovado** ou **Recusado**. A mudança é salva na hora ("Situação atualizada.").
 3. Se a pessoa mandou currículo, clique em **Baixar currículo**. Se não mandou, aparece "Sem currículo".
 
-Se a pessoa pedir para ter os dados apagados: clique em **Excluir** e confirme. Isso apaga os dados **e o currículo**, sem volta.
+Se a pessoa pedir para ter os dados apagados: clique no link pequeno **Excluir**, no canto de baixo do cartão, e confirme. Isso apaga os dados **e o currículo**, sem volta.
 
 ![print: aba Voluntários com um cartão e o campo Situação](.)
 

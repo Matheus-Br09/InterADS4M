@@ -15,6 +15,7 @@ import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
 import Servicos from './pages/Servicos.jsx'
 import Privacidade from './pages/Privacidade.jsx'
+import TemaDoPainel from './pages/gestao/TemaDoPainel.jsx'
 import GestaoLayout from './pages/gestao/GestaoLayout.jsx'
 import GestaoEntrar from './pages/gestao/GestaoEntrar.jsx'
 import GestaoDoacoes from "./pages/gestao/GestaoDoacoes.jsx"
@@ -31,19 +32,24 @@ import Noticias from './pages/Noticias.jsx'
 
 const router = createBrowserRouter([
   // Painel de gestão: fora do site público (sem menu, newsletter e rodapé)
-  { path: "gestao/entrar", element: <GestaoEntrar />, errorElement: <ErrorPage /> },
-  { path: "gestao/trocar-senha", element: <GestaoTrocarSenha />, errorElement: <ErrorPage /> },
   {
-    path: "gestao",
-    element: <GestaoLayout />,
+    element: <TemaDoPainel />,
     errorElement: <ErrorPage />,
     children: [
-      { index: true, element: <Navigate to="doacoes" replace /> },
-      // Telas das Tarefas 18 e 19 substituem estes avisos.
-      { path: "doacoes", element: <GestaoDoacoes /> },
-      { path: "voluntarios", element: <GestaoVoluntarios /> },
-      { path: "conteudos", element: <GestaoConteudos /> },
-      { path: "gestores", element: <GestaoGestores /> },
+      { path: "gestao/entrar", element: <GestaoEntrar /> },
+      { path: "gestao/trocar-senha", element: <GestaoTrocarSenha /> },
+      {
+        path: "gestao",
+        element: <GestaoLayout />,
+        children: [
+          { index: true, element: <Navigate to="doacoes" replace /> },
+          // Telas das Tarefas 18 e 19 substituem estes avisos.
+          { path: "doacoes", element: <GestaoDoacoes /> },
+          { path: "voluntarios", element: <GestaoVoluntarios /> },
+          { path: "conteudos", element: <GestaoConteudos /> },
+          { path: "gestores", element: <GestaoGestores /> },
+        ]
+      },
     ]
   },
   {
