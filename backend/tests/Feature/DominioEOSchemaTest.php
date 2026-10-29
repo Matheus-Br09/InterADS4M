@@ -36,22 +36,6 @@ class DominioEOSchemaTest extends TestCase
         }
     }
 
-    public function test_apoio_criado_pelo_cadastro_publico_nunca_vira_administrador(): void
-    {
-        $this->post('/cadastro', [
-            'nome_completo' => 'Tentativa de(admin)',
-            'email' => 'admin-falso@exemplo.com',
-            'cpf' => '12345678908',
-            'senha' => 'Senha123',
-            'senha_confirmation' => 'Senha123',
-            'tipo_usuario' => 'admin',
-        ]);
-
-        $apoiador = Apoiador::where('email', 'admin-falso@exemplo.com')->firstOrFail();
-
-        $this->assertSame('apoiador', $apoiador->getRawOriginal('tipo_usuario'));
-    }
-
     public function test_modelo_de_administrador_tem_a_sua_propria_tabela_e_oculta_a_senha(): void
     {
         $this->assertSame('administradores', (new Administrador)->getTable());
@@ -136,7 +120,7 @@ class DominioEOSchemaTest extends TestCase
         $this->assertSame('disponivel', $crianca->fresh()->status);
     }
 
-    public function test_doacao_unica_comeca_com_status_concluido(): void
+    public function test_doacao_unica_comeca_com_status_pendente(): void
     {
         $doacao = DoacaoUnica::create([
             'apoiador_id' => $this->criarApoiadorUnico()->id,
@@ -145,7 +129,7 @@ class DominioEOSchemaTest extends TestCase
             'data_doacao' => now(),
         ]);
 
-        $this->assertSame('concluido', $doacao->fresh()->status);
+        $this->assertSame('pendente', $doacao->fresh()->status);
     }
 
     public function test_doacao_mensal_comeca_com_status_ativo(): void

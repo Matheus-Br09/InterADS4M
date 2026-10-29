@@ -39,12 +39,12 @@ class GestorDeAcessoTest extends TestCase
 
         Artisan::call('gestor:senha', ['email' => 'gestora@ong.org.br', 'senha' => 'Nova-senha-123']);
 
-        $this->post('/entrar', $this->credenciaisDoApoiador($apoiador, 'Nova-senha-123'))
-            ->assertRedirect('/minha-conta');
+        $this->postJson('/api/v1/auth/entrar', $this->credenciaisDoApoiador($apoiador, 'Nova-senha-123'))
+            ->assertOk();
 
         $this->assertAuthenticatedAs($apoiador->fresh(), 'apoiador');
 
-        $this->get('/')->assertOk()->assertSee('Painel de Testes ONG SOS');
+        $this->getJson('/api/v1/gestao/doacoes')->assertOk();
     }
 
     public function test_comando_promove_um_apoiador_comum_e_libera_o_painel(): void
@@ -52,12 +52,12 @@ class GestorDeAcessoTest extends TestCase
         $apoiador = $this->criarApoiador(['email' => 'apoiador@ong.org.br']);
 
         $this->actingAs($apoiador, 'apoiador');
-        $this->get('/')->assertRedirect('/entrar');
+        $this->getJson('/api/v1/gestao/doacoes')->assertForbidden();
 
         Artisan::call('gestor:senha', ['email' => 'apoiador@ong.org.br', 'senha' => 'Outra-senha-123']);
 
         $this->actingAs($apoiador->fresh(), 'apoiador');
-        $this->get('/')->assertOk();
+        $this->getJson('/api/v1/gestao/doacoes')->assertOk();
     }
 
     public function test_comando_aceita_o_e_maiusculo(): void
@@ -121,5 +121,34 @@ class GestorDeAcessoTest extends TestCase
 
         $this->assertNotEmpty($achado, 'A senha gerada deve aparecer na saída do comando.');
         $this->assertTrue(Hash::check($achado[1], $apoiador->fresh()->senha));
+    }
+
+    public function test_gestor_criar_cria_admin_sem_cpf_e_exige_troca_de_senha(): void
+    {
+        $codigo = Artisan::call('gestor:criar', ['nome' => 'Gestora Nova', 'email' => 'Nova@Ong.org.br']);
+        $saida = Artisan::output();
+
+        $this->assertSame(0, $codigo);
+
+        $gestor = Apoiador::where('email', 'nova@ong.org.br')->firstOrFail();
+        $this->assertSame('Gestora Nova', $gestor->nome_completo);
+        $this->assertSame('admin', $gestor->tipo_usuario);
+        $this->assertNull($gestor->cpf);
+        $this->assertTrue($gestor->trocar_senha_obrigatorio);
+
+        // A senha aparece uma única vez na saída e confere com o hash gravado.
+        $this->assertSame(1, preg_match('/Senha gerada: (\S+)/', $saida, $m));
+        $this->assertTrue(Hash::check($m[1], $gestor->senha));
+    }
+
+    public function test_gestor_criar_recusa_email_repetido(): void
+    {
+        $this->criarApoiador(['email' => 'repetido@ong.org.br']);
+
+        $codigo = Artisan::call('gestor:criar', ['nome' => 'Outra Pessoa', 'email' => 'REPETIDO@ong.org.br']);
+
+        $this->assertSame(1, $codigo);
+        $this->assertSame(1, Apoiador::where('email', 'repetido@ong.org.br')->count());
+        $this->assertStringContainsString('Já existe uma conta', Artisan::output());
     }
 }

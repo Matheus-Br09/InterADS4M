@@ -37,7 +37,7 @@ class DefineSenhaDoGestor extends Command
 
         if (! $apoiador) {
             $this->error("Nenhum apoiador encontrado com o e-mail {$email}.");
-            $this->line('Rode <info>php artisan db:seed</info> para criar os dados de exemplo da ONG.');
+            $this->line('Para cadastrar um gestor novo, rode <info>php artisan gestor:criar "Nome" email</info>.');
 
             return self::FAILURE;
         }

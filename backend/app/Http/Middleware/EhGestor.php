@@ -12,21 +12,12 @@ class EhGestor
     {
         $usuario = $request->user('apoiador');
 
+        // Só existe API: quem não é gestor recebe sempre a resposta em JSON.
         if (! $usuario || $usuario->tipo_usuario !== 'admin') {
-            if ($request->expectsJson()) {
-                return response()->json([
-                    'status' => 'erro',
-                    'mensagem' => 'Acesso restrito a gestores da ONG.',
-                ], 403);
-            }
-
-            if (! $usuario) {
-                return redirect()->guest(route('login'))
-                    ->with('erro', 'Entre com o seu acesso para usar esta função.');
-            }
-
-            return redirect()->route('login')
-                ->with('erro', 'Esta função é exclusiva da gestão da ONG.');
+            return response()->json([
+                'status' => 'erro',
+                'mensagem' => 'Acesso restrito a gestores da ONG.',
+            ], 403);
         }
 
         return $next($request);

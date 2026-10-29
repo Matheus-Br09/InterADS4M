@@ -1,0 +1,10 @@
+{
+    "(and :count more error)": "(e mais :count erro)",
+    "(and :count more errors)": "(e mais :count erros)",
+    "Unauthenticated.": "Você precisa entrar para continuar.",
+    "This action is unauthorized.": "Você não tem permissão para fazer isso.",
+    "Too Many Attempts.": "Muitas tentativas. Aguarde um pouco e tente de novo.",
+    "Server Error": "Algo deu errado. Tente de novo em instantes.",
+    "Not Found": "Não encontrado.",
+    "Page Expired": "Sua sessão expirou. Recarregue a página e tente de novo."
+}

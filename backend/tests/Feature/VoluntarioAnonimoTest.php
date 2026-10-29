@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Voluntario;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -21,10 +22,13 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 98765-4321',
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(200);
-        $response->assertJsonStructure(['dados' => ['id', 'nome_completo', 'email', 'celular', 'area_atuacao', 'disponibilidade', 'status']]);
+        // A rota é pública: a resposta só confirma, não devolve o cadastro.
+        $response->assertExactJson(['message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.']);
 
         $this->assertDatabaseHas('voluntarios', [
             'nome_completo' => 'João Silva',
@@ -32,6 +36,7 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 98765-4321',
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
             'status' => 'em_analise',
             'apoiador_id' => null,
         ]);
@@ -42,6 +47,8 @@ class VoluntarioAnonimoTest extends TestCase
         $response = $this->postJson('/api/v1/voluntariado', [
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(422);
@@ -56,6 +63,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 98765-4321',
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(422);
@@ -74,15 +83,20 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(21) 99999-8888',
             'area_atuacao' => 'Fisioterapia',
             'disponibilidade' => 'Tarde',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
             'arquivo_curriculo' => $curriculo,
         ]);
 
         $response->assertStatus(200);
 
-        $voluntario = $response->json('dados');
-        $this->assertNotNull($voluntario['arquivo_curriculo']);
+        // O caminho do arquivo não volta na resposta (é dado interno).
+        $response->assertJsonMissingPath('dados');
 
-        Storage::disk('local')->assertExists($voluntario['arquivo_curriculo']);
+        $voluntario = Voluntario::where('email', 'maria@email.com')->sole();
+        $this->assertNotNull($voluntario->arquivo_curriculo);
+
+        Storage::disk('local')->assertExists($voluntario->arquivo_curriculo);
     }
 
     public function test_cadastro_anonimo_curriculo_opcional(): void
@@ -95,6 +109,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(31) 97777-6666',
             'area_atuacao' => 'Odontologia',
             'disponibilidade' => 'Integral',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(200);
@@ -112,6 +128,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(41) 96666-5555',
             'area_atuacao' => 'Área Inválida',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(422);
@@ -126,6 +144,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(51) 95555-4444',
             'area_atuacao' => 'Apoio Geral',
             'disponibilidade' => 'Disponibilidade Inválida',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(422);
@@ -143,6 +163,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 91111-1111',
             'area_atuacao' => 'Nutrição',
             'disponibilidade' => 'Manhã',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ])->assertStatus(200);
 
         // Segundo cadastro (email diferente)
@@ -152,6 +174,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 92222-2222',
             'area_atuacao' => 'Fisioterapia',
             'disponibilidade' => 'Tarde',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ])->assertStatus(200);
 
         $this->assertDatabaseCount('voluntarios', 2);
@@ -167,6 +191,8 @@ class VoluntarioAnonimoTest extends TestCase
             'celular' => '(11) 98888-7777',
             'area_atuacao' => 'Outros',
             'disponibilidade' => 'Integral',
+            'data_nascimento' => '1990-01-01',
+            'aceite_privacidade' => true,
         ]);
 
         $response->assertStatus(200);

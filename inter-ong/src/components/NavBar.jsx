@@ -1,11 +1,21 @@
 import { useState } from "react"
-import { NavLink, Link } from "react-router-dom"
+import { NavLink, Link, useLocation } from "react-router-dom"
 import logoImg from "../assets/logo.png"
 import { useTheme } from "../context/theme.js"
 
+// Itens menos usados do menu do computador ficam agrupados em "Mais".
+const GRUPO_MAIS = [
+  ["/noticias", "Notícias"],
+  ["/educacional", "Área Educacional"],
+  ["/servicos", "Serviços"],
+]
+
 export default function NavBar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMoreOpen, setIsMoreOpen] = useState(false)
   const { isDarkMode, toggleDarkMode } = useTheme()
+  const { pathname } = useLocation()
+  const maisAtivo = GRUPO_MAIS.some(([caminho]) => pathname.startsWith(caminho))
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev)
@@ -17,7 +27,7 @@ export default function NavBar() {
 
 
   const desktopNavLinkClass = ({ isActive }) =>
-    `px-4 py-1 rounded-full text-sm font-semibold transition-all duration-200 border ${
+    `px-4 py-1 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 border ${
       isActive
         ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border-pink-200 dark:border-pink-900/50"
         : "text-gray-700 dark:text-slate-200 border-transparent hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
@@ -43,7 +53,7 @@ export default function NavBar() {
             <Link
               to="/"
               onClick={closeMobileMenu}
-              className="flex items-center group transition-transform duration-200 hover:scale-105 active:scale-95"
+              className="flex lg:shrink-0 items-center group transition-transform duration-200 hover:scale-105 active:scale-95"
               aria-label="SOS Tudo pelo Social - Página Inicial"
             >
               <div className="px-4 py-2 bg-white/60 dark:bg-slate-900/60 backdrop-blur border border-white/60 dark:border-slate-700/60 rounded-full">
@@ -56,38 +66,55 @@ export default function NavBar() {
            </Link>
 
 
-            <nav aria-label="Navegação principal" className="hidden md:flex items-center gap-2 lg:gap-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
+            <nav aria-label="Navegação principal" className="hidden lg:flex items-center gap-2 lg:gap-4 bg-white/40 dark:bg-slate-900/40 backdrop-blur-sm p-1.5 rounded-full border border-white/60 dark:border-slate-800 shadow-inner">
               <NavLink to="/" className={desktopNavLinkClass} end>
                 Início
-              </NavLink>
-
-              <NavLink to={"/noticias"} className={desktopNavLinkClass}>
-                Notícias
               </NavLink>
 
               <NavLink to="/sobre" className={desktopNavLinkClass}>
                 Sobre Nós
               </NavLink>
 
-              <NavLink to="/contato" className={desktopNavLinkClass}>
-                Contato
-              </NavLink>
-
-              <NavLink to="/educacional" className={desktopNavLinkClass}>
-                Área Educacional
-              </NavLink>
-
               <NavLink to="/voluntariado" className={desktopNavLinkClass}>
                 Voluntariado
               </NavLink>
 
-              <NavLink to="/login" className={desktopNavLinkClass}>
-                Login / Cadastro
+              <NavLink to="/contato" className={desktopNavLinkClass}>
+                Contato
               </NavLink>
+
+              <div
+                className="relative"
+                onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget)) setIsMoreOpen(false) }}
+                onKeyDown={(e) => { if (e.key === "Escape") setIsMoreOpen(false) }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setIsMoreOpen((prev) => !prev)}
+                  aria-expanded={isMoreOpen}
+                  aria-controls="menu-mais"
+                  className={`px-4 py-1 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 border cursor-pointer ${
+                    maisAtivo
+                      ? "bg-white dark:bg-slate-800 text-[#fb2782] dark:text-pink-400 shadow-sm border-pink-200 dark:border-pink-900/50"
+                      : "text-gray-700 dark:text-slate-200 border-transparent hover:text-[#fb2782] dark:hover:text-pink-400 hover:bg-white/60 dark:hover:bg-slate-800/60"
+                  }`}
+                >
+                  Mais <span aria-hidden="true">▾</span>
+                </button>
+                {isMoreOpen && (
+                  <div id="menu-mais" className="absolute right-0 top-full z-50 mt-3 w-56 space-y-1 rounded-2xl border border-pink-100 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-[#0e1526]">
+                    {GRUPO_MAIS.map(([caminho, nome]) => (
+                      <NavLink key={caminho} to={caminho} onClick={() => setIsMoreOpen(false)} className={mobileNavLinkClass}>
+                        {nome}
+                      </NavLink>
+                    ))}
+                  </div>
+                )}
+              </div>
 
             </nav>
 
-            <div className="hidden md:flex items-center gap-3">
+            <div className="hidden lg:flex items-center gap-3">
               {/* Botão de Alternância de Tema (Claro / Escuro) */}
               <button
                 type="button"
@@ -130,7 +157,7 @@ export default function NavBar() {
               </NavLink>
             </div>
 
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-2">
               {/* Botão de Tema Mobile */}
               <button
                 type="button"
@@ -188,7 +215,7 @@ export default function NavBar() {
           role="navigation"
           aria-label="Menu de navegação mobile"
           inert={!isMobileMenuOpen}
-          className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
+          className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${
             isMobileMenuOpen ? "max-h-[calc(100dvh-6rem)] overflow-y-auto opacity-100 pb-5" : "max-h-0 opacity-0 pb-0"
           }`}
         >
@@ -216,7 +243,7 @@ export default function NavBar() {
 
               <NavLink to="/noticias" onClick={closeMobileMenu} className={mobileNavLinkClass}>Notícias →</NavLink>
               <NavLink to="/voluntariado" onClick={closeMobileMenu} className={mobileNavLinkClass}>Voluntariado →</NavLink>
-              <NavLink to="/login" onClick={closeMobileMenu} className={mobileNavLinkClass}>Minha conta / Entrar →</NavLink>
+              <NavLink to="/servicos" onClick={closeMobileMenu} className={mobileNavLinkClass}>Serviços →</NavLink>
               <div className="pt-2">
                 <NavLink
                   to="/doar"
@@ -239,7 +266,7 @@ export default function NavBar() {
       {isMobileMenuOpen && (
         <div
           onClick={closeMobileMenu}
-          className="fixed inset-0 top-20 sm:top-24 bg-black/20 backdrop-blur-[2px] z-[-1] md:hidden transition-opacity"
+          className="fixed inset-0 top-20 sm:top-24 bg-black/20 backdrop-blur-[2px] z-[-1] lg:hidden transition-opacity"
           aria-hidden="true"
         />
       )}

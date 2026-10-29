@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react'
 import { backend } from '../api/backend'
+import { Link } from 'react-router-dom'
 import AvisoApi from '../components/AvisoApi'
+import { ehMaiorDeIdade } from '../utils/idade'
 import realRodaConversaImg from '../assets/real-roda-conversa.jpg'
 import './css/Voluntariado.css'
 
@@ -17,6 +19,13 @@ export default function Voluntariado() {
 
     const form = event.currentTarget
     const dados = new FormData(form)
+
+    if (!ehMaiorDeIdade(dados.get('data_nascimento'))) {
+      setMensagem('')
+      setSucesso(false)
+      setErro(new Error('É preciso ter 18 anos ou mais para ser voluntário.'))
+      return
+    }
 
     // Validação e remoção de arquivo vazio
     const arquivo = dados.get('arquivo_curriculo')
@@ -132,6 +141,18 @@ export default function Voluntariado() {
                   />
                 </div>
 
+                {/* Data de nascimento */}
+                <div className="field">
+                  <label htmlFor="data_nascimento">Data de nascimento *</label>
+                  <input
+                    id="data_nascimento"
+                    name="data_nascimento"
+                    type="date"
+                    required
+                    autoComplete="bday"
+                  />
+                </div>
+
                 {/* Área de Atuação */}
                 <div className="field">
                   <label htmlFor="area_atuacao">Área de atuação *</label>
@@ -172,6 +193,13 @@ export default function Voluntariado() {
                   </small>
                 </div>
               </div>
+
+              <label className="mt-4 flex items-start gap-2 text-sm">
+                <input type="checkbox" name="aceite_privacidade" value="1" required className="mt-1" />
+                <span>
+                  Li e aceito a <Link to="/privacidade" className="underline">política de privacidade</Link>
+                </span>
+              </label>
 
               <div className="form-footer">
                 <button className="submit-button" type="submit" disabled={enviando}>

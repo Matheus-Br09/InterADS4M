@@ -16,11 +16,21 @@ class DoacaoUnica extends Model
 
     protected $fillable = [
         'apoiador_id',
+        'nome_doador',
+        'email_doador',
+        'protocolo',
         'valor',
         'metodo_pagamento',
         'status',
         'data_doacao',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'data_doacao' => 'datetime',
+        ];
+    }
 
     public function apoiador(): BelongsTo
     {

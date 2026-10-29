@@ -2,51 +2,36 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\NovoVoluntario;
 use App\Models\Voluntario;
+use App\Support\AvisaGestao;
+use App\Support\BuscaLike;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Storage;
 
 class VoluntarioApiController extends Controller
 {
-    public function minhaInscricao(Request $request): array
-    {
-        return ['dados' => $request->user('apoiador')->voluntario];
-    }
-
     public function store(Request $request): array
     {
-        // Debug: ver o que está vindo
-        \Log::info('Voluntario request', [
-            'has_file' => $request->hasFile('arquivo_curriculo'),
-            'all_keys' => array_keys($request->all()),
-            'file_info' => $request->file('arquivo_curriculo') ? 'File exists' : 'No file',
+        $dados = $request->validate([
+            'nome_completo' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255'],
+            'celular' => ['required', 'string', 'max:20'],
+            'data_nascimento' => ['required', 'date', 'before_or_equal:'.now()->subYears(18)->toDateString()],
+            'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
+            'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
+            'arquivo_curriculo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
+            'aceite_privacidade' => ['accepted'],
+        ], [
+            'data_nascimento.before_or_equal' => 'É preciso ter 18 anos ou mais para ser voluntário.',
         ]);
 
-        // Verifica se é cadastro anônimo (sem login) ou autenticado
-        $isAuthenticated = $request->user('apoiador') !== null;
+        // O aceite só autoriza o envio: não é uma coluna da tabela.
+        unset($dados['aceite_privacidade']);
 
-        if ($isAuthenticated) {
-            // Usuário logado: usa dados da conta
-            $dados = $request->validate([
-                'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
-                'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
-                'arquivo_curriculo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-            ]);
-            $dados['apoiador_id'] = $request->user('apoiador')->id;
-        } else {
-            // Cadastro anônimo: requer nome, email, celular
-            $dados = $request->validate([
-                'nome_completo' => ['required', 'string', 'max:255'],
-                'email' => ['required', 'email', 'max:255'],
-                'celular' => ['required', 'string', 'max:20'],
-                'area_atuacao' => ['required', 'in:Neuropedagogia,Odontologia,Nutrição,Fisioterapia,Apoio Geral,Outros'],
-                'disponibilidade' => ['required', 'in:Manhã,Tarde,Integral'],
-                'arquivo_curriculo' => ['nullable', 'file', 'mimes:pdf', 'max:10240'],
-            ]);
-            $dados['apoiador_id'] = null;
-        }
+        $dados['apoiador_id'] = null;
 
-        // Upload do currículo se enviado
         if ($request->hasFile('arquivo_curriculo')) {
             $dados['arquivo_curriculo'] = $request->file('arquivo_curriculo')->store('curriculos', 'local');
         }
@@ -54,20 +39,31 @@ class VoluntarioApiController extends Controller
         $dados['status'] = 'em_analise';
         $dados['data_inscricao'] = now();
 
-        // Se autenticado, atualiza ou cria baseado no apoiador_id
-        // Se anônimo, sempre cria novo registro
-        if ($isAuthenticated) {
-            $voluntario = Voluntario::updateOrCreate(['apoiador_id' => $dados['apoiador_id']], $dados);
-        } else {
-            $voluntario = Voluntario::create($dados);
-        }
+        $voluntario = Voluntario::create($dados);
 
-        return ['dados' => $voluntario, 'message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
+        AvisaGestao::enviar(new NovoVoluntario($voluntario));
+
+        // A rota é pública: a resposta não devolve o cadastro (data de
+        // nascimento, caminho do currículo), só a confirmação.
+        return ['message' => 'Inscrição recebida com sucesso! Entraremos em contato em breve.'];
     }
 
-    public function index(): array
+    public function index(Request $request): array
     {
-        return ['dados' => Voluntario::with('apoiador:id,nome_completo,email')->latest('id')->paginate(20)];
+        $filtros = $request->validate(['busca' => ['nullable', 'string', 'max:100']]);
+
+        $consulta = Voluntario::with('apoiador:id,nome_completo,email')->latest('id');
+
+        // Cadastros antigos guardam o nome no apoiador ligado. O e-mail do apoiador
+        // fica de fora: o modelo o esconde da API, então achar por ele seria um resultado sem explicação.
+        if ($padrao = BuscaLike::padrao($filtros['busca'] ?? null)) {
+            $consulta->where(fn ($q) => $q
+                ->whereRaw(BuscaLike::condicao('nome_completo'), [$padrao])
+                ->orWhereRaw(BuscaLike::condicao('email'), [$padrao])
+                ->orWhereHas('apoiador', fn ($a) => $a->whereRaw(BuscaLike::condicao('nome_completo'), [$padrao])));
+        }
+
+        return ['dados' => $consulta->paginate(20)];
     }
 
     public function update(Request $request, int $id): array
@@ -76,6 +72,19 @@ class VoluntarioApiController extends Controller
         $voluntario->update($request->validate(['status' => ['required', 'in:em_analise,entrevista_marcada,aprovado,recusado'], 'data_entrevista' => ['nullable', 'date'], 'mensagem_entrevista' => ['nullable', 'string']]));
 
         return ['dados' => $voluntario->refresh()];
+    }
+
+    public function destroy(int $id): Response
+    {
+        $voluntario = Voluntario::findOrFail($id);
+
+        if ($voluntario->arquivo_curriculo) {
+            Storage::disk('local')->delete($voluntario->arquivo_curriculo);
+        }
+
+        $voluntario->delete();
+
+        return response()->noContent();
     }
 
     public function curriculo(int $id)

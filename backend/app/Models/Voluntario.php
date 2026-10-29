@@ -19,6 +19,7 @@ class Voluntario extends Model
         'nome_completo',
         'email',
         'celular',
+        'data_nascimento',
         'area_atuacao',
         'disponibilidade',
         'arquivo_curriculo',

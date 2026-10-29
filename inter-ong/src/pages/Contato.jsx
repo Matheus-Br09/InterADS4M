@@ -1,6 +1,12 @@
 import "./css/Contato.css";
+import { useConfig } from "../context/ConfigContext.jsx";
+import { linkInstagram } from "../utils/instagram.js";
+import { linkWhatsapp } from "../utils/whatsapp.js";
 
 export default function Contato() {
+  const config = useConfig();
+  const instagram = linkInstagram(config?.instagram);
+  const whatsapp = linkWhatsapp(config?.whatsapp);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6">
 
@@ -15,7 +21,7 @@ export default function Contato() {
             <a href="mailto:sostudopelosocial@gmail.com"
                 aria-label="Enviar e-mail para sostudopelosocial@gmail.com">
 
-              <p className="font-semibold text-gray-800 dark:text-white">
+              <p className="font-semibold break-all text-gray-800 dark:text-white">
               sostudopelosocial@gmail.com
               </p>
 
@@ -29,6 +35,17 @@ export default function Contato() {
             <p className="font-semibold text-gray-800 dark:text-white">(81) 99281-2080</p>
 
           </div>
+
+          {whatsapp && (
+            <a
+              href={whatsapp}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-xl bg-green-600 p-4 text-center font-bold text-white transition hover:bg-green-700"
+            >
+              Falar pelo WhatsApp
+            </a>
+          )}
 
           <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
 
@@ -45,11 +62,11 @@ export default function Contato() {
 
             <p className="text-sm text-gray-500 dark:text-slate-400">Instagram</p>
 
-            <a href="https://www.instagram.com/SosTudopelosocial"
+            <a href={instagram}
                 target='_blank'
                 rel="noopener noreferrer"
                 aria-label="Visitar @Sostudopelosocial no Instagram (abre em nova aba)">
-              <p className="font-semibold text-pink-600 dark:text-pink-400">@SosTudopelosocial</p>
+              <p className="font-semibold break-all text-pink-600 dark:text-pink-400">@SosTudopelosocial</p>
               
             </a>
             

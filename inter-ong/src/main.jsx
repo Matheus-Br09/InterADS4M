@@ -13,8 +13,16 @@ import Sobre from './pages/Sobre.jsx'
 import ErrorPage from './pages/ErrorPage.jsx'
 import Contato from './pages/Contato.jsx'
 import Educacional from './pages/Educacional.jsx'
-import LoginECadastro from './pages/LoginECadastro.jsx'
-import GestaoMateriais from './pages/GestaoMateriais.jsx'
+import Servicos from './pages/Servicos.jsx'
+import Privacidade from './pages/Privacidade.jsx'
+import TemaDoPainel from './pages/gestao/TemaDoPainel.jsx'
+import GestaoLayout from './pages/gestao/GestaoLayout.jsx'
+import GestaoEntrar from './pages/gestao/GestaoEntrar.jsx'
+import GestaoDoacoes from "./pages/gestao/GestaoDoacoes.jsx"
+import GestaoVoluntarios from "./pages/gestao/GestaoVoluntarios.jsx"
+import GestaoConteudos from "./pages/gestao/GestaoConteudos.jsx"
+import GestaoGestores from "./pages/gestao/GestaoGestores.jsx"
+import GestaoTrocarSenha from './pages/gestao/GestaoTrocarSenha.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
 
@@ -23,6 +31,27 @@ import Noticias from './pages/Noticias.jsx'
 // Jás aqui a rota das páginas para acessá-las, caso queira adicionar uma página, coloque-a aqui
 
 const router = createBrowserRouter([
+  // Painel de gestão: fora do site público (sem menu, newsletter e rodapé)
+  {
+    element: <TemaDoPainel />,
+    errorElement: <ErrorPage />,
+    children: [
+      { path: "gestao/entrar", element: <GestaoEntrar /> },
+      { path: "gestao/trocar-senha", element: <GestaoTrocarSenha /> },
+      {
+        path: "gestao",
+        element: <GestaoLayout />,
+        children: [
+          { index: true, element: <Navigate to="doacoes" replace /> },
+          // Telas das Tarefas 18 e 19 substituem estes avisos.
+          { path: "doacoes", element: <GestaoDoacoes /> },
+          { path: "voluntarios", element: <GestaoVoluntarios /> },
+          { path: "conteudos", element: <GestaoConteudos /> },
+          { path: "gestores", element: <GestaoGestores /> },
+        ]
+      },
+    ]
+  },
   {
     path: "/",
     errorElement: <ErrorPage />,
@@ -30,7 +59,6 @@ const router = createBrowserRouter([
     children: [
       { path: "programas", element: <Noticias key="programas" recurso="programas" titulo="Programas e ações" /> },
       { path: "transparencia", element: <Noticias key="transparencia" recurso="transparencia" titulo="Transparência" /> },
-      { path: 'gestao', element: <Navigate to='/gestao/materiais' replace /> },
       {
         index: true,
         element: <LandingPage />
@@ -51,15 +79,9 @@ const router = createBrowserRouter([
         path: "educacional",
         element: <Educacional />
       },
-      {
-        path: "login",
-        element: <LoginECadastro />
-      },
+      { path: "servicos", element: <Servicos /> },
+      { path: "privacidade", element: <Privacidade /> },
 
-      {
-        path: "gestao/materiais",
-        element: <GestaoMateriais />
-      },
       {
         path: "voluntariado",
         element: <Voluntariado />

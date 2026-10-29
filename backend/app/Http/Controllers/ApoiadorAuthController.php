@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Apoiador;
-use App\Rules\Cpf;
-use App\Rules\SenhaForte;
 use App\Support\DadosDaConta;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\RateLimiter;
 
+/*
+| No MVP só a gestão da ONG entra no sistema (pelo painel, via API). Apoiador
+| comum não tem mais cadastro nem área própria: mesmo que uma conta antiga
+| acerte a senha, o login é recusado sem abrir sessão.
+*/
 class ApoiadorAuthController extends Controller
 {
     /*
@@ -22,62 +23,6 @@ class ApoiadorAuthController extends Controller
     private const TENTATIVAS_POR_CONTA = 5;
 
     private const BLOQUEIO_EM_SEGUNDOS = 300;
-
-    public function showRegister()
-    {
-        return view('auth.cadastro');
-    }
-
-    public function register(Request $request)
-    {
-        $request->merge(['cpf' => Cpf::apenasDigitos($request->cpf)]);
-
-        $validated = $request->validate([
-            'nome_completo' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:apoiadores',
-            'cpf' => ['required', 'string', new Cpf, 'unique:apoiadores'],
-            'celular' => 'nullable|string|max:255',
-            'cep' => 'nullable|string|max:255',
-            'logradouro' => 'nullable|string|max:255',
-            'numero' => 'nullable|string|max:255',
-            'complemento' => 'nullable|string|max:255',
-            'bairro' => 'nullable|string|max:255',
-            'cidade' => 'nullable|string|max:255',
-            'estado' => 'nullable|string|max:255',
-            'senha' => ['required', 'string', 'confirmed', new SenhaForte],
-        ]);
-
-        $apoiador = Apoiador::create([
-            'nome_completo' => $validated['nome_completo'],
-            'email' => $validated['email'],
-            'cpf' => $validated['cpf'],
-            'celular' => $validated['celular'] ?? null,
-            'senha' => Hash::make($validated['senha']),
-            'senha_alterada_em' => now(),
-            'cep' => $validated['cep'] ?? null,
-            'logradouro' => $validated['logradouro'] ?? null,
-            'numero' => $validated['numero'] ?? null,
-            'complemento' => $validated['complemento'] ?? null,
-            'bairro' => $validated['bairro'] ?? null,
-            'cidade' => $validated['cidade'] ?? null,
-            'estado' => $validated['estado'] ?? null,
-            'tipo_usuario' => 'apoiador',
-            'data_cadastro' => now()->toDateString(),
-        ]);
-
-        Auth::guard('apoiador')->login($apoiador);
-
-        if ($request->is('api/v1/*')) {
-            return response()->json(['dados' => DadosDaConta::de($apoiador)], 201);
-        }
-
-        return redirect()->route('minha-conta');
-    }
-
-    public function showLogin()
-    {
-        return view('auth.login');
-    }
 
     public function login(Request $request)
     {
@@ -91,55 +36,47 @@ class ApoiadorAuthController extends Controller
         if (RateLimiter::tooManyAttempts($chave, self::TENTATIVAS_POR_CONTA)) {
             $segundos = RateLimiter::availableIn($chave);
 
-            if ($request->is('api/v1/*')) {
-                return response()->json(['message' => 'Muitas tentativas de acesso. Tente novamente mais tarde.', 'tentar_em' => $segundos], 429)->header('Retry-After', (string) $segundos);
-            }
-
-            return back()
-                ->withInput($request->only('email'))
-                ->withErrors(['email' => "Muitas tentativas de acesso. Tente novamente em {$segundos} segundos."]);
+            return response()->json(['message' => 'Muitas tentativas de acesso. Tente novamente mais tarde.', 'tentar_em' => $segundos], 429)->header('Retry-After', (string) $segundos);
         }
 
-        if (Auth::guard('apoiador')->attempt(['email' => $credentials['email'], 'password' => $credentials['senha']])) {
-            // Zera o contador: quem acerta a senha não deve herdar o bloqueio
-            // das tentativas anteriores, e uma conta real não fica presa por
-            // causa de um robô que errou o e-mail algumas vezes.
-            RateLimiter::clear($chave);
-            $request->session()->regenerate();
+        $guard = Auth::guard('apoiador');
 
-            if ($request->is('api/v1/*')) {
-                return response()->json(['dados' => DadosDaConta::de(Auth::guard('apoiador')->user())]);
-            }
+        // validate() confere a senha sem abrir sessão: a sessão só nasce depois
+        // de saber que a conta é da gestão.
+        if (! $guard->validate(['email' => $credentials['email'], 'password' => $credentials['senha']])) {
+            RateLimiter::hit($chave, self::BLOQUEIO_EM_SEGUNDOS);
 
-            // Conta com troca de senha pendente vai direto para ela: cair no
-            // painel e ser jogada de volta pela metade só confunde. Quem
-            // cadastrou agora nunca entra neste caminho — conta nova nasce com
-            // a senha que a pessoa escolheu.
-            if (Auth::guard('apoiador')->user()->trocar_senha_obrigatorio) {
-                return redirect()->route('senha.edit');
-            }
-
-            return redirect()->intended('/minha-conta');
-        }
-
-        RateLimiter::hit($chave, self::BLOQUEIO_EM_SEGUNDOS);
-
-        if ($request->is('api/v1/*')) {
             return response()->json(['message' => 'E-mail ou senha inválidos.'], 401);
         }
 
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors([
-                'email' => 'As credenciais fornecidas não correspondem aos nossos registros.',
-            ]);
+        $usuario = $guard->getLastAttempted();
+
+        if ($usuario->tipo_usuario !== 'admin') {
+            return response()->json(['message' => 'Acesso restrito à gestão da ONG.'], 403);
+        }
+
+        // Zera o contador: quem acerta a senha não deve herdar o bloqueio
+        // das tentativas anteriores, e uma conta real não fica presa por
+        // causa de um robô que errou o e-mail algumas vezes.
+        RateLimiter::clear($chave);
+
+        // O attempt() faria isto sozinho; com o validate() é preciso pedir:
+        // hash antigo (custo menor) é refeito no primeiro login bem-sucedido.
+        if (config('hashing.rehash_on_login', true)) {
+            $guard->getProvider()->rehashPasswordIfRequired($usuario, ['password' => $credentials['senha']]);
+        }
+
+        $guard->login($usuario);
+        $request->session()->regenerate();
+
+        return response()->json(['dados' => DadosDaConta::de($usuario)]);
     }
 
     /*
     | A chave usa o e-mail *digitado*, não o da conta encontrada: assim um
     | e-mail inexente trava igual a um existente e o ataque não consegue
     | distinguir os dois pela resposta. O IP entra na chave para o atacante não
-    | conseguir trancar de propósito a conta de um apoiador conhecido.
+    | conseguir trancar de propósito a conta de um gestor conhecido.
     */
     private function chaveDeBloqueio(string $email, Request $request): string
     {
@@ -152,10 +89,6 @@ class ApoiadorAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        if ($request->is('api/v1/*')) {
-            return response()->noContent();
-        }
-
-        return redirect('/');
+        return response()->noContent();
     }
 }

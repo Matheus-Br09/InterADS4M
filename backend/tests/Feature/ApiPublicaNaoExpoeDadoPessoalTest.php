@@ -6,8 +6,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\Concerns\CriaCenarioOng;
 use Tests\TestCase;
 
-// Trava de LGPD: as rotas em routes/api.php são públicas porque alimentam o
-// site, então nenhuma delas pode devolver dado pessoal de apoiador (nome,
+// Trava de LGPD: as rotas GET sem login de /api/v1 são públicas porque
+// alimentam o site, então nenhuma delas pode devolver dado pessoal de apoiador (nome,
 // contato, endereço, valores pagos, papel na gestão) nem dado sensível de
 // criança (histórico, data de nascimento). Este teste varre a resposta
 // inteira de cada endpoint, em qualquer nível, em vez de conferir caminho
@@ -26,13 +26,13 @@ class ApiPublicaNaoExpoeDadoPessoalTest extends TestCase
     ];
 
     private const ENDPOINTS = [
-        '/api/criancas',
-        '/api/apoiadores',
-        '/api/apadrinhamentos',
-        '/api/programas',
-        '/api/noticias',
-        '/api/materiais-didaticos',
-        '/api/transparencia',
+        '/api/v1/csrf',
+        '/api/v1/config-publica',
+        '/api/v1/estatisticas',
+        '/api/v1/conteudos/programas',
+        '/api/v1/conteudos/noticias',
+        '/api/v1/conteudos/materiais',
+        '/api/v1/conteudos/transparencia',
     ];
 
     public function test_nenhuma_api_publica_devolve_dado_pessoal_ou_financeiro(): void
@@ -44,6 +44,7 @@ class ApiPublicaNaoExpoeDadoPessoalTest extends TestCase
         ]);
         $this->criarApadrinhamento($gestor, $crianca, ['valor_mensal' => 100.00]);
         $this->criarDoacaoUnica($gestor, ['valor' => 75.00]);
+        $this->criarDoacaoUnica(null, ['nome_doador' => 'Dora Doadora', 'email_doador' => 'dora@exemplo.org']);
         $this->criarDoacaoMensal($gestor, ['valor_mensal' => 40.00]);
         $this->criarVoluntario($gestor, ['status' => 'aprovado']);
         $this->criarPrograma();
@@ -75,15 +76,6 @@ class ApiPublicaNaoExpoeDadoPessoalTest extends TestCase
             $this->assertStringNotContainsString($apoiador->cpf, $corpo, "{$endpoint} devolveu o CPF do apoiador.");
             $this->assertStringNotContainsString($apoiador->senha, $corpo, "{$endpoint} devolveu a senha do apoiador.");
         }
-    }
-
-    public function test_o_painel_continua_mostrando_os_dados_para_a_gestao(): void
-    {
-        // O $hidden dos models só afeta JSON: a tela da gestão continua
-        // precisando ver nome, e-mail e endereço para trabalhar.
-        $this->actingAsGestor();
-
-        $this->get('/')->assertOk();
     }
 
     // Varre a resposta inteira (qualquer profundidade) e devolve o caminho das
