@@ -228,6 +228,8 @@ Alternativa: um subdomínio (`api.<domínio>`) com `backend/public` como pasta r
 | `ONG_WHATSAPP`, `ONG_INSTAGRAM`, `ONG_EMAIL_GESTAO` | contatos da ONG (`ONG_EMAIL_GESTAO` recebe os avisos de doação e voluntário) |
 | `ONG_DOACAO_EXPIRA_DIAS` | opcional (padrão 7) |
 
+> **Dados reais da ONG:** as linhas `ONG_*` prontas (Pix, titular, cidade, WhatsApp, Instagram) estão no arquivo `backend/.env.ong-producao`, que **fica fora do git** de propósito. Copie-as para o `.env` do servidor e preencha só `ONG_EMAIL_GESTAO` quando a ONG enviar o e-mail.
+
 A senha do banco e a do e-mail ficam **só** no `.env` do servidor. Nunca no Git, nunca no chat.
 
 > **`TRUSTED_PROXIES`:** deixe vazio. Só preencha com o IP/faixa do proxy da Hostinger se o site não reconhecer que está em HTTPS ou mostrar o IP errado do visitante. Sintomas: cabeçalho HSTS ausente, cookie seguro não funcionando (todo mundo deslogado), redirecionamentos estranhos. O IP real do proxy: **confirmar no painel da Hostinger** ou com o suporte.

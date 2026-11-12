@@ -31,3 +31,6 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Dados reais da ONG para colar no .env do servidor (nao vai para o git)
+/.env.ong-producao
