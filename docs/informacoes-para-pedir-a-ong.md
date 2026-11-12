@@ -33,7 +33,7 @@ Regra do projeto: **não inventamos** depoimentos, números, endereços nem fato
 14. [ ] **Missão, visão e valores** nas palavras da ONG. Os 4 cartões atuais (Inclusão, Acolhimento, Educação, Oportunidades) são genéricos: manter, trocar ou explicar com exemplos reais.
 15. [ ] **Frase de impacto real** para o topo, no lugar dos slogans genéricos ("Acolher, Incluir, Transformar" e "Pequenas ações, grandes mudanças").
 16. [ ] **Endereço, bairro e telefone** conferidos (hoje: Rua Hosana Alves do Nascimento nº 493, Casa 01, Janga, Paulista/PE). Dias e horários de funcionamento.
-17. [ ] **Telefone da página Contato:** hoje aparece **(81) 99281-2080**, diferente do WhatsApp **(81) 98711-8820**. Qual é o número certo de telefone? É o mesmo do WhatsApp? Fixo ou celular?
+17. [x] **Telefone da página Contato:** resolvido. A página agora mostra só o número oficial do WhatsApp, **(81) 98711-8820**. Se a ONG tiver um telefone fixo separado, avisar.
 18. [ ] **Redes sociais:** confirmar o Instagram `@sostudopelosocial` e se há Facebook/YouTube.
 
 ## Projetos e ações
@@ -66,6 +66,6 @@ Regra do projeto: **não inventamos** depoimentos, números, endereços nem fato
 32. [ ] **Quem responde o WhatsApp**, em quais dias e horários, e qual mensagem automática de boas-vindas usar.
 33. [ ] Texto da **mensagem pronta** do botão do WhatsApp, se a ONG preferir outro (hoje: "Olá! Vim pelo site da ONG e gostaria de saber mais.").
 
-## Decisões de design que dependem de você ou da ONG
+## Decisões de design
 
-- [ ] **Rosa da marca nos botões:** o rosa `#fb2782` com texto branco dá contraste de 3,7:1 (o recomendado para texto pequeno é 4,5:1). Para cumprir, o rosa dos botões ficaria um pouco mais fechado (`#e11d73`). Perguntar se a ONG tem um manual de marca ou se aceita o ajuste.
+- [x] **Rosa dos botões:** decidido. Os botões com texto branco usam um rosa um pouco mais fechado (`#e11d73`, contraste 4,54:1) em vez do `#fb2782`, para ficar legível. O `#fb2782` continua em títulos grandes e detalhes. Se a ONG tiver manual de marca com outra cor, ajustar.

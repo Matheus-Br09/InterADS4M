@@ -317,7 +317,7 @@ html.dark .btn-circle-arrow {
 }
 
 html.dark .btn-circle-arrow:hover {
-    background-color: #fb2782 !important;
+    background-color: #e11d73 !important;
     color: #ffffff !important;
 }
 
@@ -552,7 +552,7 @@ html.dark .pillar-card {
 /* "Faça uma doação" é o caminho principal: único cartão em rosa cheio */
 html .help-action-card-destaque,
 html.dark .help-action-card-destaque {
-  background: linear-gradient(135deg, #fb2782 0%, #e11d73 100%) !important;
+  background: linear-gradient(135deg, #e11d73 0%, #be185d 100%) !important;
   border-color: #fb2782 !important;
   box-shadow: 0 14px 28px -8px rgba(251, 39, 130, 0.45) !important;
 }
@@ -576,4 +576,20 @@ html:not(.dark) nav a[aria-current="page"] {
 html:not(.dark) .tag-sky,
 html:not(.dark) .badge-pill-sky {
   color: #0369a1 !important;
+}
+
+/* Botões rosa com texto branco: o rosa da marca (#fb2782) dá 3,7:1; o tom abaixo dá 4,5:1 ou mais (padrão de leitura WCAG AA).
+   Vale para os botões feitos com classes do Tailwind espalhadas pelo site. */
+.bg-\[\#fb2782\] {
+  background-color: #e11d73 !important;
+}
+.from-\[\#fb2782\] {
+  --tw-gradient-from: #e11d73 !important;
+}
+.via-\[\#ff3b8d\] {
+  --tw-gradient-via: #e11d73 !important;
+}
+.to-\[\#ff4785\],
+.to-\[\#ff6398\] {
+  --tw-gradient-to: #d61b6a !important;
 }

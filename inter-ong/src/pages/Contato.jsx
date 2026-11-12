@@ -1,12 +1,13 @@
 import "./css/Contato.css";
 import { useConfig } from "../context/ConfigContext.jsx";
 import { linkInstagram } from "../utils/instagram.js";
-import { linkWhatsapp } from "../utils/whatsapp.js";
+import { formatarWhatsapp, linkWhatsapp } from "../utils/whatsapp.js";
 
 export default function Contato() {
   const config = useConfig();
   const instagram = linkInstagram(config?.instagram);
   const whatsapp = linkWhatsapp(config?.whatsapp);
+  const whatsappTexto = formatarWhatsapp(config?.whatsapp);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-pink-200 via-pink-100 to-white dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6">
 
@@ -29,19 +30,21 @@ export default function Contato() {
             
           </div>
 
-          <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
+          {whatsappTexto && (
+            <div className="bg-gray-50 dark:bg-[#0e1526] contato-info-box rounded-xl p-4 hover:shadow-md transition dark:border dark:border-slate-800/80">
 
-            <p className="text-sm text-gray-500 dark:text-slate-400">Número de Telefone</p>
-            <p className="font-semibold text-gray-800 dark:text-white">(81) 99281-2080</p>
+              <p className="text-sm text-gray-500 dark:text-slate-400">Telefone e WhatsApp</p>
+              <p className="font-semibold text-gray-800 dark:text-white">{whatsappTexto}</p>
 
-          </div>
+            </div>
+          )}
 
           {whatsapp && (
             <a
               href={whatsapp}
               target="_blank"
               rel="noopener noreferrer"
-              className="block rounded-xl bg-green-600 p-4 text-center font-bold text-white transition hover:bg-green-700"
+              className="block rounded-xl bg-green-700 p-4 text-center font-bold text-white transition hover:bg-green-800"
             >
               Falar pelo WhatsApp
             </a>

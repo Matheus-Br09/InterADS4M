@@ -142,7 +142,7 @@ html.dark .auth-tabs .auth-button {
 }
 
 .auth-tabs .auth-button[aria-pressed="true"] {
-    background: #fb2782 !important;
+    background: #e11d73 !important;
     color: #ffffff !important;
     box-shadow: 0 4px 12px rgba(251, 39, 130, 0.35) !important;
 }
@@ -247,7 +247,7 @@ html.dark .input-group input::placeholder {
     align-items: center;
     padding: 0.85rem 1.75rem;
     border-radius: 9999px;
-    background: linear-gradient(135deg, #fb2782 0%, #ff4785 100%);
+    background: linear-gradient(135deg, #e11d73 0%, #d61b6a 100%);
     color: #ffffff !important;
     font-weight: 800;
     font-size: 0.9375rem;
@@ -287,7 +287,7 @@ html.dark .input-group input::placeholder {
     font-size: 0.875rem;
     font-family: 'Readex Pro', sans-serif;
     color: #ffffff !important;
-    background: linear-gradient(135deg, #fb2782 0%, #d946ef 100%);
+    background: linear-gradient(135deg, #e11d73 0%, #c026d3 100%);
     border: none;
     cursor: pointer;
     box-shadow: 0 6px 14px -3px rgba(251, 39, 130, 0.4);
