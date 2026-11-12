@@ -69,3 +69,16 @@ Regra do projeto: **não inventamos** depoimentos, números, endereços nem fato
 ## Decisões de design
 
 - [x] **Rosa dos botões:** decidido. Os botões com texto branco usam um rosa um pouco mais fechado (`#e11d73`, contraste 4,54:1) em vez do `#fb2782`, para ficar legível. O `#fb2782` continua em títulos grandes e detalhes. Se a ONG tiver manual de marca com outra cor, ajustar.
+
+## Textos já usados no site que a ONG precisa confirmar
+
+Para parar de usar frases genéricas, o site passou a usar o que a própria página Serviços já dizia. Confirmar com a ONG:
+
+- [ ] **"Atende pessoas neurodivergentes e suas famílias em Paulista, Pernambuco, com neuropedagogia, nutrição, odontologia e fisioterapia."** Está no topo da página inicial, no "Quem somos" e no Sobre. Está correto e completo? (Vulnerabilidade social continua sendo critério?)
+- [ ] **Os 4 serviços** (Neuropedagogia, Nutrição, Odontologia, Fisioterapia): são oferecidos hoje? Há mais algum?
+- [ ] **Texto da página Doar:** "Sua doação ajuda a manter as atividades e os atendimentos do SOS Tudo pelo Social." Foi retirada a frase antiga sobre "alimentação e suporte contínuo para crianças", que não estava confirmada. A ONG fornece alimentação? O que a doação paga de fato?
+- [ ] **Legenda da foto do topo:** "Oficinas lúdicas de artes e desenvolvimento psicomotor". Confirmar que descreve a foto.
+
+## Páginas que estão escondidas até haver conteúdo
+
+Notícias, Programas, Área Educacional e Transparência **não aparecem no menu nem no rodapé** enquanto estiverem vazias. Aparecem sozinhas quando a ONG publicar o primeiro item pelo painel de gestão. Combinar com a ONG quem publica e o quê (ver itens de transparência e materiais acima).

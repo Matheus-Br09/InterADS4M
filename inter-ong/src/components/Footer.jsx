@@ -4,14 +4,17 @@ import { Link } from 'react-router-dom'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { linkInstagram } from '../utils/instagram.js'
 import { formatarWhatsapp, linkWhatsapp } from '../utils/whatsapp.js'
+import { secaoDisponivel } from '../utils/secoes.js'
 
+// O terceiro valor é a seção de conteúdo: o link só aparece quando ela já tem algo publicado.
 const LINKS = [
     ['/', 'Home'],
     ['/contato', 'Contato'],
     ['/sobre', 'Sobre'],
-    ['/programas', 'Programas'],
-    ['/educacional', 'Área Educacional'],
-    ['/transparencia', 'Transparência'],
+    ['/servicos', 'Serviços'],
+    ['/programas', 'Programas', 'programas'],
+    ['/educacional', 'Área Educacional', 'materiais'],
+    ['/transparencia', 'Transparência', 'transparencia'],
 ]
 
 const pilula = 'inline-flex items-center rounded-full border border-slate-700 bg-slate-900/60 px-4 py-1.5 text-sm font-semibold transition hover:border-[#fb2782] hover:text-[#ff66a3]'
@@ -69,7 +72,7 @@ export default function Footer(){
                         <p className={titulo} id="quick-links-heading">Links Rápidos</p>
 
                         <ul role="list" aria-labelledby="quick-links-heading" className="grid grid-cols-2 gap-x-6" style={{ listStyle: "none", padding: 0, margin: 0 }}>
-                            {LINKS.map(([caminho, nome]) => (
+                            {LINKS.filter(([, , secao]) => !secao || secaoDisponivel(config, secao)).map(([caminho, nome]) => (
                                 <li key={caminho} className='link-rapido'><Link to={caminho} className="text-slate-300 hover:text-white">{nome}</Link></li>
                             ))}
                         </ul>

@@ -593,3 +593,15 @@ html:not(.dark) .badge-pill-sky {
 .to-\[\#ff6398\] {
   --tw-gradient-to: #d61b6a !important;
 }
+
+/* Legenda da foto do topo: mais clara no tema escuro (contraste) */
+html.dark .hero-photo-caption {
+  color: #cbd5e1;
+}
+
+/* Em tela estreita a foto do topo não precisa de altura mínima (evita vão em branco) */
+@media (max-width: 1023px) {
+  .hero-visual-wrapper {
+    min-height: 0;
+  }
+}

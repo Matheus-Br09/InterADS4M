@@ -100,7 +100,7 @@ export default function Doar() {
             Faça parte dessa história
           </h1>
           <p className="max-w-2xl mx-auto text-base sm:text-lg text-slate-600 dark:text-slate-300">
-            Sua contribuição apoia diariamente oficinas terapêuticas, alimentação e suporte contínuo para crianças do Instituto SOS Tudo pelo Social.
+            Sua doação ajuda a manter as atividades e os atendimentos do SOS Tudo pelo Social.
           </p>
         </header>
 
@@ -176,11 +176,6 @@ export default function Doar() {
                         }`}
                       >
                         R$ {v}
-                        {v === 50 && (
-                          <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase bg-amber-400 text-slate-900 px-1.5 py-0.5 rounded-full shadow-xs whitespace-nowrap">
-                            Favorito
-                          </span>
-                        )}
                       </button>
                     ))}
                   </div>

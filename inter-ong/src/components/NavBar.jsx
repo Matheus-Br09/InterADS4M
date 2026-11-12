@@ -3,12 +3,15 @@ import { NavLink, Link, useLocation } from "react-router-dom"
 import logoImg from "../assets/logo.png"
 import { useTheme } from "../context/theme.js"
 import IconeTema from "./IconeTema.jsx"
+import { useConfig } from "../context/ConfigContext.jsx"
+import { secaoDisponivel } from "../utils/secoes.js"
 
 // Itens menos usados do menu do computador ficam agrupados em "Mais".
+// O terceiro valor é a seção de conteúdo: o link só aparece quando ela já tem algo publicado.
 const GRUPO_MAIS = [
-  ["/noticias", "Notícias"],
-  ["/educacional", "Área Educacional"],
-  ["/servicos", "Serviços"],
+  ["/noticias", "Notícias", "noticias"],
+  ["/educacional", "Área Educacional", "materiais"],
+  ["/servicos", "Serviços", null],
 ]
 
 export default function NavBar() {
@@ -16,7 +19,9 @@ export default function NavBar() {
   const [isMoreOpen, setIsMoreOpen] = useState(false)
   const { isDarkMode, toggleDarkMode } = useTheme()
   const { pathname } = useLocation()
-  const maisAtivo = GRUPO_MAIS.some(([caminho]) => pathname.startsWith(caminho))
+  const config = useConfig()
+  const itensMais = GRUPO_MAIS.filter(([, , secao]) => !secao || secaoDisponivel(config, secao))
+  const maisAtivo = itensMais.some(([caminho]) => pathname.startsWith(caminho))
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen((prev) => !prev)
@@ -104,7 +109,7 @@ export default function NavBar() {
                 </button>
                 {isMoreOpen && (
                   <div id="menu-mais" className="absolute right-0 top-full z-50 mt-3 w-56 space-y-1 rounded-2xl border border-pink-100 bg-white p-2 shadow-xl dark:border-slate-800 dark:bg-[#0e1526]">
-                    {GRUPO_MAIS.map(([caminho, nome]) => (
+                    {itensMais.map(([caminho, nome]) => (
                       <NavLink key={caminho} to={caminho} onClick={() => setIsMoreOpen(false)} className={mobileNavLinkClass}>
                         {nome}
                       </NavLink>
@@ -234,12 +239,16 @@ export default function NavBar() {
                 <span className="text-xs opacity-60">→</span>
               </NavLink>
 
-              <NavLink to="/educacional" onClick={closeMobileMenu} className={mobileNavLinkClass}>
-                <span>Área Educacional</span>
-                <span className="text-xs opacity-60">→</span>
-              </NavLink>
+              {secaoDisponivel(config, "materiais") && (
+                <NavLink to="/educacional" onClick={closeMobileMenu} className={mobileNavLinkClass}>
+                  <span>Área Educacional</span>
+                  <span className="text-xs opacity-60">→</span>
+                </NavLink>
+              )}
 
-              <NavLink to="/noticias" onClick={closeMobileMenu} className={mobileNavLinkClass}>Notícias →</NavLink>
+              {secaoDisponivel(config, "noticias") && (
+                <NavLink to="/noticias" onClick={closeMobileMenu} className={mobileNavLinkClass}>Notícias →</NavLink>
+              )}
               <NavLink to="/voluntariado" onClick={closeMobileMenu} className={mobileNavLinkClass}>Voluntariado →</NavLink>
               <NavLink to="/servicos" onClick={closeMobileMenu} className={mobileNavLinkClass}>Serviços →</NavLink>
               <div className="pt-2">

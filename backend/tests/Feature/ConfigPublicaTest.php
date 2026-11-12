@@ -2,10 +2,14 @@
 
 namespace Tests\Feature;
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Concerns\CriaCenarioOng;
 use Tests\TestCase;
 
 class ConfigPublicaTest extends TestCase
 {
+    use CriaCenarioOng, RefreshDatabase;
+
     public function test_config_publica_informa_whatsapp_instagram_e_disponibilidade_do_pix(): void
     {
         config([
@@ -53,5 +57,30 @@ class ConfigPublicaTest extends TestCase
             ->assertOk()
             ->assertJsonPath('dados.pix_disponivel', false)
             ->assertJsonPath('dados.whatsapp', null);
+    }
+
+    public function test_sem_conteudo_publicado_nenhuma_secao_aparece_como_disponivel(): void
+    {
+        $this->getJson('/api/v1/config-publica')
+            ->assertOk()
+            ->assertJsonPath('dados.secoes.noticias', false)
+            ->assertJsonPath('dados.secoes.programas', false)
+            ->assertJsonPath('dados.secoes.materiais', false)
+            ->assertJsonPath('dados.secoes.transparencia', false);
+    }
+
+    public function test_secao_aparece_quando_tem_conteudo_e_programa_inativo_nao_conta(): void
+    {
+        $this->criarNoticia();
+        $this->criarPrograma(['status' => 'inativo']);
+
+        $this->getJson('/api/v1/config-publica')
+            ->assertOk()
+            ->assertJsonPath('dados.secoes.noticias', true)
+            ->assertJsonPath('dados.secoes.programas', false);
+
+        $this->criarPrograma(['status' => 'ativo']);
+
+        $this->getJson('/api/v1/config-publica')->assertJsonPath('dados.secoes.programas', true);
     }
 }

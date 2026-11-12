@@ -1,5 +1,4 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&display=swap');
 
 /* Cores desta página vêm das variáveis do index.css (seguem o tema claro/escuro).
    Não redefinir --pink aqui: um :root próprio vazava para o site inteiro. */
@@ -17,7 +16,7 @@
 }
 
 .volunteer-page {
-  font-family: "Nunito Sans", sans-serif;
+  font-family: "Readex Pro", sans-serif;
   color: var(--dark);
   background: var(--bg-page);
   overflow: hidden;
@@ -120,7 +119,7 @@
   position: absolute;
   width: 370px;
   height: 370px;
-  background: var(--blue);
+  background: linear-gradient(135deg, #ffc2da 0%, #fb2782 100%);
   border-radius: 50%;
 }
 
@@ -451,5 +450,13 @@
 
   .volunteer-cta h2 {
     font-size: 25px;
+  }
+}
+
+/* Em tela estreita o selo "Junte-se a nós" não deve esticar na largura toda */
+@media (max-width: 1023px) {
+  .volunteer-hero .eyebrow {
+    align-self: center;
+    width: fit-content;
   }
 }

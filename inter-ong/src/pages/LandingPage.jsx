@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { useConfig } from '../context/ConfigContext.jsx'
+import { secaoDisponivel } from '../utils/secoes.js'
 import './css/LandingPage.css'
 
 
@@ -7,9 +9,9 @@ import realCriancaDesenhoImg from '../assets/real-crianca-desenho.jpg'
 import realRodaConversaImg from '../assets/real-roda-conversa.jpg'
 import realRecreacaoPraiaImg from '../assets/real-recreacao-praia.jpg'
 import realOficinaArteImg from '../assets/real-oficina-arte.jpg'
-import helpHeartImg from '../assets/help-heart.jpg'
 
 export default function LandingPage() {
+  const verTodosProjetos = secaoDisponivel(useConfig(), 'programas')
   return (
     <main className="landing-page-main" id="conteudo-principal">
 
@@ -45,7 +47,7 @@ export default function LandingPage() {
 
 
               <p className="hero-subtitle">
-                A SOS Tudo pelo Social desenvolve ações que acolhem, incluem e criam novas oportunidades para pessoas em situação de vulnerabilidade.
+                A SOS Tudo pelo Social atende pessoas neurodivergentes e suas famílias em Paulista, Pernambuco, com neuropedagogia, nutrição, odontologia e fisioterapia.
               </p>
 
 
@@ -64,29 +66,15 @@ export default function LandingPage() {
 
 
             <div className="hero-visual-wrapper">
-              <div className="hero-blob-shape" />
-
-              <div className="hero-photo-card">
-                <img
-                  src={realOficinaUvaImg}
-                  alt="Crianças atendidas pelo instituto SOS Tudo pelo Social"
-                />
-                <div className="hero-shirt-tag">
-                  <span className="hero-shirt-sos">SOS</span>
-                  <span className="hero-shirt-sub">Tudo pelo social</span>
+              <figure className="hero-photo-figure">
+                <div className="hero-photo-card">
+                  <img
+                    src={realOficinaUvaImg}
+                    alt="Crianças atendidas pelo instituto SOS Tudo pelo Social"
+                  />
                 </div>
-              </div>
-
-
-              <div className="hero-float-badge">
-                <span className="hero-float-badge-icon">♥</span>
-                <p className="hero-float-badge-text">
-                  Pequenas ações,<br />
-                  grandes mudanças.
-                </p>
-              </div>
-
-
+                <figcaption className="hero-photo-caption">Oficinas lúdicas de artes e desenvolvimento psicomotor</figcaption>
+              </figure>
             </div>
 
           </div>
@@ -114,11 +102,11 @@ export default function LandingPage() {
 
               <h2 className="about-title">
                 Mais que assistência,<br />
-                <span className="text-pink-highlight">criamos oportunidades.</span>
+                criamos oportunidades.
               </h2>
 
               <p className="about-desc">
-                A SOS Tudo pelo Social é uma organização sem fins lucrativos que atua no apoio, inclusão e desenvolvimento de pessoas em situação de vulnerabilidade, com foco em ações sociais, educacionais e de acolhimento.
+                A SOS Tudo pelo Social é uma organização sem fins lucrativos que atua no apoio, inclusão e desenvolvimento de pessoas neurodivergentes e de suas famílias, com foco em ações sociais, educacionais e de acolhimento.
               </p>
 
               <div>
@@ -178,19 +166,21 @@ export default function LandingPage() {
           <div className="projects-header-row">
             <div className="projects-header-left">
               <h2 className="section-headline">
-                Conheça nossos <span className="text-pink-highlight">projetos</span>
+                Conheça nossos projetos
               </h2>
               <p className="section-subtext">
                 Ações que fazem a diferença na vida de muitas pessoas.
               </p>
             </div>
 
+            {verTodosProjetos && (
             <div>
-              <Link to="/programas" className="projects-link-all">
-                <span>Ver todos os projetos</span>
-                <span>→</span>
-              </Link>
-            </div>
+                <Link to="/programas" className="projects-link-all">
+                  <span>Ver todos os projetos</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            )}
           </div>
 
 
@@ -209,11 +199,6 @@ export default function LandingPage() {
                     Atividades e recursos que estimulam o desenvolvimento e a aprendizagem de forma inclusiva.
                   </p>
                 </div>
-                <div className="project-card-bottom">
-                  <Link to="/educacional" className="btn-circle-arrow" aria-label="Acessar projeto">
-                    →
-                  </Link>
-                </div>
               </div>
             </div>
 
@@ -228,11 +213,6 @@ export default function LandingPage() {
                   <p className="project-card-desc">
                     Ações de apoio a famílias em situação de vulnerabilidade, com foco no cuidado e na dignidade.
                   </p>
-                </div>
-                <div className="project-card-bottom">
-                  <Link to="/contato" className="btn-circle-arrow" aria-label="Acessar projeto">
-                    →
-                  </Link>
                 </div>
               </div>
             </div>
@@ -249,11 +229,6 @@ export default function LandingPage() {
                     Projetos que fortalecem os laços sociais e promovem a inclusão na comunidade.
                   </p>
                 </div>
-                <div className="project-card-bottom">
-                  <Link to="/sobre" className="btn-circle-arrow" aria-label="Acessar projeto">
-                    →
-                  </Link>
-                </div>
               </div>
             </div>
 
@@ -269,11 +244,6 @@ export default function LandingPage() {
                   <p className="project-card-desc">
                     Iniciativas que informam, sensibilizam e mobilizam a sociedade para causas sociais importantes.
                   </p>
-                </div>
-                <div className="project-card-bottom">
-                  <Link to="/contato" className="btn-circle-arrow" aria-label="Acessar projeto">
-                    →
-                  </Link>
                 </div>
               </div>
             </div>
@@ -292,17 +262,11 @@ export default function LandingPage() {
 
             <div className="help-top-left">
               <h2 className="section-headline">
-                Como você pode <span className="text-pink-highlight">ajudar?</span>
+                Como você pode ajudar?
               </h2>
               <p className="section-subtext">
                 Existem várias formas de contribuir com a nossa causa.
               </p>
-            </div>
-
-            <div className="help-top-right">
-              <div className="help-photo-box">
-                <img src={helpHeartImg} alt="Mãos segurando coração rosa" />
-              </div>
             </div>
 
           </div>

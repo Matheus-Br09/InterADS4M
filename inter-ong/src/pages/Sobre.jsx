@@ -16,7 +16,7 @@ export default function Sobre() {
 
         <div className="text-center mb-10">
 
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text text-transparent drop-shadow-md">
+          <h1 className="text-4xl font-bold text-slate-900 dark:text-white">
 
             Quem Somos
 
@@ -29,7 +29,7 @@ export default function Sobre() {
         <div className="sobre-card rounded-3xl bg-white dark:bg-[#121a2d] p-8 shadow-sm border border-pink-100 dark:border-slate-800 space-y-4">
 
           <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            O SOS Tudo pelo Social é uma organização sem fins lucrativos de Paulista-PE que atua no apoio, na inclusão e no desenvolvimento de pessoas em situação de vulnerabilidade, com ações sociais, educacionais e de acolhimento.
+            O SOS Tudo pelo Social é uma organização sem fins lucrativos de Paulista-PE que atua no apoio, na inclusão e no desenvolvimento de pessoas neurodivergentes e de suas famílias, com ações sociais, educacionais e de acolhimento.
           </p>
 
           <p className="text-gray-700 dark:text-slate-200 leading-relaxed">

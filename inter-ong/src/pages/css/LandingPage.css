@@ -272,19 +272,6 @@
   min-height: 480px;
 }
 
-.hero-blob-shape {
-  position: absolute;
-  width: 490px;
-  height: 490px;
-  max-width: 140%;
-  background: linear-gradient(135deg, #ffc2da 0%, #fb2782 100%);
-  border-radius: 50%;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 0;
-  filter: blur(0.5px);
-}
 
 .hero-photo-card {
   position: relative;
@@ -292,10 +279,8 @@
   width: 100%;
   max-width: 350px;
   aspect-ratio: 3 / 4;
-  border-radius: 2.5rem;
+  border-radius: 1rem;
   overflow: hidden;
-  border: 4px solid #ffffff;
-  box-shadow: 0 25px 50px -12px rgba(14, 116, 144, 0.18);
 }
 
 .hero-photo-card img {
@@ -306,78 +291,25 @@
   transition: transform 0.6s ease;
 }
 
-.hero-photo-card:hover img {
-  transform: scale(1.04);
-}
-
-.hero-shirt-tag {
-  position: absolute;
-  top: 48%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(4px);
-  padding: 0.35rem 0.95rem;
-  border-radius: 9999px;
-  border: 1px solid rgba(251, 39, 130, 0.25);
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.hero-shirt-sos {
-  color: #fb2782;
-  font-weight: 900;
-  font-size: 0.8rem;
-  letter-spacing: 0.05em;
-}
-
-.hero-shirt-sub {
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 0.7rem;
-}
-
-.hero-float-badge {
-  position: absolute;
-  bottom: -0.75rem;
-  left: -2.5rem;
-  z-index: 2;
-  background: rgba(255, 255, 255, 0.98);
-  backdrop-filter: blur(8px);
-  padding: 0.85rem 1.35rem;
-  border-radius: 1.5rem;
-  border: 1.5px solid #fecdd3;
-  box-shadow: 0 14px 28px -6px rgba(251, 39, 130, 0.18);
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  animation: hero-float-anim 4s ease-in-out infinite;
-}
-
-@keyframes hero-float-anim {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-7px);
-  }
-}
-
-.hero-float-badge-icon {
-  color: #fb2782;
-  font-size: 1rem;
-}
-
-.hero-float-badge-text {
-  font-size: 0.875rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.25;
+.hero-photo-figure {
   margin: 0;
+  width: 100%;
+  max-width: 350px;
 }
+
+.hero-photo-caption {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: #475569;
+}
+
+
+
+
+
+
+
 
 .hero-floating-doodles {
   position: absolute;
@@ -1181,11 +1113,6 @@
 
   .about-pillars-grid {
     grid-template-columns: 1fr;
-  }
-
-  .hero-float-badge {
-    left: 0;
-    bottom: -0.5rem;
   }
 
   /* Textos decorativos "Mais inclusão…": dentro da tela, sem cortar na borda */
