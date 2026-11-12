@@ -8,9 +8,6 @@ import realRodaConversaImg from '../assets/real-roda-conversa.jpg'
 import realRecreacaoPraiaImg from '../assets/real-recreacao-praia.jpg'
 import realOficinaArteImg from '../assets/real-oficina-arte.jpg'
 import helpHeartImg from '../assets/help-heart.jpg'
-import avatarMaeImg from '../assets/avatar-mae.jpg'
-import avatarVoluntarioImg from '../assets/avatar-voluntario.jpg'
-import avatarParceiroImg from '../assets/avatar-parceiro.jpg'
 
 export default function LandingPage() {
   return (
@@ -473,79 +470,6 @@ export default function LandingPage() {
       </section>
 
 
-
-      <section className="testimonials-section" aria-label="Depoimentos">
-        <div className="landing-container">
-
-
-          <div className="projects-header-row">
-            <div>
-              <div className="badge-pill badge-pill-pink">
-                <span className="badge-icon-heart">♥</span>
-                <span>Histórias reais</span>
-              </div>
-              <h2 className="section-headline">
-                Depoimentos que <span className="text-pink-highlight">inspiram</span>
-              </h2>
-            </div>
-
-            <div>
-              <Link to="/sobre" className="projects-link-all">
-                <span>Ver mais depoimentos</span>
-                <span>→</span>
-              </Link>
-            </div>
-          </div>
-
-
-          <div className="testimonials-grid">
-
-
-            <div className="testimonial-card">
-              <div>
-                <span className="testimonial-quote-icon">“</span>
-                <p className="testimonial-quote-text">
-                  "A ONG fez toda a diferença na nossa família. Aqui encontramos acolhimento e apoio de verdade."
-                </p>
-              </div>
-              <div className="testimonial-author-box">
-                <img src={avatarMaeImg} alt="Mãe de atendido" className="testimonial-avatar" />
-                <span className="testimonial-author-name">Mãe de atendido</span>
-              </div>
-            </div>
-
-
-            <div className="testimonial-card">
-              <div>
-                <span className="testimonial-quote-icon">“</span>
-                <p className="testimonial-quote-text">
-                  "Ser voluntário é uma das melhores experiências da minha vida. A gente recebe muito mais do que dá."
-                </p>
-              </div>
-              <div className="testimonial-author-box">
-                <img src={avatarVoluntarioImg} alt="Voluntário" className="testimonial-avatar avatar-border-sky" />
-                <span className="testimonial-author-name">Voluntário</span>
-              </div>
-            </div>
-
-
-            <div className="testimonial-card">
-              <div>
-                <span className="testimonial-quote-icon">“</span>
-                <p className="testimonial-quote-text">
-                  "A inclusão muda vidas. E ver esse trabalho de perto me mostra que um mundo melhor é possível."
-                </p>
-              </div>
-              <div className="testimonial-author-box">
-                <img src={avatarParceiroImg} alt="Parceiro da ONG" className="testimonial-avatar" />
-                <span className="testimonial-author-name">Parceiro da ONG</span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
 
       <section className="cta-section" aria-label="Chamada para ação">
         <div className="landing-container">

@@ -29,31 +29,11 @@ export default function Sobre() {
         <div className="sobre-card rounded-3xl bg-white dark:bg-[#121a2d] p-8 shadow-sm border border-pink-100 dark:border-slate-800 space-y-4">
 
           <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Uma liderança comprometida com a transformação social em Paulista-PE, cuja jornada política nasceu do desejo genuíno de fazer a diferença na vida das famílias que mais precisam de apoio, cuidado e oportunidades.
+            O SOS Tudo pelo Social é uma organização sem fins lucrativos de Paulista-PE que atua no apoio, na inclusão e no desenvolvimento de pessoas em situação de vulnerabilidade, com ações sociais, educacionais e de acolhimento.
           </p>
 
           <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Com uma atuação próxima da comunidade, busca entender de forma real as necessidades da população, valorizando cada história e cada desafio enfrentado no dia a dia.
-          </p>
-
-          <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Com coragem, empatia e sensibilidade, transformou a convivência ao lado das famílias em uma verdadeira missão de vida: garantir dignidade, respeito e acesso a direitos básicos, especialmente para pessoas com deficiência e em situação de vulnerabilidade social.
-          </p>
-
-          <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Mais do que ouvir, essa liderança atua de forma prática, promovendo ações que impactam diretamente a qualidade de vida da população.
-          </p>
-
-          <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Acredita que a transformação social acontece através da união, do trabalho coletivo e do fortalecimento de políticas públicas inclusivas.
-          </p>
-
-          <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Por isso, atua incentivando projetos sociais, promovendo iniciativas educativas e criando oportunidades para o desenvolvimento pessoal e profissional de jovens, adultos e idosos.
-          </p>
-
-          <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
-            Através do projeto "SOS Tudo pelo Social", trabalhamos para construir uma rede de apoio sólida e abrangente, que atende desde a primeira infância até a terceira idade.
+            Trabalhamos para construir uma rede de apoio sólida e abrangente, que atende desde a primeira infância até a terceira idade.
           </p>
 
           <p className="text-gray-700 dark:text-slate-200 leading-relaxed">
