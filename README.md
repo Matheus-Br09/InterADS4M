@@ -321,6 +321,7 @@ O login do gestor é `POST /api/v1/auth/entrar`. A resposta 403 com `codigo=troc
 - ✅ Testes automatizados no backend e no frontend
 - ⏳ Fase 2: publicar na Hostinger (seção acima), confirmar a chave Pix com a ONG (e fazer um Pix real de R$ 5 pelo QR do site antes de anunciar), teste de aceitação com a ONG, incluir prints no guia do painel, revisar textos de serviços e privacidade com a ONG
 - 🗑️ Removidos do MVP: login/"minha conta" do apoiador e apadrinhamento
+- 🔮 Futuro: seção de depoimentos na página inicial, só com depoimentos reais e autorização por escrito de quem falou (a versão com frases inventadas foi removida). Também futuro: números reais de impacto e imagem de prévia do link (precisa do domínio)
 
 ---
 
