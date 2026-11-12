@@ -3,6 +3,7 @@ import '../pages/css/Footer.css'
 import { Link } from 'react-router-dom'
 import { useConfig } from '../context/ConfigContext.jsx'
 import { linkInstagram } from '../utils/instagram.js'
+import { formatarWhatsapp, linkWhatsapp } from '../utils/whatsapp.js'
 
 const LINKS = [
     ['/', 'Home'],
@@ -17,7 +18,10 @@ const pilula = 'inline-flex items-center rounded-full border border-slate-700 bg
 const titulo = 'mb-3.5 font-bold text-[#ff66a3]'
 
 export default function Footer(){
-    const instagram = linkInstagram(useConfig()?.instagram)
+    const config = useConfig()
+    const instagram = linkInstagram(config?.instagram)
+    const whatsapp = linkWhatsapp(config?.whatsapp)
+    const whatsappTexto = formatarWhatsapp(config?.whatsapp)
     return(
         <footer className="text-white" aria-label="Rodapé do site">
             <div className="h-1 bg-gradient-to-r from-[#fb2782] via-[#ff98b7] to-[#3bb4ee]" aria-hidden="true" />
@@ -38,6 +42,18 @@ export default function Footer(){
                             >
                                 Instagram
                             </a>
+
+                            {whatsapp && (
+                                <a
+                                    href={whatsapp}
+                                    target='_blank'
+                                    rel="noopener noreferrer"
+                                    aria-label="Falar com a ONG pelo WhatsApp (abre em nova aba)"
+                                    className={pilula}
+                                >
+                                    WhatsApp
+                                </a>
+                            )}
 
                             <a
                                 href="mailto:sostudopelosocial@gmail.com"
@@ -71,6 +87,20 @@ export default function Footer(){
                                 sostudopelosocial@gmail.com
                             </a>
                         </p>
+
+                        {whatsapp && whatsappTexto && (
+                            <p className='contato-rapido'>
+                                <a
+                                    href={whatsapp}
+                                    target='_blank'
+                                    rel="noopener noreferrer"
+                                    aria-label={`Falar pelo WhatsApp com ${whatsappTexto} (abre em nova aba)`}
+                                    className="text-slate-300 hover:text-white"
+                                >
+                                    WhatsApp {whatsappTexto}
+                                </a>
+                            </p>
+                        )}
 
                         <p className='contato-rapido'>
                             <a

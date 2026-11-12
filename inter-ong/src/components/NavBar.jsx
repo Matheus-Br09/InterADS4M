@@ -2,6 +2,7 @@ import { useState } from "react"
 import { NavLink, Link, useLocation } from "react-router-dom"
 import logoImg from "../assets/logo.png"
 import { useTheme } from "../context/theme.js"
+import IconeTema from "./IconeTema.jsx"
 
 // Itens menos usados do menu do computador ficam agrupados em "Mais".
 const GRUPO_MAIS = [
@@ -125,16 +126,12 @@ export default function NavBar() {
               >
                 {isDarkMode ? (
                   <>
-                    <svg className="w-4 h-4 fill-amber-400 text-amber-400 transition-transform duration-300 rotate-0" viewBox="0 0 24 24">
-                      <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37c-.39-.39-1.03-.39-1.41 0s-.39 1.03 0 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.36c.39-.39.39-1.03 0-1.41s-1.03-.39-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z" />
-                    </svg>
+                    <IconeTema escuro className="h-4 w-4 text-amber-400" />
                     <span className="transition-opacity duration-300">Tema Claro</span>
                   </>
                 ) : (
                   <>
-                    <svg className="w-4 h-4 fill-slate-700 text-slate-700 transition-transform duration-300 rotate-0" viewBox="0 0 24 24">
-                      <path d="M12.3 2a10 10 0 0 0 9.7 11.5 10 10 0 1 1-11.5-9.7c.6 0 1.2.1 1.8.2z" />
-                    </svg>
+                    <IconeTema escuro={false} className="h-4 w-4 text-slate-700" />
                     <span className="transition-opacity duration-300">Tema Escuro</span>
                   </>
                 )}
@@ -165,7 +162,8 @@ export default function NavBar() {
                 className="theme-toggle-btn inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-white/90 dark:bg-slate-800 text-slate-700 dark:text-slate-100 border border-pink-200/50 dark:border-slate-700 shadow-xs transition-all duration-300"
                 aria-label={isDarkMode ? "Mudar para Tema Claro" : "Mudar para Tema Escuro"}
               >
-                {isDarkMode ? "☀️ Claro" : "🌙 Escuro"}
+                <IconeTema escuro={isDarkMode} className={`h-4 w-4 ${isDarkMode ? "text-amber-400" : "text-slate-700"}`} />
+                {isDarkMode ? "Claro" : "Escuro"}
               </button>
 
               <NavLink

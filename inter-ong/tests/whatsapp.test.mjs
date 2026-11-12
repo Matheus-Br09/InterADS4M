@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { linkWhatsapp } from '../src/utils/whatsapp.js'
+import { formatarWhatsapp, linkWhatsapp } from '../src/utils/whatsapp.js'
 
 test('linkWhatsapp monta o link só com os dígitos do número', () => {
   assert.equal(linkWhatsapp('5581987118820'), 'https://wa.me/5581987118820')
@@ -19,4 +19,16 @@ test('linkWhatsapp inclui a mensagem pronta, codificada para URL', () => {
 
 test('linkWhatsapp ignora mensagem vazia', () => {
   assert.equal(linkWhatsapp('5581987118820', '  '), 'https://wa.me/5581987118820')
+})
+
+test('formatarWhatsapp mostra o número no padrão brasileiro', () => {
+  assert.equal(formatarWhatsapp('5581987118820'), '(81) 98711-8820')
+  assert.equal(formatarWhatsapp('+55 (81) 98711-8820'), '(81) 98711-8820')
+  assert.equal(formatarWhatsapp('558133334444'), '(81) 3333-4444')
+})
+
+test('formatarWhatsapp devolve null sem número ou com formato desconhecido', () => {
+  assert.equal(formatarWhatsapp(''), null)
+  assert.equal(formatarWhatsapp(undefined), null)
+  assert.equal(formatarWhatsapp('123'), null)
 })

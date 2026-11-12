@@ -33,34 +33,39 @@ Regra do projeto: **não inventamos** depoimentos, números, endereços nem fato
 14. [ ] **Missão, visão e valores** nas palavras da ONG. Os 4 cartões atuais (Inclusão, Acolhimento, Educação, Oportunidades) são genéricos: manter, trocar ou explicar com exemplos reais.
 15. [ ] **Frase de impacto real** para o topo, no lugar dos slogans genéricos ("Acolher, Incluir, Transformar" e "Pequenas ações, grandes mudanças").
 16. [ ] **Endereço, bairro e telefone** conferidos (hoje: Rua Hosana Alves do Nascimento nº 493, Casa 01, Janga, Paulista/PE). Dias e horários de funcionamento.
-17. [ ] **Redes sociais:** confirmar o Instagram `@sostudopelosocial` e se há Facebook/YouTube.
+17. [ ] **Telefone da página Contato:** hoje aparece **(81) 99281-2080**, diferente do WhatsApp **(81) 98711-8820**. Qual é o número certo de telefone? É o mesmo do WhatsApp? Fixo ou celular?
+18. [ ] **Redes sociais:** confirmar o Instagram `@sostudopelosocial` e se há Facebook/YouTube.
 
 ## Projetos e ações
 
-18. [ ] Confirmar os **4 projetos** mostrados (Área Educacional, Acolhimento e Suporte, Cidadania em Ação, Eventos e Campanhas): nomes, descrição curta de cada um, quem participa, dias/horários, como se inscrever.
-19. [ ] Conteúdo da página **Serviços**: lista real do que a ONG oferece e para quem.
-20. [ ] **Área Educacional:** o que existe de verdade (turmas, materiais, vagas).
+19. [ ] Confirmar os **4 projetos** mostrados (Área Educacional, Acolhimento e Suporte, Cidadania em Ação, Eventos e Campanhas): nomes, descrição curta de cada um, quem participa, dias/horários, como se inscrever.
+20. [ ] Conteúdo da página **Serviços**: lista real do que a ONG oferece e para quem.
+21. [ ] **Área Educacional:** o que existe de verdade (turmas, materiais, vagas).
 
 ## Números e provas (para voltar a seção "Nosso impacto")
 
-21. [ ] **Números reais** que a ONG aceita divulgar: famílias/pessoas atendidas, atendimentos por mês, voluntários ativos, anos de atuação, eventos realizados. Com a data de referência.
-22. [ ] **Depoimentos reais** de famílias, voluntários e parceiros, **com autorização por escrito** de quem falou (nome ou "mãe de atendido", como a pessoa preferir) e, se houver foto, autorização da foto.
-23. [ ] **Parceiros:** nomes e logos de quem apoia (só com autorização de cada um) e **como uma empresa pode virar parceira** (contato e o que oferecer).
+22. [ ] **Números reais** que a ONG aceita divulgar: famílias/pessoas atendidas, atendimentos por mês, voluntários ativos, anos de atuação, eventos realizados. Com a data de referência.
+23. [ ] **Depoimentos reais** de famílias, voluntários e parceiros, **com autorização por escrito** de quem falou (nome ou "mãe de atendido", como a pessoa preferir) e, se houver foto, autorização da foto.
+24. [ ] **Parceiros:** nomes e logos de quem apoia (só com autorização de cada um) e **como uma empresa pode virar parceira** (contato e o que oferecer).
 
 ## Doações e transparência
 
-24. [ ] **O que a doação financia**, com exemplos concretos (ex.: "R$ 50 compram X"). Só valores que a ONG confirmar.
-25. [ ] **Valores sugeridos** para doação (hoje R$ 25 / 50 / 100 / 200): manter ou mudar.
-26. [ ] Como a ONG vai **dar recibo** ou agradecer o doador, e quem confirma os Pix no painel (confere o extrato do banco).
-27. [ ] **Documentos de transparência** que podem ser publicados: estatuto, ata, relatório anual, balanço, certidões.
+25. [ ] **O que a doação financia**, com exemplos concretos (ex.: "R$ 50 compram X"). Só valores que a ONG confirmar.
+26. [ ] **Valores sugeridos** para doação (hoje R$ 25 / 50 / 100 / 200): manter ou mudar.
+27. [ ] Como a ONG vai **dar recibo** ou agradecer o doador, e quem confirma os Pix no painel (confere o extrato do banco).
+28. [ ] **Documentos de transparência** que podem ser publicados: estatuto, ata, relatório anual, balanço, certidões.
 
 ## Voluntariado e privacidade (LGPD)
 
-28. [ ] **Como funciona o voluntariado:** funções, carga horária, exigência de documentos, quem entra em contato e em quanto tempo.
-29. [ ] **Política de privacidade** e termos: a ONG precisa ler e aprovar o texto atual. Informar **quem é o responsável** pelos dados (nome e e-mail para pedidos de exclusão).
-30. [ ] **Newsletter:** quem vai escrever e enviar? Com que frequência? (Se ninguém, tirar o formulário do site.)
+29. [ ] **Como funciona o voluntariado:** funções, carga horária, exigência de documentos, quem entra em contato e em quanto tempo.
+30. [ ] **Política de privacidade** e termos: a ONG precisa ler e aprovar o texto atual. Informar **quem é o responsável** pelos dados (nome e e-mail para pedidos de exclusão).
+31. [ ] **Newsletter:** quem vai escrever e enviar? Com que frequência? (Se ninguém, tirar o formulário do site.)
 
 ## Atendimento
 
-31. [ ] **Quem responde o WhatsApp**, em quais dias e horários, e qual mensagem automática de boas-vindas usar.
-32. [ ] Texto da **mensagem pronta** do botão do WhatsApp, se a ONG preferir outro (hoje: "Olá! Vim pelo site da ONG e gostaria de saber mais.").
+32. [ ] **Quem responde o WhatsApp**, em quais dias e horários, e qual mensagem automática de boas-vindas usar.
+33. [ ] Texto da **mensagem pronta** do botão do WhatsApp, se a ONG preferir outro (hoje: "Olá! Vim pelo site da ONG e gostaria de saber mais.").
+
+## Decisões de design que dependem de você ou da ONG
+
+- [ ] **Rosa da marca nos botões:** o rosa `#fb2782` com texto branco dá contraste de 3,7:1 (o recomendado para texto pequeno é 4,5:1). Para cumprir, o rosa dos botões ficaria um pouco mais fechado (`#e11d73`). Perguntar se a ONG tem um manual de marca ou se aceita o ajuste.

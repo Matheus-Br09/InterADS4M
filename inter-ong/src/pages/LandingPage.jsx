@@ -134,11 +134,6 @@ export default function LandingPage() {
 
 
               <div className="pillar-card">
-                <div className="pillar-icon-box">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                  </svg>
-                </div>
                 <h3 className="pillar-card-title">Inclusão</h3>
                 <p className="pillar-card-desc">
                   Acreditamos em um mundo mais justo para todos.
@@ -147,11 +142,6 @@ export default function LandingPage() {
 
 
               <div className="pillar-card">
-                <div className="pillar-icon-box">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                  </svg>
-                </div>
                 <h3 className="pillar-card-title">Acolhimento</h3>
                 <p className="pillar-card-desc">
                   Valorizamos cada história e cada pessoa.
@@ -160,11 +150,6 @@ export default function LandingPage() {
 
 
               <div className="pillar-card">
-                <div className="pillar-icon-box">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z" />
-                  </svg>
-                </div>
                 <h3 className="pillar-card-title">Educação</h3>
                 <p className="pillar-card-desc">
                   Promovemos conhecimento como ferramenta de mudança.
@@ -172,11 +157,6 @@ export default function LandingPage() {
               </div>
 
               <div className="pillar-card">
-                <div className="pillar-icon-box">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2L4.5 20.29l.71.71L12 18l6.79 3 .71-.71z" />
-                  </svg>
-                </div>
                 <h3 className="pillar-card-title">Oportunidades</h3>
                 <p className="pillar-card-desc">
                   Trabalhamos para abrir novos caminhos.
@@ -331,7 +311,7 @@ export default function LandingPage() {
           <div className="help-cards-grid">
 
 
-            <div className="help-action-card">
+            <div className="help-action-card help-action-card-destaque">
               <div className="help-card-left">
                 <div className="help-card-icon-box icon-box-pink">
                   <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">

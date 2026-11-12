@@ -276,7 +276,7 @@ html.dark .impact-banner-wrapper {
 html.dark .cta-banner-wrapper,
 html.dark .volunteer-banner,
 html.dark .cta-banner-v2 {
-    background: linear-gradient(135deg, #1e1b4b 0%, #2e1039 100%) !important;
+    background: linear-gradient(135deg, #131a2e 0%, #3a0f2a 100%) !important;
     border-color: #334155 !important;
 }
 
@@ -534,4 +534,46 @@ html.alto-contraste svg {
 }
 @media (prefers-reduced-motion: reduce) {
   .wa-pulso::before { animation: none; opacity: 0; }
+}
+
+
+/* Valores da ONG: lista simples com traço rosa, em vez de quatro cartões iguais */
+html .pillar-card,
+html.dark .pillar-card {
+  background: transparent !important;
+  border: 0 !important;
+  border-left: 3px solid #fb2782 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  padding: 0.2rem 0 0.2rem 1rem !important;
+  transform: none !important;
+}
+
+/* "Faça uma doação" é o caminho principal: único cartão em rosa cheio */
+html .help-action-card-destaque,
+html.dark .help-action-card-destaque {
+  background: linear-gradient(135deg, #fb2782 0%, #e11d73 100%) !important;
+  border-color: #fb2782 !important;
+  box-shadow: 0 14px 28px -8px rgba(251, 39, 130, 0.45) !important;
+}
+html .help-action-card-destaque .help-card-title,
+html .help-action-card-destaque .help-card-desc,
+html.dark .help-action-card-destaque .help-card-title,
+html.dark .help-action-card-destaque .help-card-desc {
+  color: #ffffff !important;
+}
+
+/* Tema claro: o rosa da marca (#fb2782) em texto pequeno dá 3,7:1 sobre branco; abaixo de 4,5:1 é difícil de ler.
+   Para textos pequenos usamos um rosa mais fechado (5,6:1). Títulos grandes e botões cheios continuam no rosa da marca. */
+html:not(.dark) .btn-outline-small,
+html:not(.dark) .btn-secondary-outline,
+html:not(.dark) .projects-link-all,
+html:not(.dark) .badge-pill-pink,
+html:not(.dark) .tag-pink,
+html:not(.dark) nav a[aria-current="page"] {
+  color: #c8105f !important;
+}
+html:not(.dark) .tag-sky,
+html:not(.dark) .badge-pill-sky {
+  color: #0369a1 !important;
 }
