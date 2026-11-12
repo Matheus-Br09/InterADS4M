@@ -50,15 +50,15 @@ export default function LandingPage() {
 
 
               <div className="hero-actions-row">
-                <a href="#projetos" className="btn-primary-pink">
-                  <span>Conheça nossos projetos</span>
-                  <span>→</span>
-                </a>
-
-                <Link to="/doar" className="btn-secondary-outline">
+                <Link to="/doar" className="btn-primary-pink">
                   <span>Quero ajudar</span>
                   <span>♡</span>
                 </Link>
+
+                <a href="#projetos" className="btn-secondary-outline">
+                  <span>Conheça nossos projetos</span>
+                  <span>→</span>
+                </a>
               </div>
             </div>
 
@@ -87,19 +87,6 @@ export default function LandingPage() {
               </div>
 
 
-              <div className="hero-floating-doodles doodle-font">
-                <span className="hero-doodle-line hero-doodle-line-1">Mais inclusão</span>
-                <span className="hero-doodle-line hero-doodle-line-2">Mais oportunidades</span>
-                <span className="hero-doodle-line hero-doodle-line-3">Mais vidas</span>
-                <span className="hero-doodle-heart">♡</span>
-              </div>
-
-
-              <div className="hero-left-doodle-heart" aria-hidden="true">
-                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" focusable="false">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
-                </svg>
-              </div>
             </div>
 
           </div>
@@ -124,10 +111,6 @@ export default function LandingPage() {
 
 
             <div className="about-content">
-              <div className="badge-pill badge-pill-pink">
-                <span className="badge-icon-heart">♥</span>
-                <span>Quem somos</span>
-              </div>
 
               <h2 className="about-title">
                 Mais que assistência,<br />
@@ -214,10 +197,6 @@ export default function LandingPage() {
 
           <div className="projects-header-row">
             <div className="projects-header-left">
-              <div className="badge-pill badge-pill-pink">
-                <span className="badge-icon-heart">♥</span>
-                <span>Nossas iniciativas</span>
-              </div>
               <h2 className="section-headline">
                 Conheça nossos <span className="text-pink-highlight">projetos</span>
               </h2>
@@ -324,42 +303,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="impact-section" aria-label="Nosso impacto">
-        <div className="landing-container">
-
-          <div className="impact-banner-wrapper">
-
-
-            <div className="impact-doodle-sparkle">
-              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path strokeLinecap="round" d="M3 12h3m12 0h3M5.6 5.6l2.1 2.1m8.6 8.6l2.1 2.1M12 3v3m0 12v3M5.6 18.4l2.1-2.1m8.6-8.6l2.1-2.1" />
-              </svg>
-            </div>
-
-            <div className="impact-grid">
-
-
-              <div className="impact-left-content">
-                <div className="badge-pill badge-pill-sky">
-                  <span className="badge-icon-heart">♥</span>
-                  <span>Nosso impacto</span>
-                </div>
-                <h2 className="impact-title">
-                  Pequenas ações,<br />
-                  <span className="text-pink-highlight">grandes transformações.</span>
-                </h2>
-                <p className="impact-desc">
-                  Cada doação, cada hora de voluntariado e cada palavra de incentivo ajudam a manter as portas abertas para as famílias que atendemos.
-                </p>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-
 
       <section className="help-section" aria-label="Como ajudar">
         <div className="landing-container">
@@ -368,10 +311,6 @@ export default function LandingPage() {
           <div className="help-top-row">
 
             <div className="help-top-left">
-              <div className="badge-pill badge-pill-pink">
-                <span className="badge-icon-heart">♥</span>
-                <span>Faça parte</span>
-              </div>
               <h2 className="section-headline">
                 Como você pode <span className="text-pink-highlight">ajudar?</span>
               </h2>
@@ -381,21 +320,8 @@ export default function LandingPage() {
             </div>
 
             <div className="help-top-right">
-              <div className="help-doodle-juntos doodle-font">
-                <span>♡ Juntos</span>
-                <span>vamos mais longe</span>
-              </div>
-
               <div className="help-photo-box">
                 <img src={helpHeartImg} alt="Mãos segurando coração rosa" />
-              </div>
-
-              <div className="help-slogan-vertical doodle-font">
-                Fazer<br />
-                o bem<br />
-                também<br />
-                transforma<br />
-                você ♡
               </div>
             </div>
 
@@ -493,21 +419,6 @@ export default function LandingPage() {
                 <span>Quero ajudar agora</span>
                 <span>→</span>
               </Link>
-            </div>
-
-
-            <div className="cta-right-group">
-              <div className="cta-puzzle-icon">
-                <svg width="100%" height="100%" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20.5 11H19V7c0-1.1-.9-2-2-2h-4V3.5C13 2.12 11.88 1 10.5 1S8 2.12 8 3.5V5H4c-1.1 0-1.99.9-1.99 2v3.8H3.5c1.49 0 2.7 1.21 2.7 2.7s-1.21 2.7-2.7 2.7H2V20c0 1.1.9 2 2 2h3.8v-1.5c0-1.49 1.21-2.7 2.7-2.7s2.7 1.21 2.7 2.7V22H17c1.1 0 2-.9 2-2v-4h1.5c1.38 0 2.5-1.12 2.5-2.5s-1.12-2.5-2.5-2.5z" />
-                </svg>
-              </div>
-
-              <div className="cta-slogan-text doodle-font">
-                Inclusão hoje,<br />
-                um amanhã<br />
-                mais justo
-              </div>
             </div>
 
           </div>

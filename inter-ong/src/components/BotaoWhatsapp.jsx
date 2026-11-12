@@ -38,7 +38,8 @@ export default function BotaoWhatsapp() {
           balao ? 'translate-x-0 opacity-100' : 'pointer-events-none translate-x-3 opacity-0'
         }`}
       >
-        Fale com a gente no WhatsApp
+        <span className="sm:hidden">Fale conosco</span>
+        <span className="hidden sm:inline">Fale com a gente no WhatsApp</span>
       </span>
       <span className="wa-pulso relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-[#25D366] text-white shadow-xl transition hover:scale-110 hover:bg-[#1ebe5b] active:scale-95 sm:h-[60px] sm:w-[60px]">
         {/* Logo do WhatsApp: ícone "whatsapp-logo" (fill) do Phosphor Icons, licença MIT (veja src/assets/icons/LICENSE-phosphor.txt) */}
