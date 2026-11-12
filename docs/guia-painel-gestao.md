@@ -7,7 +7,7 @@ Este guia é para a equipe da ONG. Não precisa saber de computação: é só se
 **Regras de ouro**
 
 - A senha é só sua. Não passe para ninguém e não deixe anotada à vista.
-- Os dados de doadores e voluntários são pessoais. Não envie por WhatsApp, não tire print para redes sociais.
+- Os dados de doadores, voluntários e inscritos nas novidades são pessoais. Não envie por WhatsApp, não tire print para redes sociais.
 - Antes de qualquer botão vermelho (Excluir, Apagar, Desativar), leia a pergunta que aparece na tela. Esses botões **não têm volta**.
 
 ---
@@ -22,7 +22,7 @@ Este guia é para a equipe da ONG. Não precisa saber de computação: é só se
 
 Logo no alto do painel há três números de resumo: **Doações para confirmar**, **Voluntários em análise** e **Confirmadas, feitas neste mês** (soma das doações já confirmadas que a pessoa fez neste mês; uma doação feita no fim de um mês e confirmada só no mês seguinte conta no mês em que foi feita, então esse número pode diferir do extrato do banco). Eles se atualizam sozinhos quando você confirma uma doação ou muda a situação de um voluntário.
 
-No cabeçalho, ao lado do seu nome, o botão **Claro / Escuro** troca o visual do painel (a escolha vale também para o site e fica guardada no seu navegador). Abaixo do resumo, há quatro abas: **Doações**, **Voluntários**, **Conteúdos** e **Gestores**. Para sair, clique em **Sair**, no canto de cima. Faça isso sempre que usar um computador que não é só seu.
+No cabeçalho, ao lado do seu nome, o botão **Claro / Escuro** troca o visual do painel (a escolha vale também para o site e fica guardada no seu navegador). Abaixo do resumo, há cinco abas: **Doações**, **Voluntários**, **Conteúdos**, **Inscritos** e **Gestores**. Para sair, clique em **Sair**, no canto de cima. Faça isso sempre que usar um computador que não é só seu.
 
 Se a tela mostrar um erro de carregamento, clique em **Tentar novamente**.
 
@@ -113,7 +113,28 @@ Na lista **Já publicados**, clique em **Excluir** ao lado do título e confirme
 
 ![print: lista "Já publicados" com o botão Excluir](.)
 
-## 6. Adicionar ou desativar um gestor (aba Gestores)
+## 6. Ver os inscritos nas novidades (aba Inscritos)
+
+Quem preenche **"Receba novidades da ONG"** no rodapé do site vai para esta lista, com nome (se informou), e-mail e data da inscrição. Todas essas pessoas marcaram que leram a política de privacidade.
+
+> **Importante:** o site **não envia** as novidades. Ele só guarda a lista. Para mandar uma mensagem, baixe a planilha e use o programa de e-mail da ONG (por exemplo, o Gmail), enviando **com cópia oculta (CCO)** para ninguém ver o e-mail dos outros.
+
+![print: aba Inscritos com a lista e o botão "Baixar planilha (CSV)"](.)
+
+### Baixar a lista
+
+1. Abra a aba **Inscritos**.
+2. Clique em **Baixar planilha (CSV)**. O arquivo se abre no Excel ou no Google Planilhas, com as colunas **Nome**, **E-mail** e **Data da inscrição**.
+
+### Achar alguém
+
+Digite o nome ou o e-mail no campo **Buscar por nome ou e-mail**.
+
+### Remover quem pediu para sair
+
+Se alguém pedir para não receber mais novidades (ou pedir para apagar os dados), clique em **Remover da lista** no cartão da pessoa e confirme. O nome e o e-mail são apagados e **não voltam**. Guarde o pedido por escrito (mensagem ou e-mail) como prova.
+
+## 7. Adicionar ou desativar um gestor (aba Gestores)
 
 ### Adicionar uma pessoa
 
@@ -131,7 +152,7 @@ A pessoa entra com essa senha e é obrigada a criar a própria (veja o item 2).
 
 Na lista **Quem tem acesso**, clique em **Desativar** ao lado da pessoa e confirme. Ela perde o acesso ao painel na hora. Você não consegue desativar a si mesmo (aparece "(você)" ao lado do seu nome).
 
-## 7. Se algo der errado
+## 8. Se algo der errado
 
 - **Não consigo entrar:** confira o e-mail e a senha. Se esqueceu a senha, chame quem cuida do site (não existe ainda o botão "esqueci a senha").
 - **Apareceu uma mensagem vermelha:** leia o texto, tente de novo e, se continuar, avise quem cuida do site, dizendo o que você clicou e o que apareceu.

@@ -22,6 +22,7 @@ import GestaoDoacoes from "./pages/gestao/GestaoDoacoes.jsx"
 import GestaoVoluntarios from "./pages/gestao/GestaoVoluntarios.jsx"
 import GestaoConteudos from "./pages/gestao/GestaoConteudos.jsx"
 import GestaoGestores from "./pages/gestao/GestaoGestores.jsx"
+import GestaoNewsletter from "./pages/gestao/GestaoNewsletter.jsx"
 import GestaoTrocarSenha from './pages/gestao/GestaoTrocarSenha.jsx'
 import Voluntariado from './pages/Voluntariado.jsx'
 import Noticias from './pages/Noticias.jsx'
@@ -47,6 +48,7 @@ const router = createBrowserRouter([
           { path: "doacoes", element: <GestaoDoacoes /> },
           { path: "voluntarios", element: <GestaoVoluntarios /> },
           { path: "conteudos", element: <GestaoConteudos /> },
+          { path: "newsletter", element: <GestaoNewsletter /> },
           { path: "gestores", element: <GestaoGestores /> },
         ]
       },

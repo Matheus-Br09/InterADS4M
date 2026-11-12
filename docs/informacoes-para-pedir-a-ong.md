@@ -59,7 +59,7 @@ Regra do projeto: **não inventamos** depoimentos, números, endereços nem fato
 
 29. [ ] **Como funciona o voluntariado:** funções, carga horária, exigência de documentos, quem entra em contato e em quanto tempo.
 30. [ ] **Política de privacidade** e termos: a ONG precisa ler e aprovar o texto atual. Informar **quem é o responsável** pelos dados (nome e e-mail para pedidos de exclusão).
-31. [ ] **Newsletter:** quem vai escrever e enviar? Com que frequência? (Se ninguém, tirar o formulário do site.)
+31. [ ] **Newsletter:** quem vai escrever e enviar? Com que frequência? (Se ninguém, tirar o formulário do site.) Já existe a aba **Inscritos** no painel, que baixa a lista em planilha, mas o site não envia as mensagens. Decidir também o que fazer com quem pedir para sair (remover pela aba Inscritos).
 
 ## Atendimento
 

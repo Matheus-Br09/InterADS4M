@@ -8,6 +8,7 @@ use App\Http\Controllers\DashboardTesteController;
 use App\Http\Controllers\DoacaoUnicaController;
 use App\Http\Controllers\GestaoDoacoesController;
 use App\Http\Controllers\GestaoGestoresController;
+use App\Http\Controllers\GestaoNewsletterController;
 use App\Http\Controllers\GestaoResumoController;
 use App\Http\Controllers\MinhaContaController;
 use App\Http\Controllers\SessaoApiController;
@@ -51,6 +52,9 @@ Route::middleware('auth:apoiador')->group(function () {
             Route::get('doacoes', [GestaoDoacoesController::class, 'index']);
             Route::patch('doacoes/{id}', [GestaoDoacoesController::class, 'update'])->whereNumber('id');
             Route::delete('doacoes/{id}', [GestaoDoacoesController::class, 'anonimizar'])->whereNumber('id');
+            Route::get('newsletter', [GestaoNewsletterController::class, 'index']);
+            Route::get('newsletter/exportar', [GestaoNewsletterController::class, 'exportar']);
+            Route::delete('newsletter/{id}', [GestaoNewsletterController::class, 'destroy'])->whereNumber('id');
             Route::get('gestores', [GestaoGestoresController::class, 'index']);
             Route::post('gestores', [GestaoGestoresController::class, 'store']);
             Route::delete('gestores/{id}', [GestaoGestoresController::class, 'destroy'])->whereNumber('id');

@@ -201,3 +201,17 @@ test('busca e resumo da gestão montam a URL com texto codificado', async () => 
     '/api/v1/gestao/resumo',
   ])
 })
+
+test('lista de inscritos da newsletter: busca, remoção e endereço da planilha', async () => {
+  const fetch = responder([json({ dados: {} }), json({ dados: {} }), json({ token: 'abc' }), new Response(null, { status: 204 })])
+  await backend.gestaoNewsletter(2, undefined, 'ana paula')
+  await backend.gestaoNewsletter(1, undefined, '  ')
+  await backend.removerInscrito(7)
+  const chamadas = fetch.mock.calls.map(({ arguments: args }) => [args[0], args[1].method ?? 'GET'])
+  assert.deepEqual([chamadas[0], chamadas[1], chamadas[3]], [
+    ['/api/v1/gestao/newsletter?busca=ana%20paula&page=2', 'GET'],
+    ['/api/v1/gestao/newsletter?page=1', 'GET'],
+    ['/api/v1/gestao/newsletter/7', 'DELETE'],
+  ])
+  assert.equal(backend.newsletterExportarUrl(), '/api/v1/gestao/newsletter/exportar')
+})

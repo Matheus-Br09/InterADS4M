@@ -9,6 +9,7 @@ const ABAS = [
   ['doacoes', 'Doações'],
   ['voluntarios', 'Voluntários'],
   ['conteudos', 'Conteúdos'],
+  ['newsletter', 'Inscritos'],
   ['gestores', 'Gestores'],
 ]
 
